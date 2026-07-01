@@ -1,0 +1,196 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Alert Details - BOOKED</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#feb62f",
+                        "primary-fixed": "#ffe08b",
+                        "on-tertiary-fixed": "#001f24",
+                        "on-secondary-fixed": "#281900",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#6f5700",
+                        "secondary-fixed": "#ffdeae",
+                        "tertiary-fixed": "#95f1ff",
+                        "primary-container": "#ffcc00",
+                        "on-tertiary-fixed-variant": "#004f57",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#00daf0",
+                        "on-tertiary-container": "#00646e",
+                        "on-background": "#1f1b10",
+                        "surface-container": "#f7eddb",
+                        "inverse-on-surface": "#faf0dd",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed-variant": "#604100",
+                        "background": "#ffffff",
+                        "surface-tint": "#745b00",
+                        "surface-dim": "#e3d9c7",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#f1c100",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#f1c100",
+                        "inverse-surface": "#353024",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#d2c5ab",
+                        "surface-container-low": "#fdf2e0",
+                        "on-primary-fixed-variant": "#584400",
+                        "surface-variant": "#ebe1d0",
+                        "on-primary-fixed": "#241a00",
+                        "on-error-container": "#93000a",
+                        "secondary": "#7f5700",
+                        "surface-container-highest": "#ebe1d0",
+                        "surface-container-high": "#f1e7d5",
+                        "secondary-fixed-dim": "#ffba3d",
+                        "primary": "#745b00",
+                        "tertiary-container": "#00e7fe",
+                        "tertiary": "#006874",
+                        "surface": "#ffffff",
+                        "surface-bright": "#ffffff",
+                        "outline": "#132e51",
+                        "on-surface": "#132e51",
+                        "on-secondary-container": "#6d4a00",
+                        "error-container": "#ffdad6",
+                        "on-surface-variant": "#4e4632"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "md": "20px",
+                        "gutter-mobile": "12px",
+                        "base": "8px",
+                        "lg": "32px",
+                        "xs": "4px",
+                        "sm": "12px",
+                        "margin-mobile": "16px",
+                        "xl": "48px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Hanken Grotesk', sans-serif;
+            background-color: #ffffff;
+            color: #132e51;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom spacing for ultra-minimal look */
+        .content-canvas {
+            min-height: calc(100vh - 120px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen">
+<!-- Top Bar -->
+<nav class="sticky top-0 z-50 bg-surface border-b border-on-surface/5 px-margin-mobile py-sm flex justify-between items-center w-full">
+<button class="flex items-center justify-center p-xs hover:bg-surface-container-high transition-colors rounded-lg active:scale-95">
+<span class="material-symbols-outlined text-on-surface" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight uppercase">Alert Details</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</nav>
+<!-- Main Content -->
+<main class="content-canvas px-margin-mobile pt-lg flex flex-col" style="opacity: 0; transform: translateY(10px); transition: opacity 0.6s ease-out, transform 0.6s ease-out;">
+<!-- Header Section -->
+<header class="mb-lg">
+<div class="flex items-center gap-2 mb-xs">
+<span class="w-2 h-2 bg-primary rounded-full"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase">2 MINUTES AGO</span>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight font-extrabold mb-sm">
+                BOOKING CONFIRMED
+            </h2>
+</header>
+<!-- Message Body -->
+<section class="max-w-md">
+<div class="border-l-4 border-primary pl-md py-sm mb-lg">
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+                    Great news! You've been moved from the waiting list to a confirmed seat for the <span class="font-bold">South to Humewood</span> route departing at <span class="font-bold">08:30 AM</span>. 
+                </p>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-xl">
+                Please ensure you are at the stop 5 minutes before departure. Have your digital boarding pass ready for the driver to scan upon entry.
+            </p>
+<!-- Contextual Visual Element -->
+<div class="w-full h-48 bg-surface-container-low rounded-xl overflow-hidden mb-lg border border-on-surface/5"><div class="flex items-center justify-center h-full">
+    <span class="material-symbols-outlined" style="font-size: 120px; color: #22c55e; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;">check_circle</span>
+</div></div>
+<!-- Quick Action -->
+<button class="w-full py-md bg-primary-container text-on-primary-container font-label-md text-label-md rounded-[5px] active:bg-primary transition-colors flex items-center justify-center gap-sm" style="transform: scale(1);">
+<span class="material-symbols-outlined">confirmation_number</span>
+                VIEW BOARDING PASS
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<!-- Determined as Alert Detail, so 'Alerts' tab is contextually the parent, but requested style has no active state highlights -->
+
+<!-- Micro-interaction script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const backBtn = document.querySelector('nav button');
+            backBtn.addEventListener('click', () => {
+                window.history.back();
+            });
+
+            // Gentle fade-in for content
+            const main = document.querySelector('main');
+            main.style.opacity = '0';
+            main.style.transform = 'translateY(10px)';
+            main.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            
+            setTimeout(() => {
+                main.style.opacity = '1';
+                main.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+
+
+
+
+</body></html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ShuttleAdmin - Users Management</title>
+<!-- Google Fonts: Hanken Grotesk -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#ebe1d0",
+                        "secondary-fixed-dim": "#ffba3d",
+                        "tertiary-fixed": "#95f1ff",
+                        "surface-tint": "#745b00",
+                        "surface-container-highest": "#ebe1d0",
+                        "inverse-on-surface": "#faf0dd",
+                        "surface-container-low": "#fdf2e0",
+                        "surface": "#fff8f1",
+                        "on-background": "#1f1b10",
+                        "on-tertiary-fixed": "#001f24",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#e3d9c7",
+                        "on-primary-fixed-variant": "#584400",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#ffcc00",
+                        "on-secondary-container": "#6d4a00",
+                        "tertiary": "#006874",
+                        "secondary": "#7f5700",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fff8f1",
+                        "inverse-primary": "#f1c100",
+                        "on-secondary-fixed": "#281900",
+                        "on-surface-variant": "#4e4632",
+                        "primary": "#745b00",
+                        "on-tertiary-fixed-variant": "#004f57",
+                        "outline-variant": "#d2c5ab",
+                        "on-secondary-fixed-variant": "#604100",
+                        "inverse-surface": "#353024",
+                        "primary-fixed": "#ffe08b",
+                        "tertiary-fixed-dim": "#00daf0",
+                        "surface-container": "#f7eddb",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#feb62f",
+                        "surface-container-high": "#f1e7d5",
+                        "outline": "#80765f",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#6f5700",
+                        "secondary-fixed": "#ffdeae",
+                        "primary-fixed-dim": "#f1c100",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#00e7fe",
+                        "on-surface": "#1f1b10",
+                        "background": "#fff8f1",
+                        "on-primary-fixed": "#241a00",
+                        "on-tertiary-container": "#00646e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "2px",
+                        "lg": "4px",
+                        "xl": "8px",
+                        "full": "12px"
+                    },
+                    "spacing": {
+                        "lg": "32px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "gutter-mobile": "12px",
+                        "sm": "12px",
+                        "xl": "48px",
+                        "xs": "4px",
+                        "md": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Hanken Grotesk', sans-serif;
+            background-color: #fff8f1;
+            margin: 0;
+            padding: 0;
+            color: #1f1b10;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .flat-border {
+            border: 1px solid rgba(19, 46, 81, 0.1);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fff8f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d2c5ab;
+        }
+    </style>
+</head>
+<body class="bg-background">
+<!-- SideNavBar (Authority: SCREEN_5) -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline flex flex-col py-md px-sm z-50">
+<div class="mb-lg px-sm">
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-md">dashboard</span>
+                Overview
+            </a>
+<a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-md">location_on</span>
+                Shuttle Stops
+            </a>
+<a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-md">airport_shuttle</span>
+                Shuttles
+            </a>
+<a class="flex items-center px-md py-sm transition-colors duration-200 text-on-secondary-container bg-secondary-container dark:bg-secondary-fixed-dim dark:text-on-secondary-fixed font-bold border-l-4 border-primary font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-md" style="font-variation-settings: &quot;FILL&quot; 1;">group</span>
+                Users
+            </a>
+<a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-md">assessment</span>
+                Reports
+            </a>
+</nav>
+<div class="mt-auto px-sm pt-md border-t border-outline-variant/30">
+<a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-md">logout</span>Logout
+            </a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 p-xl min-h-screen">
+<!-- Header & Toolbar -->
+<header class="mb-xl flex flex-col md:flex-row md:items-end justify-between gap-lg">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Users Management</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage system access for students, marshals, and administrators.</p>
+</div>
+<div class="flex gap-sm">
+<button class="bg-surface-container-lowest text-on-surface flat-border px-md py-sm font-label-md text-label-md flex items-center gap-sm hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px]">upload</span>
+                    Upload CSV
+                </button>
+<button class="bg-[#ffcc00] text-[#132e51] px-md py-sm font-label-md text-label-md font-bold flex items-center gap-sm hover:brightness-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                    Add Single User
+                </button>
+</div>
+</header>
+<!-- Stats Overview -->
+<div class="grid grid-cols-1 gap-md mb-xl md:grid-cols-3">
+    <!-- Active Sessions Card -->
+    <div class="bg-surface-container-lowest p-md border border-outline-variant border-l-4 border-l-[#27ae60] rounded flex flex-col gap-xs">
+        <div class="flex justify-between items-center">
+            <span class="text-label-md font-label-md text-on-surface-variant uppercase">Active Sessions</span>
+            <div class="flex items-center gap-xs">
+                <span class="w-2 h-2 rounded-full bg-[#27ae60]"></span>
+                <span class="text-[11px] font-bold text-[#27ae60]">LIVE</span>
+            </div>
+        </div>
+        <div class="text-headline-lg font-headline-lg text-on-surface">86</div>
+    </div>
+    <!-- Flagged Accounts Card -->
+    <div class="bg-surface-container-lowest p-md border border-outline-variant border-l-4 border-l-error rounded flex flex-col gap-xs">
+        <div class="flex justify-between items-center">
+            <span class="text-label-md font-label-md text-on-surface-variant uppercase">Flagged Accounts</span>
+            <span class="material-symbols-outlined text-error text-[20px]">warning</span>
+        </div>
+        <div class="text-headline-lg font-headline-lg text-on-surface">12</div>
+    </div>
+<div class="bg-surface-container-lowest p-md border border-outline-variant border-l-4 border-l-primary rounded flex flex-col gap-xs">
+    <div class="flex justify-between items-center">
+        <span class="text-label-md font-label-md text-on-surface-variant uppercase">Total Users</span>
+        <span class="material-symbols-outlined text-primary text-[20px]">group</span>
+    </div>
+    <div class="text-headline-lg font-headline-lg text-on-surface">1,120</div>
+</div></div><div class="flex flex-wrap gap-sm mb-lg">
+<button class="px-md py-sm rounded-lg font-label-md text-label-md transition-all bg-surface-container-lowest text-on-surface-variant border border-outline-variant hover:bg-surface-container-low">All</button>
+<button class="px-md py-sm rounded-lg font-label-md text-label-md transition-all bg-primary-container text-on-primary-container font-bold border border-primary">Students</button>
+<button class="px-md py-sm rounded-lg font-label-md text-label-md transition-all bg-surface-container-lowest text-on-surface-variant border border-outline-variant hover:bg-surface-container-low">
+        Marshals
+    </button>
+<button class="px-md py-sm rounded-lg font-label-md text-label-md transition-all bg-surface-container-lowest text-on-surface-variant border border-outline-variant hover:bg-surface-container-low">
+        Admins
+    </button>
+</div>
+<!-- Table Container -->
+<div class="bg-surface-container-lowest flat-border overflow-hidden">
+<div class="px-md py-sm bg-surface-container-low border-b border-outline-variant flex justify-between items-center">
+<div class="flex items-center gap-md">
+<span class="font-label-md text-label-md text-on-surface">Showing 5 of 1,120 Students</span>
+<div class="relative">
+<input class="bg-white border border-outline px-lg text-label-sm rounded focus:ring-1 focus:ring-primary-container outline-none w-64 py-2.5 pl-10" placeholder="Search by name, ID or email..." type="text">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined p-xs hover:bg-surface-container-high rounded transition-colors text-on-surface-variant">filter_list</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest">
+<th class="px-md py-md font-label-md text-label-md text-on-surface-variant border-b border-outline-variant">User ID</th>
+<th class="px-md py-md font-label-md text-label-md text-on-surface-variant border-b border-outline-variant">Name</th>
+<th class="px-md py-md font-label-md text-label-md text-on-surface-variant border-b border-outline-variant">Role</th>
+<th class="px-md py-md font-label-md text-label-md text-on-surface-variant border-b border-outline-variant">Email</th>
+<th class="px-md py-md font-label-md text-label-md text-on-surface-variant border-b border-outline-variant text-center">Status</th>
+<th class="px-md py-md font-label-md text-label-md text-on-surface-variant border-b border-outline-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-md py-md">
+<span class="font-body-md text-body-md text-on-surface-variant">ST-2024-001</span>
+</td>
+<td class="px-md py-md">
+<span class="font-body-md text-body-md font-bold text-on-surface">Sarah Jenkins</span>
+</td>
+<td class="px-md py-md">
+<span class="px-sm py-xs bg-surface-container-high text-on-surface-variant rounded text-[11px] font-bold uppercase">Student</span>
+</td>
+<td class="px-md py-md font-body-md text-body-md text-on-surface-variant">sarah.j@university.edu</td>
+<td class="px-md py-md text-center">
+<span class="bg-[#27ae60] text-white px-sm py-xs text-[11px] font-bold uppercase rounded-full">Active</span>
+</td>
+<td class="px-md py-md text-right">
+<button class="p-xs hover:bg-primary-container rounded transition-colors text-on-surface-variant group-hover:text-on-surface">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<!-- Row 3 -->
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-md py-md">
+<span class="font-body-md text-body-md text-on-surface-variant">ST-2024-118</span>
+</td>
+<td class="px-md py-md">
+<span class="font-body-md text-body-md font-bold text-on-surface">David Miller</span>
+</td>
+<td class="px-md py-md">
+<span class="px-sm py-xs bg-surface-container-high text-on-surface-variant rounded text-[11px] font-bold uppercase">Student</span>
+</td>
+<td class="px-md py-md font-body-md text-body-md text-on-surface-variant">d.miller@university.edu</td>
+<td class="px-md py-md text-center">
+<span class="bg-surface-variant text-on-surface-variant px-sm py-xs text-[11px] font-bold uppercase rounded-full">Inactive</span>
+</td>
+<td class="px-md py-md text-right">
+<button class="p-xs hover:bg-primary-container rounded transition-colors text-on-surface-variant group-hover:text-on-surface">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-md py-md">
+<span class="font-body-md text-body-md text-on-surface-variant">ST-2024-209</span>
+</td>
+<td class="px-md py-md">
+<span class="font-body-md text-body-md font-bold text-on-surface">Isabella Rossi</span>
+</td>
+<td class="px-md py-md">
+<span class="px-sm py-xs bg-surface-container-high text-on-surface-variant rounded text-[11px] font-bold uppercase">Student</span>
+</td>
+<td class="px-md py-md font-body-md text-body-md text-on-surface-variant">i.rossi@university.edu</td>
+<td class="px-md py-md text-center">
+<span class="bg-[#27ae60] text-white px-sm py-xs text-[11px] font-bold uppercase rounded-full">Active</span>
+</td>
+<td class="px-md py-md text-right">
+<button class="p-xs hover:bg-primary-container rounded transition-colors text-on-surface-variant group-hover:text-on-surface">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group"><td class="px-md py-md"><span class="font-body-md text-body-md text-on-surface-variant">ST-2024-301</span></td><td class="px-md py-md"><span class="font-body-md text-body-md font-bold text-on-surface">Liam O'Connor</span></td><td class="px-md py-md"><span class="px-sm py-xs bg-surface-container-high text-on-surface-variant rounded text-[11px] font-bold uppercase">Student</span></td><td class="px-md py-md font-body-md text-body-md text-on-surface-variant">l.oconnor@university.edu</td><td class="px-md py-md text-center"><span class="bg-[#27ae60] text-white px-sm py-xs text-[11px] font-bold uppercase rounded-full">Active</span></td><td class="px-md py-md text-right"><button class="p-xs hover:bg-primary-container rounded transition-colors text-on-surface-variant group-hover:text-on-surface"><span class="material-symbols-outlined">edit</span></button></td></tr><tr class="hover:bg-surface-container-low transition-colors group"><td class="px-md py-md"><span class="font-body-md text-body-md text-on-surface-variant">ST-2024-302</span></td><td class="px-md py-md"><span class="font-body-md text-body-md font-bold text-on-surface">Sofia Martinez</span></td><td class="px-md py-md"><span class="px-sm py-xs bg-surface-container-high text-on-surface-variant rounded text-[11px] font-bold uppercase">Student</span></td><td class="px-md py-md font-body-md text-body-md text-on-surface-variant">s.martinez@university.edu</td><td class="px-md py-md text-center"><span class="bg-surface-variant text-on-surface-variant px-sm py-xs text-[11px] font-bold uppercase rounded-full">Inactive</span></td><td class="px-md py-md text-right"><button class="p-xs hover:bg-primary-container rounded transition-colors text-on-surface-variant group-hover:text-on-surface"><span class="material-symbols-outlined">edit</span></button></td></tr></tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-md py-md border-t border-outline-variant flex items-center justify-between">
+<div class="text-label-sm text-on-surface-variant">Page 1 of 224</div>
+<div class="flex gap-xs">
+<button class="w-8 h-8 flex items-center justify-center flat-border hover:bg-surface-container-low opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center flat-border bg-primary-container text-on-primary-container font-bold">1</button>
+<button class="w-8 h-8 flex items-center justify-center flat-border hover:bg-surface-container-low">2</button>
+<button class="w-8 h-8 flex items-center justify-center flat-border hover:bg-surface-container-low">3</button>
+<button class="w-8 h-8 flex items-center justify-center flat-border hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Maintenance Footer Info -->
+</main>
+<script>
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mousedown', function() {
+                this.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', function() {
+                this.classList.remove('scale-95');
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+
+</body></html>

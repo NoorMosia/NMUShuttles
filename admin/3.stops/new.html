@@ -1,0 +1,255 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Edit Shuttle Stop | ShuttleAdmin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#f1c100",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#f1c100",
+                    "primary": "#745b00",
+                    "on-primary-fixed": "#241a00",
+                    "secondary-fixed-dim": "#ffba3d",
+                    "surface-dim": "#e3d9c7",
+                    "on-primary-fixed-variant": "#584400",
+                    "tertiary": "#006874",
+                    "on-background": "#1f1b10",
+                    "surface-container-highest": "#ebe1d0",
+                    "on-primary-container": "#6f5700",
+                    "on-secondary": "#ffffff",
+                    "surface-variant": "#ebe1d0",
+                    "outline": "#80765f",
+                    "on-error-container": "#93000a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface": "#1f1b10",
+                    "background": "#fff8f1",
+                    "surface-container-high": "#f1e7d5",
+                    "on-secondary-container": "#6d4a00",
+                    "surface-tint": "#745b00",
+                    "on-error": "#ffffff",
+                    "surface-bright": "#fff8f1",
+                    "surface-container": "#f7eddb",
+                    "secondary-fixed": "#ffdeae",
+                    "error-container": "#ffdad6",
+                    "tertiary-container": "#00e7fe",
+                    "inverse-surface": "#353024",
+                    "on-secondary-fixed-variant": "#604100",
+                    "primary-fixed": "#ffe08b",
+                    "on-tertiary-fixed": "#001f24",
+                    "on-surface-variant": "#4e4632",
+                    "on-secondary-fixed": "#281900",
+                    "outline-variant": "#d2c5ab",
+                    "primary-container": "#ffcc00",
+                    "on-tertiary-fixed-variant": "#004f57",
+                    "surface-container-low": "#fdf2e0",
+                    "error": "#ba1a1a",
+                    "surface": "#fff8f1",
+                    "secondary-container": "#feb62f",
+                    "on-tertiary-container": "#00646e",
+                    "tertiary-fixed": "#95f1ff",
+                    "on-primary": "#ffffff",
+                    "inverse-on-surface": "#faf0dd",
+                    "tertiary-fixed-dim": "#00daf0",
+                    "secondary": "#7f5700"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "unit": "4px",
+                    "gutter-mobile": "12px",
+                    "md": "20px",
+                    "sm": "12px",
+                    "xl": "48px",
+                    "xs": "4px",
+                    "lg": "32px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"],
+                    "label-sm": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "label-md": ["Hanken Grotesk"],
+                    "display-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Hanken Grotesk', sans-serif;
+            background-color: #fff8f1;
+            color: #1f1b10;
+            margin: 0;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        /* Custom scrollbar for a clean look */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fff8f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d2c5ab;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #80765f;
+        }
+        /* Hide arrows on number inputs */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-outline-variant dark:border-outline bg-background dark:bg-inverse-surface flex flex-col py-lg z-50"><div class="mb-lg px-sm"></div><nav class="flex-1 space-y-1"><a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md" href="#"><span class="material-symbols-outlined mr-md">dashboard</span>Overview</a><a class="flex items-center px-md py-sm transition-colors duration-200 text-on-secondary-container bg-secondary-container dark:bg-secondary-fixed-dim dark:text-on-secondary-fixed font-bold border-l-4 border-primary font-body-md text-body-md" href="#"><span class="material-symbols-outlined mr-md">location_on</span>Shuttle Stops</a><a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md" href="#"><span class="material-symbols-outlined mr-md">directions_bus</span>Shuttles</a><a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md" href="#"><span class="material-symbols-outlined mr-md">group</span>Users</a><a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md" href="#"><span class="material-symbols-outlined mr-md">assessment</span>Reports</a></nav><div class="mt-auto px-sm pt-md"></div><a class="flex items-center px-md py-sm rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low font-body-md text-body-md mt-auto" href="#"><span class="material-symbols-outlined mr-md">logout</span>Logout</a></aside>
+<!-- Main Content Shell -->
+<main class="ml-64 min-h-screen flex flex-col pb-32">
+<!-- TopAppBar -->
+<!-- Canvas Area -->
+<div class="max-w-6xl mx-auto px-lg py-lg">
+<!-- Header Section -->
+<button class="flex items-center gap-xs text-on-surface-variant hover:text-on-surface mb-md transition-colors group"><span class="material-symbols-outlined text-base group-hover:-translate-x-1 transition-transform" data-icon="arrow_back">arrow_back</span><span class="font-label-md text-label-md">Back to Fleet</span></button><div class="mb-xl"><h3 class="font-headline-lg text-headline-lg text-on-surface mb-xs">New Shuttle Stop</h3><p class="font-body-md text-body-md text-on-surface-variant">Shuttle Stops / New Stop</p></div>
+<!-- Form Content -->
+<form class="grid grid-cols-12 gap-lg" onsubmit="return false;">
+<!-- Basic Details Card -->
+<section class="col-span-12 lg:col-span-7 shuttle-card bg-surface-container-lowest p-lg rounded-lg space-y-lg">
+<h4 class="text-label-md font-label-md uppercase tracking-widest text-on-surface-variant border-b border-outline-variant pb-xs">Basic Stop Details</h4>
+<div class="grid grid-cols-2 gap-md">
+<div class="col-span-2">
+<label class="block text-label-md font-label-md text-on-surface mb-xs">Stop Name</label>
+<input class="flat-input font-body-md text-body-md w-full" placeholder="Enter stop name" type="text" value="">
+</div>
+<div class="col-span-1">
+<label class="block text-label-md font-label-md text-on-surface mb-xs">Latitude</label>
+<input class="flat-input font-body-md text-body-md w-full" placeholder="e.g. 34.0522" step="any" type="number" value="">
+</div>
+<div class="col-span-1">
+<label class="block text-label-md font-label-md text-on-surface mb-xs">Longitude</label>
+<input class="flat-input font-body-md text-body-md w-full" placeholder="e.g. -118.2437" step="any" type="number" value="">
+</div>
+<div class="col-span-2">
+<label class="block text-label-md font-label-md text-on-surface mb-xs">Region</label>
+<select class="flat-input font-body-md text-body-md w-full">
+<option>North Campus</option>
+<option>South Campus</option>
+<option>West Residential</option>
+<option>Downtown Loop</option>
+</select>
+</div><div class="col-span-2">
+<label class="block text-label-md font-label-md text-on-surface mb-xs">Stop Summary</label>
+<textarea class="flat-input font-body-md text-body-md w-full" placeholder="Enter a detailed summary of the stop location and facilities..."></textarea>
+</div>
+</div>
+<!-- Map Preview Placeholder -->
+<div class="mt-md pt-md border-t border-outline-variant">
+<div class="h-48 w-full bg-surface-container rounded relative overflow-hidden group">
+<img class="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 transition-all duration-500" data-location="Los Angeles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLpcKBukUUwMQ24HdsSIwGmGSowEEFryO34TajvVV80BYf1PfIkzEWQmlMxSCiYplZZT8icdcx2b5ysGyKfgat9Fs9UfxQpbXenRRYx46AemoJCnLSBSBk2Gi8vBJTykcJPkYA-qiFSZgjky498CvIQpm6_8BAy7oQI-g50J5kt6hMVoSKu0HDMmxATzCn99XpngByfjl5ZSuzOvCpKyCoau90gcQSMzKnPV-JTYxe4zPzfSevDkVQy1fKmlNsOixsP-lGyrZ5mqEg">
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="location_on" style="font-variation-settings: &quot;FILL&quot; 1;">location_on</span>
+</div>
+<div class="absolute bottom-2 right-2 bg-white/90 px-xs py-1 text-[10px] font-bold border border-outline-variant uppercase">Interactive Map Preview</div>
+</div>
+</div>
+</section>
+<!-- Assignment Column -->
+<div class="col-span-12 lg:col-span-5 space-y-lg">
+<!-- Assign Shuttles -->
+<section class="bg-white p-lg border border-outline-variant rounded-lg">
+<div class="flex justify-between items-center mb-md"><h4 class="text-label-md font-label-md uppercase tracking-widest text-on-surface-variant">Assign Shuttles</h4><div class="flex items-center gap-sm"><button class="text-primary text-label-sm font-bold hover:underline ml-base" type="button">+ Add New</button></div></div>
+<div class="space-y-base max-h-48 overflow-y-auto pr-xs"></div>
+</section>
+<!-- Assign Marshals -->
+<section class="bg-white p-lg border border-outline-variant rounded-lg">
+<div class="flex justify-between items-center mb-md">
+<h4 class="text-label-md font-label-md uppercase tracking-widest text-on-surface-variant">Assign Marshals</h4>
+<button class="text-primary text-label-sm font-bold hover:underline" type="button">+ Add New</button>
+</div>
+<div class="grid grid-cols-1 gap-base"></div>
+</section>
+</div>
+<!-- Action Footer -->
+<footer class="fixed bottom-0 right-0 left-64 bg-surface-container-lowest border-t border-outline-variant h-20 px-xl flex items-center justify-end gap-md z-50"><button class="px-lg py-sm rounded-lg border border-outline text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors">Cancel</button><button class="px-xl py-sm rounded-[5px] bg-[#ffcc00] text-[#132e51] font-bold font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-sm">Add Stop</button></footer>
+</form>
+</div>
+</main>
+<script>
+        // Simple micro-interaction for form feedback
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Saving...';
+            submitBtn.classList.add('opacity-70');
+            
+            setTimeout(() => {
+                submitBtn.innerText = 'Changes Saved!';
+                submitBtn.classList.remove('bg-primary-container');
+                submitBtn.classList.add('bg-success', 'text-white', 'border-transparent');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.add('bg-primary-container');
+                    submitBtn.classList.remove('bg-success', 'text-white', 'border-transparent', 'opacity-70');
+                }, 2000);
+            }, 1000);
+        });
+
+        // Hover effect for nav items
+        const navItems = document.querySelectorAll('nav a');
+        navItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                if(!item.classList.contains('font-bold')) {
+                    item.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1";
+                }
+            });
+            item.addEventListener('mouseleave', () => {
+                if(!item.classList.contains('font-bold')) {
+                    item.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0";
+                }
+            });
+        });
+    </script>
+
+
+</body></html>

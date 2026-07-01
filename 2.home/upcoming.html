@@ -1,0 +1,243 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Booked - Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#fdf2e0",
+                    "surface-container-high": "#f1e7d5",
+                    "on-primary-container": "#6f5700",
+                    "inverse-primary": "#f1c100",
+                    "error": "#ba1a1a",
+                    "primary": "#745b00",
+                    "surface-container": "#f7eddb",
+                    "outline": "#80765f",
+                    "on-surface-variant": "#4e4632",
+                    "inverse-on-surface": "#faf0dd",
+                    "on-tertiary-fixed": "#001f24",
+                    "on-tertiary-container": "#00646e",
+                    "tertiary-container": "#00e7fe",
+                    "on-background": "#1f1b10",
+                    "surface-dim": "#e3d9c7",
+                    "surface-variant": "#ebe1d0",
+                    "on-error-container": "#93000a",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#006874",
+                    "surface-container-highest": "#ebe1d0",
+                    "tertiary-fixed": "#95f1ff",
+                    "secondary": "#7f5700",
+                    "on-surface": "#1f1b10",
+                    "on-tertiary-fixed-variant": "#004f57",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed": "#281900",
+                    "secondary-fixed": "#ffdeae",
+                    "primary-fixed-dim": "#f1c100",
+                    "on-secondary-container": "#6d4a00",
+                    "on-secondary-fixed-variant": "#604100",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#745b00",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed-dim": "#ffba3d",
+                    "surface-bright": "#fff8f1",
+                    "primary-container": "#ffcc00",
+                    "background": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "secondary-container": "#feb62f",
+                    "outline-variant": "#d2c5ab",
+                    "on-primary-fixed": "#241a00",
+                    "on-primary-fixed-variant": "#584400",
+                    "tertiary-fixed-dim": "#00daf0",
+                    "surface": "#ffffff",
+                    "inverse-surface": "#353024",
+                    "primary-fixed": "#ffe08b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "5px",
+                    "lg": "5px",
+                    "xl": "5px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "48px",
+                    "unit": "4px",
+                    "md": "20px",
+                    "gutter-mobile": "12px",
+                    "sm": "12px",
+                    "xs": "4px",
+                    "lg": "32px",
+                    "margin-mobile": "16px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "display-lg": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "label-md": ["Hanken Grotesk"],
+                    "label-sm": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #ffffff;
+            font-family: 'Hanken Grotesk', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .flat-border {
+            border: 1px solid rgba(19, 46, 81, 0.1);
+        }
+        /* Custom Tab Logic - Simplified for this HTML output */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { 
+            background-color: #ffcc00; 
+            color: #241a00;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-on-surface">
+<main class="flex-grow px-margin-mobile pb-xl max-w-2xl mx-auto w-full pt-[64px]">
+<!-- Welcome Section -->
+<section class="mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs">Welcome back, Sarah</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Your schedule for today is clear.</p>
+</section>
+<!-- Booking Tabs -->
+<div class="mb-lg">
+<div class="flex gap-2 mb-md p-1 bg-surface-container rounded-lg">
+<button class="tab-btn flex-1 py-base font-label-md text-label-md rounded transition-colors text-on-surface-variant active" id="btn-active" onclick="switchTab('active')" style="opacity: 1;">Upcoming</button>
+<button class="tab-btn flex-1 py-base font-label-md text-label-md rounded transition-colors text-on-surface-variant" id="btn-past" onclick="switchTab('past')" style="opacity: 1;">
+                Past</button>
+</div>
+<!-- Active Tab Content -->
+<div class="tab-content space-y-sm active" id="tab-active"><div class="bg-white p-md rounded flex items-center justify-between group border border-outline-variant/20"><div class="flex items-center gap-sm"><div class="bg-primary-container/20 p-base rounded"><span class="material-symbols-outlined text-primary">push_pin</span></div><div><h3 class="font-headline-sm text-headline-sm text-on-surface">South to Humewood</h3><p class="font-label-sm text-label-sm text-on-surface-variant">Today, 2:00 PM</p></div></div><span class="material-symbols-outlined text-on-surface-variant">chevron_right</span></div><div class="bg-white p-md rounded flex items-center justify-between group border border-outline-variant/20"><div class="flex items-center gap-sm"><div class="bg-primary-container/20 p-base rounded"><span class="material-symbols-outlined text-primary">push_pin</span></div><div><h3 class="font-headline-sm text-headline-sm text-on-surface">South to Humewood</h3><p class="font-label-sm text-label-sm text-on-surface-variant">Tomorrow, 10:30 AM</p></div></div><span class="material-symbols-outlined text-on-surface-variant">chevron_right</span></div></div>
+<!-- Past Tab Content -->
+<div class="tab-content space-y-sm" id="tab-past">
+<div class="bg-white p-md rounded flex items-center justify-between group border border-outline-variant/20">
+<div class="flex items-center gap-sm">
+<div class="bg-outline-variant/20 p-base rounded">
+<span class="material-symbols-outlined text-on-surface-variant">history</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">General Inquiry</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Yesterday, 2:00 PM</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<div class="bg-white p-md rounded flex items-center justify-between group opacity-70 border border-outline-variant/20">
+<div class="flex items-center gap-sm">
+<div class="bg-outline-variant/20 p-base rounded">
+<span class="material-symbols-outlined text-on-surface-variant">history</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Follow-up Call</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Last Monday, 9:00 AM</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (FAB) -->
+<button class="fixed bottom-[84px] right-margin-mobile z-50 w-14 h-14 bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg active:scale-90 transition-transform" style="border-radius: 5px; opacity: 1;">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface flex justify-around items-center px-gutter-mobile py-2">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 transition-colors" href="#" style="border-top: 3px solid rgb(255, 204, 0); background-color: transparent;">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<!-- Maps -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors px-4 py-1 rounded-full" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="font-label-sm text-label-sm">Maps</span>
+</a>
+<!-- Alerts -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors px-4 py-1 rounded-full relative" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+<span class="absolute top-1 right-5 w-2 h-2 bg-error rounded-full"></span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors px-4 py-1 rounded-full" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<script>
+    function switchTab(tab) {
+        // Hide all content
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        // Remove active button style
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        // Show selected content
+        document.getElementById('tab-' + tab).classList.add('active');
+        // Add active button style
+        document.getElementById('btn-' + tab).classList.add('active');
+    }
+
+    // Micro-interactions
+    document.querySelectorAll('button, a').forEach(el => {
+        el.addEventListener('mousedown', () => {
+            if(!el.classList.contains('active:scale-95') && !el.classList.contains('active:scale-90')) {
+                el.style.opacity = '0.7';
+            }
+        });
+        el.addEventListener('mouseup', () => {
+            el.style.opacity = '1';
+        });
+        el.addEventListener('mouseleave', () => {
+            el.style.opacity = '1';
+        });
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>

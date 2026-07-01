@@ -1,0 +1,316 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Admin - Upload CSV</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#d2c5ab",
+                        "error-container": "#ffdad6",
+                        "secondary": "#7f5700",
+                        "on-tertiary-fixed-variant": "#004f57",
+                        "secondary-fixed": "#ffdeae",
+                        "primary-fixed-dim": "#f1c100",
+                        "surface-container-low": "#fdf2e0",
+                        "secondary-container": "#feb62f",
+                        "surface-container": "#f7eddb",
+                        "primary-container": "#ffcc00",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#ebe1d0",
+                        "on-secondary-fixed": "#281900",
+                        "on-primary-fixed-variant": "#584400",
+                        "inverse-on-surface": "#faf0dd",
+                        "on-tertiary-container": "#00646e",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#6d4a00",
+                        "inverse-primary": "#f1c100",
+                        "surface-variant": "#ebe1d0",
+                        "surface-dim": "#e3d9c7",
+                        "on-tertiary-fixed": "#001f24",
+                        "on-surface-variant": "#4e4632",
+                        "on-secondary-fixed-variant": "#604100",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed-dim": "#00daf0",
+                        "tertiary": "#006874",
+                        "primary-fixed": "#ffe08b",
+                        "on-surface": "#1f1b10",
+                        "surface-container-high": "#f1e7d5",
+                        "secondary-fixed-dim": "#ffba3d",
+                        "primary": "#745b00",
+                        "surface": "#fff8f1",
+                        "tertiary-container": "#00e7fe",
+                        "surface-tint": "#745b00",
+                        "background": "#fff8f1",
+                        "surface-bright": "#fff8f1",
+                        "on-primary-container": "#6f5700",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#1f1b10",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#353024",
+                        "outline": "#80765f",
+                        "on-primary-fixed": "#241a00",
+                        "tertiary-fixed": "#95f1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "20px",
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "gutter-mobile": "12px",
+                        "unit": "4px",
+                        "lg": "32px",
+                        "xs": "4px",
+                        "xl": "48px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Hanken Grotesk', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .drag-zone {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .drag-zone.dragging {
+            background-color: #ffcc0015;
+            border-color: #ffcc00;
+            transform: scale(1.01);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed inset-y-0 left-0 flex flex-col z-40 h-screen w-64 flex-shrink-0 bg-surface dark:bg-inverse-surface border-r border-on-surface/10">
+<div class="px-md py-lg">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-inverse-on-surface">Campus Shuttle</h1>
+<p class="font-label-md text-label-md text-on-surface-variant opacity-70">Admin Dashboard</p>
+</div>
+<nav class="flex-1 px-sm space-y-unit">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Overview
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+                Shuttle Stops
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="directions_bus">directions_bus</span>
+                Shuttles
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container font-bold border-r-4 border-primary font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: &quot;FILL&quot; 1;">group</span>
+                Users
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+                Reports
+            </a>
+</nav>
+<div class="p-md">
+<button class="w-full py-sm bg-primary-container hover:bg-[#e6b800] transition-colors text-on-primary-container font-label-md text-label-md font-bold rounded-lg flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                Add New Shuttle
+            </button>
+</div>
+<div class="border-t border-on-surface/5 p-sm">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 flex flex-col h-screen overflow-y-auto">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-16 w-full px-md bg-surface dark:bg-inverse-surface border-b border-on-surface/10 sticky top-0 z-30">
+<div class="flex items-center gap-md">
+<a class="flex items-center gap-1 text-primary hover:opacity-80 transition-opacity font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="arrow_back">arrow_back</span>
+                    Back to Users
+                </a>
+<span class="h-4 w-px bg-on-surface/10"></span>
+<h2 class="font-headline-sm text-headline-sm font-bold text-primary">Admin - Upload CSV</h2>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden lg:block">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[20px]" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-lowest border border-on-surface/10 rounded-lg text-body-md focus:outline-none focus:border-primary transition-colors w-64" placeholder="Search resources..." type="text">
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border border-on-surface/5">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a campus administrator in a light, modern office setting with warm sunlight and minimal architectural details. The lighting is soft and corporate, reflecting a trustworthy and efficient personality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuASda8Zypfjykhzyy6718PCMX6kmuo4J_BnNEQ1Zbn20E2x2TPXdmj6MCvazrY-tp2utAinN5413UKTiiWhGcQnH2Wx7XKjyqhxXU8TtGFtR2UTDuUfJHPKx8VvuUCrUGz3rW4hAAq4_fNGUd7LMO2bC6qBzasPYiW3KNm-rRvlQVybQX8aPFapUlSVXLjc6hjXpwFidWnzay8zvhkGE0-hfYL77x9MR2o-yvRKABubqiNm7f7rEm56em05ykPm-I99iimN11cFZVcj">
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<section class="p-xl flex-1 flex flex-col max-w-5xl mx-auto w-full">
+<div class="mb-lg">
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-2">Bulk Add Users</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Streamline your administration by uploading a CSV file containing user details. Ensure your file matches the required template for successful processing.</p>
+</div>
+<!-- Bento Layout Content -->
+<div class="grid grid-cols-12 gap-md items-start">
+<!-- Main Upload Block -->
+<div class="col-span-12 lg:col-span-8 space-y-md">
+<div class="drag-zone relative group flex flex-col items-center justify-center border-2 border-dashed border-outline-variant bg-surface-container-lowest p-xl rounded-xl cursor-pointer hover:border-primary-container" id="dropzone">
+<input accept=".csv" class="absolute inset-0 opacity-0 cursor-pointer" id="fileInput" type="file">
+<div class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-md group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-[40px] text-on-primary-container" data-icon="upload_file">upload_file</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-2">Drag and drop your CSV file here</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-base text-center">or click to browse your computer</p>
+<p class="font-label-sm text-label-sm text-outline px-3 py-1 bg-surface-container-low rounded">Maximum file size: 10MB</p>
+</div>
+
+</div>
+<!-- Guidelines Block -->
+<div class="col-span-12 lg:col-span-4 space-y-md">
+<div class="bg-surface-container-high p-md rounded-xl border border-on-surface/5">
+<h5 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-md opacity-60">Validation Rules</h5>
+<ul class="space-y-sm">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] mt-1" data-icon="check_circle" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Email addresses must be unique.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] mt-1" data-icon="check_circle" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">User IDs should follow 'STU-XXXX' format.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] mt-1" data-icon="check_circle" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Departments must match existing records.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] mt-1" data-icon="check_circle" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Status column is mandatory (Active/Inactive).</span>
+</li>
+</ul>
+</div>
+<div class="p-md rounded-xl border border-error bg-error-container/20 flex flex-col gap-2">
+<div class="flex items-center gap-2 text-error">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+<span class="font-label-md text-label-md font-bold">Important Notice</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-error-container">Bulk uploading will not overwrite existing users. Errors will be reported after processing is complete.</p>
+</div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="mt-xl flex items-center justify-end gap-md pt-lg border-t border-on-surface/10">
+<button class="px-lg py-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-highest transition-colors rounded-lg">
+                    Cancel
+                </button>
+<button class="px-xl py-sm bg-primary-container hover:bg-[#e6b800] text-on-primary-container font-bold font-label-md text-label-md rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" id="uploadBtn">
+<span class="material-symbols-outlined" data-icon="cloud_upload">cloud_upload</span>
+                    Process Upload
+                </button>
+</div>
+</section>
+</main>
+<script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('dragging');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('dragging');
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.name.endsWith('.csv')) {
+                    dropzone.querySelector('h4').textContent = file.name;
+                    dropzone.querySelector('p').textContent = `File size: ${(file.size / 1024).toFixed(1)} KB`;
+                    dropzone.classList.add('border-primary');
+                    dropzone.querySelector('.bg-primary-container').innerHTML = '<span class="material-symbols-outlined text-[40px] text-on-primary-container" style="font-variation-settings: \'FILL\' 1;">check_circle</span>';
+                } else {
+                    alert('Please upload a valid CSV file.');
+                }
+            }
+        }
+
+        uploadBtn.addEventListener('click', () => {
+            const btn = uploadBtn;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="progress_activity">progress_activity</span> Processing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<span class="material-symbols-outlined" data-icon="done_all">done_all</span> Successfully Uploaded';
+                btn.classList.replace('bg-primary-container', 'bg-secondary-container');
+            }, 2000);
+        });
+    </script>
+
+
+</body></html>

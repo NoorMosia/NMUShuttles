@@ -1,0 +1,335 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Admin - Confirm CSV Import</title>
+<!-- Google Fonts: Hanken Grotesk -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#d2c5ab",
+                    "error-container": "#ffdad6",
+                    "secondary": "#7f5700",
+                    "on-tertiary-fixed-variant": "#004f57",
+                    "secondary-fixed": "#ffdeae",
+                    "primary-fixed-dim": "#f1c100",
+                    "surface-container-low": "#fdf2e0",
+                    "secondary-container": "#feb62f",
+                    "surface-container": "#f7eddb",
+                    "primary-container": "#ffcc00",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#ebe1d0",
+                    "on-secondary-fixed": "#281900",
+                    "on-primary-fixed-variant": "#584400",
+                    "inverse-on-surface": "#faf0dd",
+                    "on-tertiary-container": "#00646e",
+                    "on-primary": "#ffffff",
+                    "on-secondary-container": "#6d4a00",
+                    "inverse-primary": "#f1c100",
+                    "surface-variant": "#ebe1d0",
+                    "surface-dim": "#e3d9c7",
+                    "on-tertiary-fixed": "#001f24",
+                    "on-surface-variant": "#4e4632",
+                    "on-secondary-fixed-variant": "#604100",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed-dim": "#00daf0",
+                    "tertiary": "#006874",
+                    "primary-fixed": "#ffe08b",
+                    "on-surface": "#1f1b10",
+                    "surface-container-high": "#f1e7d5",
+                    "secondary-fixed-dim": "#ffba3d",
+                    "primary": "#745b00",
+                    "surface": "#fff8f1",
+                    "tertiary-container": "#00e7fe",
+                    "surface-tint": "#745b00",
+                    "background": "#fff8f1",
+                    "surface-bright": "#fff8f1",
+                    "on-primary-container": "#6f5700",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#1f1b10",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#353024",
+                    "outline": "#80765f",
+                    "on-primary-fixed": "#241a00",
+                    "tertiary-fixed": "#95f1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "md": "20px",
+                    "margin-mobile": "16px",
+                    "base": "8px",
+                    "gutter-mobile": "12px",
+                    "unit": "4px",
+                    "lg": "32px",
+                    "xs": "4px",
+                    "xl": "48px",
+                    "sm": "12px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "label-md": ["Hanken Grotesk"],
+                    "display-lg": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Hanken Grotesk', sans-serif;
+        background-color: #fff8f1;
+      }
+      /* Custom Table Styling to match Flat Precision */
+      .preview-table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .preview-table th, .preview-table td {
+        border-bottom: 1px solid rgba(19, 46, 81, 0.1);
+        text-align: left;
+      }
+    </style>
+</head>
+<body class="overflow-hidden">
+<!-- Shell Layout Wrapper -->
+<div class="flex h-screen w-full">
+<!-- SideNavBar Component (JSON Authority) -->
+<aside class="fixed inset-y-0 left-0 flex flex-col z-40 bg-surface dark:bg-inverse-surface h-screen w-64 flex-shrink-0 border-r border-on-surface/10">
+<div class="p-md">
+
+
+</div>
+<nav class="flex-grow mt-sm">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span class="font-label-md text-label-md">Shuttle Stops</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="directions_bus">directions_bus</span>
+<span class="font-label-md text-label-md">Shuttles</span>
+</a>
+<!-- Active Item: Users (Closest match to CSV student import context) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container font-bold border-r-4 border-primary" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-md text-label-md">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="font-label-md text-label-md">Reports</span>
+</a>
+</nav>
+<div class="mt-auto p-md border-t border-on-surface/10">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 flex-grow flex flex-col h-full bg-background overflow-hidden">
+<!-- TopAppBar Component (JSON Authority) -->
+
+<!-- Content Area -->
+<div class="flex-grow p-lg overflow-y-auto pb-32">
+<!-- File Indicator Section -->
+<div class="mb-lg flex items-center gap-sm bg-surface-container-low p-md rounded-lg border border-on-surface/5">
+<div class="w-12 h-12 flex items-center justify-center bg-primary-container text-on-primary-container rounded-lg">
+<span class="material-symbols-outlined text-[32px]" data-icon="csv">csv</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">students_list_batch_01.csv</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">424 rows detected • Ready to import</p>
+</div>
+</div>
+<!-- Preview Table Section -->
+<div class="bg-surface-container-lowest border border-on-surface/10 rounded-xl overflow-hidden">
+<div class="p-md border-b border-on-surface/10 flex justify-between items-center bg-surface-container">
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Data Preview (Showing first 10 rows)</h4>
+<div class="flex items-center gap-sm">
+<span class="bg-success text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase">No Errors</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="preview-table">
+<thead class="bg-surface-container-highest">
+<tr>
+<th class="px-md py-sm font-label-md text-label-md text-on-surface-variant">User ID</th>
+<th class="px-md py-sm font-label-md text-label-md text-on-surface-variant">Name</th>
+<th class="px-md py-sm font-label-md text-label-md text-on-surface-variant">Role</th>
+<th class="px-md py-sm font-label-md text-label-md text-on-surface-variant">Email</th>
+</tr>
+</thead>
+<tbody class="text-on-surface font-body-md text-body-md">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-medium">S-2024-001</td>
+<td class="px-md py-md">Marcus Thompson</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">m.thompson@university.edu</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-medium">S-2024-002</td>
+<td class="px-md py-md">Elena Rodriguez</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">e.rodriguez@university.edu</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-medium">S-2024-003</td>
+<td class="px-md py-md">Jordan Lee</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">j.lee@university.edu</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-medium">S-2024-004</td>
+<td class="px-md py-md">Sarah Jenkins</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">s.jenkins@university.edu</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-medium">S-2024-005</td>
+<td class="px-md py-md">Aiden Vance</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">a.vance@university.edu</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-medium">S-2024-006</td>
+<td class="px-md py-md">Lila Chen</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">l.chen@university.edu</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-medium">S-2024-007</td>
+<td class="px-md py-md">Oscar Wildey</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">o.wildey@university.edu</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-medium">S-2024-008</td>
+<td class="px-md py-md">Priya Sharma</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">p.sharma@university.edu</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-md font-medium">S-2024-009</td>
+<td class="px-md py-md">Derek Smith</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">d.smith@university.edu</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors border-b-0">
+<td class="px-md py-md font-medium">S-2024-010</td>
+<td class="px-md py-md">Maria Garcia</td>
+<td class="px-md py-md"><span class="bg-surface-container-high px-2 py-1 rounded text-xs font-semibold">Student</span></td>
+<td class="px-md py-md">m.garcia@university.edu</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Summary Card -->
+<div class="mt-lg grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="bg-surface p-md border border-on-surface/10 rounded-lg">
+<p class="font-label-md text-label-md text-on-surface-variant">Total Records</p>
+<h4 class="font-headline-md text-headline-md font-bold text-on-surface">424</h4>
+</div>
+<div class="bg-surface p-md border border-on-surface/10 rounded-lg">
+<p class="font-label-md text-label-md text-on-surface-variant">Duplicates Found</p>
+<h4 class="font-headline-md text-headline-md font-bold text-on-surface">0</h4>
+</div>
+<div class="bg-surface p-md border border-on-surface/10 rounded-lg">
+<p class="font-label-md text-label-md text-on-surface-variant">Expected Role</p>
+<h4 class="font-headline-md text-headline-md font-bold text-primary">Student</h4>
+</div>
+</div>
+</div>
+<!-- Fixed Bottom Action Bar -->
+<footer class="fixed bottom-0 right-0 left-64 bg-surface border-t border-on-surface/10 p-md flex justify-between items-center z-50">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="info">info</span>
+<p class="font-label-md text-label-md text-on-surface-variant">Please ensure the column headers match the system requirements before confirming.</p>
+</div>
+<div class="flex gap-md">
+<button class="px-lg py-md border-2 border-on-surface text-on-surface font-label-md text-label-md rounded hover:bg-on-surface hover:text-surface transition-all active:scale-95">
+                        Cancel
+                    </button>
+<button class="px-xl py-md bg-[#ffcc00] text-[#132e51] font-bold font-label-md text-label-md rounded hover:brightness-90 transition-all active:scale-95 flex items-center gap-2" id="confirm-btn">
+<span class="">Confirm Import</span>
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</button>
+</div>
+</footer>
+</main>
+</div>
+<!-- Success Feedback Notification (Hidden by default) -->
+<div class="fixed top-20 right-8 transform translate-x-full transition-transform duration-300 z-[100] flex items-center gap-3 bg-inverse-surface text-inverse-on-surface px-lg py-md rounded-lg shadow-xl border-l-4 border-primary" id="success-toast">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="check_circle">check_circle</span>
+<div>
+<p class="font-label-md text-label-md font-bold">Import Successful</p>
+<p class="text-xs opacity-80">424 students added to the database.</p>
+</div>
+</div>
+<script>
+        document.getElementById('confirm-btn').addEventListener('click', function() {
+            const toast = document.getElementById('success-toast');
+            toast.classList.remove('translate-x-full');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 4000);
+            
+            this.innerHTML = `
+                <span class="animate-spin material-symbols-outlined" data-icon="sync">sync</span>
+                <span>Processing...</span>
+            `;
+            this.disabled = true;
+            this.classList.add('opacity-70');
+            
+            setTimeout(() => {
+                this.innerHTML = `
+                    <span>Confirm Import</span>
+                    <span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+                `;
+                this.disabled = false;
+                this.classList.remove('opacity-70');
+            }, 2000);
+        });
+    </script>
+
+
+</body></html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ShuttlePro Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#241a00",
+                        "surface-dim": "#e3d9c7",
+                        "on-tertiary-container": "#00646e",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#ffba3d",
+                        "outline-variant": "#d2c5ab",
+                        "on-surface": "#1f1b10",
+                        "surface-container-low": "#fdf2e0",
+                        "on-secondary-fixed-variant": "#604100",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#ebe1d0",
+                        "tertiary-container": "#00e7fe",
+                        "on-secondary-container": "#6d4a00",
+                        "on-primary-container": "#6f5700",
+                        "tertiary-fixed": "#95f1ff",
+                        "primary": "#745b00",
+                        "on-tertiary-fixed": "#001f24",
+                        "outline": "#80765f",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#1f1b10",
+                        "inverse-primary": "#f1c100",
+                        "surface-bright": "#fff8f1",
+                        "secondary-fixed": "#ffdeae",
+                        "primary-container": "#ffcc00",
+                        "inverse-on-surface": "#faf0dd",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#ffe08b",
+                        "surface-container": "#f7eddb",
+                        "secondary-container": "#feb62f",
+                        "on-tertiary-fixed-variant": "#004f57",
+                        "tertiary": "#006874",
+                        "surface": "#ffffff",
+                        "background": "#ffffff",
+                        "surface-tint": "#745b00",
+                        "surface-container-high": "#f1e7d5",
+                        "secondary": "#7f5700",
+                        "surface-variant": "#ebe1d0",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#281900",
+                        "on-surface-variant": "#4e4632",
+                        "inverse-surface": "#353024",
+                        "primary-fixed-dim": "#f1c100",
+                        "tertiary-fixed-dim": "#00daf0",
+                        "on-primary-fixed-variant": "#584400",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "5px",
+                        "lg": "5px",
+                        "xl": "5px",
+                        "full": "5px"
+                    },
+                    "spacing": {
+                        "xl": "48px",
+                        "lg": "32px",
+                        "unit": "4px",
+                        "sm": "12px",
+                        "margin-mobile": "16px",
+                        "gutter-mobile": "12px",
+                        "xs": "4px",
+                        "md": "20px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Hanken Grotesk', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24">
+<!-- Top AppBar (From JSON) -->
+<header class="w-full top-0 sticky bg-surface z-40 border-b border-outline-variant/20">
+<div class="flex items-center justify-between px-margin-mobile py-sm h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer">arrow_back</span>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">PROFILE</h1>
+</div>
+<div class="w-8"></div> <!-- Spacer for balance -->
+</div>
+</header>
+<main class="max-w-md mx-auto px-margin-mobile pt-lg">
+<!-- Student Details Section -->
+<section class="mb-xl">
+<div class="flex flex-col items-center text-center py-xl mb-xl border-b border-outline-variant/30 pb-24">
+
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">John Doe</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">218012345</p>
+<p class="font-body-md text-body-md text-on-surface-variant">j.doe@university.edu</p>
+</div>
+</div>
+
+</section>
+<!-- Booking Statistics Section -->
+<section class="mb-xl">
+<div class="grid grid-cols-2 gap-gutter-mobile">
+<div class="p-md bg-white rounded flex flex-col items-center text-center">
+<span class="font-display-lg text-display-lg text-error mb-xs">2</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">No-Show Count</span>
+</div>
+<div class="p-md bg-white rounded flex flex-col items-center text-center">
+<span class="font-display-lg text-display-lg text-primary mb-xs">12</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Cancelled Bookings</span>
+</div>
+</div>
+<p class="mt-sm font-label-sm text-label-sm text-on-surface-variant italic text-center">
+                Note: Cancellations are preferred over no-shows to free up seats.
+            </p>
+</section>
+<!-- Latest Reports Section -->
+<section class="mb-lg">
+<h3 class="font-label-md text-label-md text-on-surface mb-sm tracking-widest font-bold">LATEST REPORTS</h3>
+<div class="rounded overflow-hidden gap-gutter-mobile flex-col flex">
+<!-- Report Item 1 -->
+<div class="bg-white p-sm flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer rounded border border-outline-variant/30">
+<div class="flex-1">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">12 Oct 2023</span>
+<span class="px-xs py-[2px] bg-surface-variant text-on-surface-variant font-label-sm text-[10px] rounded uppercase">Resolved</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface line-clamp-1">Shuttle arrived 15 minutes late at North Campus.</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant ml-sm">chevron_right</span>
+</div>
+<!-- Report Item 2 -->
+<div class="bg-white p-sm flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer rounded border border-outline-variant/30">
+<div class="flex-1">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">08 Oct 2023</span>
+<span class="px-xs py-[2px] bg-secondary-container text-on-secondary-container font-label-sm text-[10px] rounded uppercase">Pending</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface line-clamp-1">Driver was extremely professional and helpful with luggage.</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant ml-sm">chevron_right</span>
+</div>
+<!-- Report Item 3 -->
+<div class="bg-white p-sm flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer rounded border border-outline-variant/30">
+<div class="flex-1">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">05 Oct 2023</span>
+<span class="px-xs py-[2px] bg-surface-variant text-on-surface-variant font-label-sm text-[10px] rounded uppercase">Resolved</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface line-clamp-1">Unexpected detour due to road construction at Main Gate.</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant ml-sm">chevron_right</span>
+</div>
+<!-- Report Item 4 -->
+<div class="bg-white p-sm flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer rounded border border-outline-variant/30">
+<div class="flex-1">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">01 Oct 2023</span>
+<span class="px-xs py-[2px] bg-secondary-container text-on-secondary-container font-label-sm text-[10px] rounded uppercase">Pending</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface line-clamp-1">Booking failed with error code 404 while using Wi-Fi.</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant ml-sm">chevron_right</span>
+</div>
+<!-- Report Item 5 -->
+<div class="bg-white p-sm flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer rounded border border-outline-variant/30">
+<div class="flex-1">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">28 Sep 2023</span>
+<span class="px-xs py-[2px] bg-surface-variant text-on-surface-variant font-label-sm text-[10px] rounded uppercase">Resolved</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface line-clamp-1">Shuttle felt overcrowded during peak morning hours.</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant ml-sm">chevron_right</span>
+</div>
+</div>
+<div class="mt-md text-center">
+<a class="font-label-md text-label-md text-primary font-bold uppercase underline decoration-2 underline-offset-4 hover:text-on-secondary-container transition-colors" href="#">
+                    ALL REPORTS
+                </a>
+</div>
+</section>
+<!-- Danger Zone -->
+<section class="mt-xl pt-lg border-t border-outline/10">
+<button class="w-full flex items-center justify-center gap-xs py-sm text-error font-label-md text-label-md hover:bg-error-container/20 transition-all rounded">
+<span class="material-symbols-outlined">logout</span>
+                LOGOUT
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation (From JSON) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center h-16 bg-surface border-t border-outline-variant/20">
+  <!-- Home -->
+  <a class="flex flex-col items-center justify-center text-on-surface-variant transition-all duration-150 hover:bg-surface-container-low w-1/4 h-full" href="#">
+    <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">home</span>
+    <span class="font-label-sm text-label-sm mt-1">Home</span>
+  </a>
+  <!-- Maps -->
+  <a class="flex flex-col items-center justify-center text-on-surface-variant transition-all duration-150 hover:bg-surface-container-low w-1/4 h-full" href="#">
+    <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">map</span>
+    <span class="font-label-sm text-label-sm mt-1">Maps</span>
+  </a>
+  <!-- Alerts -->
+  <a class="flex flex-col items-center justify-center text-on-surface-variant transition-all duration-150 hover:bg-surface-container-low w-1/4 h-full" href="#">
+    <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">notifications</span>
+    <span class="font-label-sm text-label-sm mt-1">Alerts</span>
+  </a>
+  <!-- Profile (Active) -->
+  <a class="flex flex-col items-center justify-center text-primary relative transition-all duration-150 hover:bg-surface-container-low w-1/4 h-full" href="#">
+    <div class="active-indicator" style="position: absolute; top: 0px; left: 0px; right: 0px; height: 3px; background-color: rgb(255, 204, 0);"></div>
+    <span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">person</span>
+    <span class="font-label-sm text-label-sm mt-1 font-bold">Profile</span>
+  </a>
+</nav>
+<script>
+        // Simple ripple-like effect on report items for micro-interaction
+        document.querySelectorAll('.cursor-pointer').forEach(item => {
+            item.addEventListener('mousedown', () => {
+                item.style.backgroundColor = '#f7eddb';
+            });
+            item.addEventListener('mouseup', () => {
+                setTimeout(() => {
+                    item.style.backgroundColor = '';
+                }, 100);
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+
+</body></html>

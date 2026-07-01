@@ -1,0 +1,192 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Booking Details - BOOKED</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#00daf0",
+                    "on-tertiary-fixed": "#001f24",
+                    "error-container": "#ffdad6",
+                    "primary": "#745b00",
+                    "on-background": "#1f1b10",
+                    "on-surface": "#1f1b10",
+                    "primary-fixed-dim": "#f1c100",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed": "#241a00",
+                    "surface-variant": "#ebe1d0",
+                    "on-primary-fixed-variant": "#584400",
+                    "error": "#ba1a1a",
+                    "inverse-surface": "#353024",
+                    "surface-container": "#f7eddb",
+                    "primary-container": "#ffcc00",
+                    "on-secondary": "#ffffff",
+                    "surface-bright": "#fff8f1",
+                    "surface": "#fff8f1",
+                    "surface-tint": "#745b00",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#f1e7d5",
+                    "outline": "#80765f",
+                    "inverse-primary": "#f1c100",
+                    "tertiary": "#006874",
+                    "on-secondary-fixed-variant": "#604100",
+                    "on-primary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#fdf2e0",
+                    "on-tertiary-fixed-variant": "#004f57",
+                    "on-surface-variant": "#4e4632",
+                    "secondary": "#7f5700",
+                    "surface-dim": "#e3d9c7",
+                    "on-secondary-container": "#6d4a00",
+                    "outline-variant": "#d2c5ab",
+                    "background": "#fff8f1",
+                    "secondary-fixed": "#ffdeae",
+                    "secondary-container": "#feb62f",
+                    "on-tertiary-container": "#00646e",
+                    "secondary-fixed-dim": "#ffba3d",
+                    "tertiary-container": "#00e7fe",
+                    "on-primary-container": "#6f5700",
+                    "tertiary-fixed": "#95f1ff",
+                    "primary-fixed": "#ffe08b",
+                    "inverse-on-surface": "#faf0dd",
+                    "on-secondary-fixed": "#281900",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-highest": "#ebe1d0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "md": "20px",
+                    "sm": "12px",
+                    "margin-mobile": "16px",
+                    "lg": "32px",
+                    "unit": "4px",
+                    "base": "8px",
+                    "xs": "4px",
+                    "gutter-mobile": "12px",
+                    "xl": "48px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "label-sm": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"],
+                    "label-md": ["Hanken Grotesk"],
+                    "display-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #ffffff;
+            color: #1f1b10;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-body-md text-body-md antialiased">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 bg-surface flex justify-between items-center px-margin-mobile py-sm border-b border-outline-variant/20 z-50 sticky">
+<button aria-label="Back" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:opacity-80">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-primary tracking-tight">Booking Details</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="flex-grow px-margin-mobile py-lg max-w-md mx-auto w-full pb-xl">
+<!-- Section 1: Trip Details -->
+<section class="mb-lg">
+<div class="flex items-start gap-md p-md border border-on-surface/10 rounded-lg bg-surface-container-lowest border-outline-variant/30">
+<div class="flex flex-col items-center gap-1 mt-1">
+<div class="w-3 h-3 rounded-full border-2 border-primary"></div>
+<div class="w-0.5 h-12 bg-outline-variant"></div>
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+</div>
+<div class="flex flex-col gap-4">
+<div>
+<p class="font-label-sm text-on-surface-variant uppercase tracking-wider">From</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">South</p>
+</div>
+<div>
+<p class="font-label-sm text-on-surface-variant uppercase tracking-wider">To</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">Humewood</p>
+</div>
+</div>
+</div>
+<div class="mt-md flex items-center gap-sm p-sm border border-on-surface/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">calendar_today</span>
+<p class="font-label-md text-label-md text-on-surface">Today, 2:00 PM</p>
+</div>
+</section>
+<!-- Section 2: QR Code -->
+<section class="mb-xl flex flex-col items-center">
+<div class="p-md bg-white border-2 border-on-surface/10 rounded-xl">
+<div class="aspect-square w-64 flex items-center justify-center bg-white">
+<!-- QR Code Placeholder -->
+<img alt="QR Code" class="w-full h-full object-contain" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg">
+</div>
+</div>
+<p class="mt-sm font-label-sm text-on-surface-variant text-center">Scan this code at the shuttle entry</p>
+</section>
+<!-- Section 3: Buttons -->
+<section class="flex flex-col gap-md">
+<button class="w-full py-md bg-primary-container text-on-primary-container font-label-md text-label-md rounded-[5px] active:bg-primary transition-colors flex items-center justify-center gap-sm" style="transform: scale(1);">
+<span class="material-symbols-outlined">download</span>
+                Download QR Code
+            </button>
+<button class="w-full py-md border-2 border-error text-error font-label-md text-label-md rounded-[5px] active:bg-error/10 transition-colors flex items-center justify-center gap-sm" style="transform: scale(1);">
+<span class="material-symbols-outlined">cancel</span>
+                Cancel Booking
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+
+<!-- Spacing for Bottom Bar -->
+
+<script>
+        // Micro-interaction for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => btn.style.transform = 'scale(0.98)');
+            btn.addEventListener('mouseup', () => btn.style.transform = 'scale(1)');
+            btn.addEventListener('mouseleave', () => btn.style.transform = 'scale(1)');
+        });
+    </script>
+
+
+
+
+
+
+
+
+</body></html>

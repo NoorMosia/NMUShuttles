@@ -1,0 +1,259 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ShuttleBoard - Passenger List</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#00646e",
+                    "on-primary-fixed": "#241a00",
+                    "inverse-surface": "#353024",
+                    "on-tertiary-fixed-variant": "#004f57",
+                    "surface-container": "#f7eddb",
+                    "outline": "#80765f",
+                    "primary-fixed": "#ffe08b",
+                    "on-secondary-fixed": "#281900",
+                    "surface": "#fff8f1",
+                    "on-tertiary-fixed": "#001f24",
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#ebe1d0",
+                    "inverse-on-surface": "#faf0dd",
+                    "on-primary-container": "#6f5700",
+                    "tertiary-container": "#00e7fe",
+                    "surface-bright": "#fff8f1",
+                    "on-secondary-fixed-variant": "#604100",
+                    "tertiary": "#006874",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#00daf0",
+                    "secondary": "#7f5700",
+                    "surface-dim": "#e3d9c7",
+                    "background": "#fff8f1",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#fdf2e0",
+                    "primary": "#745b00",
+                    "error": "#ba1a1a",
+                    "primary-fixed-dim": "#f1c100",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#745b00",
+                    "on-primary-fixed-variant": "#584400",
+                    "tertiary-fixed": "#95f1ff",
+                    "surface-variant": "#ebe1d0",
+                    "outline-variant": "#d2c5ab",
+                    "on-background": "#1f1b10",
+                    "error-container": "#ffdad6",
+                    "on-surface-variant": "#4e4632",
+                    "on-surface": "#1f1b10",
+                    "inverse-primary": "#f1c100",
+                    "secondary-fixed-dim": "#ffba3d",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#f1e7d5",
+                    "on-secondary-container": "#6d4a00",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#feb62f",
+                    "secondary-fixed": "#ffdeae",
+                    "primary-container": "#ffcc00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "gutter-mobile": "12px",
+                    "sm": "12px",
+                    "xl": "48px",
+                    "base": "8px",
+                    "xs": "4px",
+                    "unit": "4px",
+                    "lg": "32px",
+                    "md": "20px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "label-sm": ["Hanken Grotesk"],
+                    "label-md": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "display-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #ffffff;
+            color: #1f1b10;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .card-shadow-soft {
+            border: 1px solid rgba(19, 46, 81, 0.1);
+        }
+        .transition-all-custom {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md antialiased">
+<!-- Top App Bar -->
+<header class="w-full top-0 sticky bg-white z-40 border-b border-outline-variant flex items-center px-margin-mobile h-16 w-full justify-between">
+<div class="flex items-center gap-4">
+<button class="hover:bg-surface-container transition-colors duration-200 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm font-bold text-on-surface">Passenger List</h1>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</div>
+</header>
+<main class="max-w-md mx-auto px-margin-mobile pb-24 pt-6">
+<!-- Timeslot Header -->
+<section class="mb-8">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="schedule">schedule</span>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">MARSHAL DASHBOARD</p>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Current Timeslot: 08:30 AM</h2>
+<div class="mt-4 flex items-center justify-between bg-surface-container-low p-4 rounded-xl border border-outline-variant">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">TOTAL PASSENGERS</p>
+<p class="font-headline-sm text-headline-sm text-primary">32 Students</p>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-on-surface-variant">BOARDED</p>
+<p class="font-headline-sm text-headline-sm text-on-tertiary-container">14 / 32</p>
+</div>
+</div>
+</section><div class="mb-6 relative"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span><input type="text" placeholder="Search student name or ID..." class="w-full bg-surface-container-low border border-outline-variant rounded-lg py-2 pl-10 pr-4 font-body-md text-body-md focus:outline-none focus:border-primary transition-colors"></div>
+<!-- Passenger List -->
+<div class="space-y-4">
+<!-- Student Card 1 -->
+<div class="bg-white card-shadow-soft rounded-xl p-md flex items-center justify-between transition-all-custom hover:bg-surface-container-lowest">
+<div class="flex items-center gap-4">
+
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Alex Rivera</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">ID: 2024-8841-ST</p>
+</div>
+</div>
+<button class="bg-[#ffcc00] text-[#132e51] px-6 py-2 rounded-lg font-label-md text-label-md transition-all-custom active:scale-95" onclick="toggleCheck(this)">
+                    CHECK
+                </button>
+</div>
+<!-- Student Card 2 -->
+<div class="bg-white card-shadow-soft rounded-xl p-md flex items-center justify-between transition-all-custom hover:bg-surface-container-lowest">
+<div class="flex items-center gap-4">
+
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Jordan Smith</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">ID: 2024-9122-ST</p>
+</div>
+</div>
+<button class="bg-[#ffcc00] text-[#132e51] px-6 py-2 rounded-lg font-label-md text-label-md transition-all-custom active:scale-95" onclick="toggleCheck(this)">
+                    CHECK
+                </button>
+</div>
+<!-- Student Card 3 (Boarded State Example) -->
+<div class="bg-surface-container-low border border-outline-variant opacity-75 rounded-xl p-md flex items-center justify-between">
+<div class="flex items-center gap-4">
+
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface-variant">Elena Gilbert</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">ID: 2024-7710-ST</p>
+</div>
+</div>
+<div class="flex items-center text-on-tertiary-container gap-1 px-3 py-2">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md">BOARDED</span>
+</div>
+</div>
+<!-- Student Card 4 -->
+<div class="bg-white card-shadow-soft rounded-xl p-md flex items-center justify-between transition-all-custom hover:bg-surface-container-lowest">
+<div class="flex items-center gap-4">
+
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Marcus Chen</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">ID: 2024-5543-ST</p>
+</div>
+</div>
+<button class="bg-[#ffcc00] text-[#132e51] px-6 py-2 rounded-lg font-label-md text-label-md transition-all-custom active:scale-95" onclick="toggleCheck(this)">
+                    CHECK
+                </button>
+</div>
+<!-- Student Card 5 -->
+<div class="bg-white card-shadow-soft rounded-xl p-md flex items-center justify-between transition-all-custom hover:bg-surface-container-lowest">
+<div class="flex items-center gap-4">
+
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Sarah Connor</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">ID: 2024-1234-ST</p>
+</div>
+</div>
+<button class="bg-[#ffcc00] text-[#132e51] px-6 py-2 rounded-lg font-label-md text-label-md transition-all-custom active:scale-95" onclick="toggleCheck(this)">
+                    CHECK
+                </button>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Shared Component) -->
+
+<script>
+        function toggleCheck(btn) {
+            const card = btn.closest('.bg-white');
+            const nameEl = card.querySelector('h3');
+            const imgEl = card.querySelector('img');
+            const parent = card.parentElement;
+
+            // Simple visual transition to "Boarded" state
+            btn.innerHTML = `
+                <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    <span>DONE</span>
+                </div>
+            `;
+            btn.classList.remove('bg-[#ffcc00]', 'text-[#132e51]', 'border-b-2', 'border-primary');
+            btn.classList.add('text-on-tertiary-container', 'bg-transparent');
+            btn.disabled = true;
+
+            card.classList.add('bg-surface-container-low', 'opacity-75');
+            card.classList.remove('bg-white', 'hover:bg-surface-container-lowest');
+            nameEl.classList.add('line-through');
+            imgEl.classList.add('grayscale');
+
+            // Optional: Move to bottom of list logic could go here
+        }
+    </script>
+
+
+</body></html>

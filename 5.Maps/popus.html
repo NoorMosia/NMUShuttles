@@ -1,0 +1,208 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Maps View - Booked</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#f1c100",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#95f1ff",
+                        "surface-container": "#f7eddb",
+                        "secondary-fixed-dim": "#ffba3d",
+                        "outline-variant": "#d2c5ab",
+                        "surface-container-high": "#f1e7d5",
+                        "primary": "#745b00",
+                        "primary-container": "#ffcc00",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#feb62f",
+                        "surface-variant": "#ebe1d0",
+                        "secondary": "#7f5700",
+                        "inverse-on-surface": "#faf0dd",
+                        "tertiary": "#006874",
+                        "tertiary-fixed-dim": "#00daf0",
+                        "on-secondary-fixed-variant": "#604100",
+                        "on-tertiary-container": "#00646e",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#353024",
+                        "surface": "#fff8f1",
+                        "on-primary-container": "#6f5700",
+                        "on-surface": "#1f1b10",
+                        "surface-tint": "#745b00",
+                        "on-secondary-container": "#6d4a00",
+                        "background": "#fff8f1",
+                        "secondary-fixed": "#ffdeae",
+                        "on-surface-variant": "#4e4632",
+                        "outline": "#80765f",
+                        "surface-container-highest": "#ebe1d0",
+                        "tertiary-container": "#00e7fe",
+                        "primary-fixed": "#ffe08b",
+                        "on-primary-fixed-variant": "#584400",
+                        "surface-container-low": "#fdf2e0",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#241a00",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#281900",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#004f57",
+                        "surface-bright": "#fff8f1",
+                        "primary-fixed-dim": "#f1c100",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#e3d9c7",
+                        "on-tertiary-fixed": "#001f24",
+                        "on-background": "#1f1b10",
+                        "navy-custom": "#132e51"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "xs": "4px",
+                        "lg": "32px",
+                        "base": "8px",
+                        "sm": "12px",
+                        "md": "20px",
+                        "margin-mobile": "16px",
+                        "xl": "48px",
+                        "gutter-mobile": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>body {
+    font-family: "Hanken Grotesk", sans-serif;
+    background-color: #fff8f1;
+    overflow: hidden
+    }
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    vertical-align: middle
+    }
+.map-canvas {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBnm8dYqiFtNgmu59JnmoYRIlh4co7oeTaxfSzGLFjev-zmvwvfeHUkSImpMGU3ibKAgX3s17PO9gBlwtkkv1mS_zArPVzcUwQcXUThMWuCfLodqu6OQDZarfZY3N80DIS6_VJG2VmwSXiweTwFcfHK1ef2fFhYGa8Vcj_NMvXu1_gJc9nIn9NPIJ3ZRQJlRx9x70IU8KFaqoJXxT2scSNLuUsKueSrmwpc_p3MhO8sk6oYRYKe4GBK2f5D9XlLXICTQWWmc7FTZCuk)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen w-full bg-white">
+<!-- Top AppBar -->
+<header class="w-full top-0 sticky border-b border-outline-variant flex items-center px-margin-mobile py-base z-50 bg-white justify-start gap-sm"><button class="flex items-center justify-center p-xs hover:bg-surface-container transition-colors rounded-full active:opacity-80"><span class="material-symbols-outlined text-primary">arrow_back</span></button><h1 class="font-headline-sm text-headline-sm text-on-surface">Maps</h1></header>
+<!-- Map View Container -->
+<main class="relative flex-1 overflow-hidden">
+<!-- Persistent Search Bar on Map -->
+<div class="absolute top-sm left-margin-mobile right-margin-mobile z-20"><div class="rounded-lg px-md py-sm flex items-center gap-sm bg-white border"><span class="material-symbols-outlined text-on-surface-variant">search</span><input class="flex-1 bg-transparent border-none outline-none focus:ring-0 text-body-md text-on-surface p-0 placeholder-on-surface-variant/60 font-body-md" placeholder="Search for a shuttle stop..." type="text"><span class="material-symbols-outlined text-on-surface-variant">mic</span></div></div>
+<!-- Simulated Map Background -->
+<div class="absolute inset-0 map-canvas bg-cover bg-center grayscale opacity-40" data-alt="A clean, minimalist vector-style map of a metropolitan coastal area. The map uses a light-mode palette with soft whites, pale grays for streets, and subtle primary yellow accents for points of interest. Several blue and gold circular map pins are scattered across the grid. The aesthetic is professional, architectural, and utilitarian, avoiding shadows in favor of crisp tonal shifts." data-location="Cape Town" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDs6-hsrX9cbY38ikMOuv9bchCP4qh_Tj40qDlg2Wn_9nRTCsxdCRCsE60-UZwBfho0I_H-6r_PZJxXQWQ45y2dsGK5yVcr3RvQr415damTsEC3_-TVcMQL9HZQFIcxC8VA8EVz-Z2SglOjceJyPjuoHVVZEdGFZtkNRGIrjwK8r0Uxfllwgm6ImU6V63IMuT49cuKtrUrHEPm7S6fimggakKYVB07vIETYhINgoqPKz-8qHLjt9FGMQbLO9FEBdZeKypbtiJZI2wol&quot;);"></div>
+<!-- Custom Map Pins (Representative) -->
+<div class="absolute top-1/3 left-1/4 z-10">
+<span class="material-symbols-outlined text-primary bg-primary-container p-1 rounded-full border-2 border-white scale-125" data-icon="shuttle" style="font-variation-settings: 'FILL' 1;">shuffle</span>
+</div>
+<div class="absolute top-1/2 left-1/2 z-10">
+<div class="relative">
+<span class="material-symbols-outlined text-navy-custom scale-150" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-navy-custom rounded-full animate-ping opacity-50"></div>
+</div>
+</div>
+<!-- Bottom Sheet Popup -->
+<div class="absolute bottom-0 left-0 w-full z-30 transition-transform duration-300 transform translate-y-0">
+<div class="bg-surface-container-lowest rounded-t-xl border-t border-x border-outline-variant/20 p-md pb-lg bg-white"><div class="w-12 h-1 bg-outline-variant/30 rounded-full mx-auto mb-md"></div><div class="flex justify-between items-start mb-md"><div><h2 class="font-headline-md text-headline-md text-on-surface mb-xs">Humewood Stop</h2><div class="flex items-center gap-xs"><span class="material-symbols-outlined text-secondary text-base">schedule</span><p class="font-label-md text-label-md text-secondary">Next shuttle in 12 mins</p></div></div><div class="bg-surface-container-high px-sm py-xs rounded"><span class="font-label-sm text-label-sm font-bold text-on-surface-variant">GATE A-12</span></div></div><p class="font-body-md text-body-md text-on-surface-variant mb-lg">Located near the main terminal entrance. Dedicated pick-up zone for premium members.</p><div class="flex flex-col gap-sm"><button class="w-full bg-navy-custom py-md rounded-xl flex items-center justify-center gap-base active:opacity-90 transition-opacity"><span class="material-symbols-outlined text-white">local_taxi</span><span class="font-label-md text-label-md font-bold text-white uppercase tracking-wider">BOOK SHUTTLE</span></button><button class="w-full bg-transparent border-2 border-navy-custom py-md rounded-xl flex items-center justify-center gap-base active:bg-navy-custom/5 transition-colors"><span class="material-symbols-outlined text-navy-custom">directions</span><span class="font-label-md text-label-md font-bold text-navy-custom uppercase tracking-wider">DIRECTIONS</span></button></div></div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface flex justify-around items-center px-gutter-mobile py-2">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors px-4 py-1 rounded-full" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<!-- Maps (Active) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 transition-colors" href="#" style="border-top: 3px solid rgb(255, 204, 0); background-color: transparent;">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">map</span>
+<span class="font-label-sm text-label-sm">Maps</span>
+</a>
+<!-- Alerts -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors px-4 py-1 rounded-full relative" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+<span class="absolute top-1 right-5 w-2 h-2 bg-error rounded-full"></span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors px-4 py-1 rounded-full" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for the bottom sheet
+        let startY = 0;
+        const sheet = document.querySelector('.absolute.bottom-0.left-0.w-full.z-30');
+        
+        sheet.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        });
+
+        sheet.addEventListener('touchmove', (e) => {
+            const currentY = e.touches[0].clientY;
+            const diff = currentY - startY;
+            if (diff > 0) {
+                sheet.style.transform = `translateY(${diff}px)`;
+            }
+        });
+
+        sheet.addEventListener('touchend', (e) => {
+            const currentY = e.changedTouches[0].clientY;
+            const diff = currentY - startY;
+            if (diff > 100) {
+                sheet.style.transform = 'translateY(100%)';
+                // Reset after 2s for demo purposes
+                setTimeout(() => {
+                    sheet.style.transform = 'translateY(0)';
+                }, 2000);
+            } else {
+                sheet.style.transform = 'translateY(0)';
+            }
+        });
+    </script>
+
+
+
+
+</body></html>

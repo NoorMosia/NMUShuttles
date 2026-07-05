@@ -1,0 +1,56 @@
+# =========================
+# Secrets & local config
+# =========================
+appsettings.Development.json
+appsettings.Local.json
+*.env
+.env
+.env.*
+
+# =========================
+# .NET
+# =========================
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# =========================
+# Flutter
+# =========================
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+
+# =========================
+# IDE
+# =========================
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# OS
+# =========================
+Thumbs.db
+.DS_Store

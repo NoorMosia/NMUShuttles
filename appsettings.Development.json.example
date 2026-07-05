@@ -1,0 +1,19 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=tcp:nmushuttles.database.windows.net,1433;Initial Catalog=nmuShuttles;Persist Security Info=False;User ID=mainAdmin;Password=madibaShuttles$;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  },
+  "Jwt": {
+    "Secret": "xWXdOhh7gAHjKI+iixrltmh0TFuITFKde2BUD8juY9U=",
+    "Issuer": "NmuShuttle.Api",
+    "Audience": "NmuShuttle.Clients",
+    "StudentTokenExpiryHours": 24,
+    "MarshalTokenExpiryHours": 24,
+    "AdminTokenExpiryHours": 8
+  },
+  "Firebase": {
+    "ServiceAccountPath": "./firebase-service-account.json"
+  },
+  "Otp": {
+    "ExpiryMinutes": 5
+  }
+}

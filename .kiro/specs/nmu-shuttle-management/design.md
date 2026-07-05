@@ -18,6 +18,14 @@ and reporting ecosystem.
 - **Background automation**: two hosted services (Rolling Injection Job and Lockout Gate) drive all
   time-sensitive state changes without manual operator intervention.
 
+### Seed Data Reference
+
+For development and integration testing, refer to [`firstSeed.md`](../../firstSeed.md) which defines
+the initial data set: 2 admins, 3 campuses, 8 stops, 15 students (3 priority), 3 marshals, 8 shuttles
+(2 accessible), 18 schedule times, 10 calendar exceptions, and 14 priority schedules. This seed is
+loaded during local development via an EF Core `DbContext` seeding hook or a dedicated `/admin/seed`
+endpoint (development builds only).
+
 ---
 
 ## Architecture
@@ -188,9 +196,14 @@ CalendarException (standalone)
 | AllocationId | INT IDENTITY | PK |
 | TripInstanceId | INT | FK → TripInstances NOT NULL |
 | ShuttleId | INT | FK → Shuttles NOT NULL |
+| OrderPosition | INT | NOT NULL — 1-based front-to-back convoy position |
 | IsOperational | BIT | NOT NULL DEFAULT 1 |
 | AssignedAt | DATETIME2 | NOT NULL DEFAULT GETUTCDATE() |
 | UNIQUE | (TripInstanceId, ShuttleId) | — no duplicate allocations |
+| UNIQUE | (TripInstanceId, OrderPosition) | — unique position per convoy |
+
+**Ordering Rule:** When allocations are created, accessible shuttles (`Shuttle.IsAccessibleVehicle = TRUE`)
+are assigned the lowest `OrderPosition` values. Non-accessible shuttles follow after all accessible ones.
 
 #### Bookings
 | Column | Type | Constraints |
@@ -253,6 +266,24 @@ CalendarException (standalone)
 | CreatedAt | DATETIME2 | NOT NULL DEFAULT GETUTCDATE() |
 | UpdatedAt | DATETIME2 | NULL |
 
+#### BreakdownLogs
+| Column | Type | Constraints |
+|---|---|---|
+| BreakdownLogId | INT IDENTITY | PK |
+| TripInstanceId | INT | FK → TripInstances NOT NULL |
+| ShuttleId | INT | FK → Shuttles NOT NULL |
+| VendorCompanyName | NVARCHAR(100) | NOT NULL — denormalized from Shuttle at flag time |
+| FlaggedAt | DATETIME2 | NOT NULL DEFAULT GETUTCDATE() |
+| FlaggedByMarshalId | INT | FK → Marshals NOT NULL |
+| ResolutionType | NVARCHAR(20) | NULL CHECK IN ('Replaced','Cancelled') — set by Admin |
+| ReplacementShuttleId | INT | FK → Shuttles NULL — set when ResolutionType = 'Replaced' |
+| ResolvedAt | DATETIME2 | NULL |
+| ResolvedByAdminId | INT | FK → Admins NULL |
+
+**Purpose:** Provides an immutable audit trail of every breakdown event for vendor reliability
+analytics. The `VendorCompanyName` is denormalized at flag time so analytics remain stable even
+if the Shuttle's vendor is later updated.
+
 ### Key Indexes
 
 ```sql
@@ -262,6 +293,10 @@ CREATE INDEX IX_Bookings_StudentId ON Bookings (StudentId);
 CREATE INDEX IX_Bookings_QrCodeToken ON Bookings (QrCodeToken);
 CREATE INDEX IX_TripInstances_TripDate_Status ON TripInstances (TripDate, Status);
 CREATE INDEX IX_TripShuttleAllocations_TripInstanceId ON TripShuttleAllocations (TripInstanceId);
+CREATE INDEX IX_TripShuttleAllocations_TripInstanceId_OrderPosition ON TripShuttleAllocations (TripInstanceId, OrderPosition);
+CREATE INDEX IX_BreakdownLogs_ShuttleId ON BreakdownLogs (ShuttleId);
+CREATE INDEX IX_BreakdownLogs_VendorCompanyName ON BreakdownLogs (VendorCompanyName);
+CREATE INDEX IX_BreakdownLogs_FlaggedAt ON BreakdownLogs (FlaggedAt);
 CREATE INDEX IX_DeviceRegistrations_OwnerId_Type ON DeviceRegistrations (OwnerId, OwnerType);
 CREATE INDEX IX_Notifications_StudentId_IsRead ON Notifications (StudentId, IsRead);
 CREATE INDEX IX_PrioritySchedules_DayOfWeek_Active ON PrioritySchedules (DayOfWeek, IsActive);
@@ -372,24 +407,31 @@ initiation and admin login endpoints. Role guards are noted as `[Student]`, `[Ma
 
 | Method | Route | Roles | Description |
 |---|---|---|---|
-| POST | `/checkin` | Marshal | Dual-key check-in (QR token + ShuttleId) |
+| POST | `/checkin` | Marshal | QR check-in — system auto-assigns shuttle by convoy order |
 | GET | `/trips/{tripId}/passengers` | Marshal | Passenger manifest for a TripInstance |
 
 **POST `/checkin`**
 ```json
-// Request
-{ "qrCodeToken": "a3f9c...", "shuttleId": 7 }
+// Request — no shuttleId; system determines shuttle via OrderPosition fill
+{ "qrCodeToken": "a3f9c..." }
 // Response 200
 {
   "bookingId": 101,
   "studentName": "Jane Doe",
   "boardedStatus": "Boarded",
-  "boardedAt": "2025-07-10T06:55:12Z"
+  "boardedAt": "2025-07-10T06:55:12Z",
+  "assignedShuttleId": 7,
+  "assignedShuttleLicensePlate": "EC 142-837",
+  "orderPosition": 1
 }
 // Response 404: token not found
 // Response 409: already boarded
-// Response 422: not confirmed / wrong shuttle
+// Response 422: not confirmed / scan window not open / convoy full
 ```
+
+**Time-gate rule:** Check-in is only available starting 35 minutes before the TripInstance's
+scheduled DepartureTime. Requests earlier than `DepartureTime - 35 min` are rejected with HTTP 422
+and message `"Check-in scanning is not yet available for this trip."`
 
 **GET `/trips/{tripId}/passengers`**
 ```json
@@ -417,22 +459,44 @@ initiation and admin login endpoints. Role guards are noted as `[Student]`, `[Ma
 |---|---|---|---|
 | GET | `/trips/{id}` | Student, Marshal, Admin | Get TripInstance detail |
 | PATCH | `/trips/{id}/status` | Admin | Manual status transition |
-| POST | `/trips/{tripId}/breakdown` | Marshal | Flag shuttle breakdown |
-| PUT | `/trips/{tripId}/standby` | Admin | Replace broken shuttle with standby |
+| POST | `/trips/{tripId}/breakdown` | Marshal | Flag shuttle as broken/not arrived (single action) |
+| POST | `/trips/{tripId}/breakdown/{breakdownLogId}/resolve` | Admin | Resolve an incident (replace or cancel) |
 
-**POST `/trips/{tripId}/breakdown`**
+**POST `/trips/{tripId}/breakdown`** — Marshal flags shuttle; NO notification dispatched at this point
 ```json
-// Request
+// Request — single action: select shuttle and confirm flag
 { "shuttleId": 7 }
-// Response 200: { "newTotalCapacity": 30, "status": "IncidentActive" }
+// Response 200
+{
+  "breakdownLogId": 14,
+  "newTotalCapacity": 30,
+  "status": "IncidentActive"
+}
 ```
 
-**PUT `/trips/{tripId}/standby`**
+**POST `/trips/{tripId}/breakdown/{breakdownLogId}/resolve`** — Admin resolves; notifications dispatched here
 ```json
-// Request
-{ "brokenShuttleId": 7, "replacementShuttleId": 12 }
-// Response 200: { "newTotalCapacity": 60, "status": "Scheduling" }
+// Request option A: assign replacement
+{ "resolutionType": "Replaced", "replacementShuttleId": 12 }
+// Response 200
+{
+  "newTotalCapacity": 60,
+  "status": "InTransit",
+  "notificationsSent": 45
+}
+
+// Request option B: mark as cancelled (no replacement)
+{ "resolutionType": "Cancelled" }
+// Response 200
+{
+  "newTotalCapacity": 30,
+  "status": "IncidentActive",
+  "notificationsSent": 45
+}
 ```
+
+**Notification rule:** Push notifications to affected students are dispatched ONLY after admin
+resolution, never at marshal flag time.
 
 
 ### Admin Endpoints
@@ -456,8 +520,33 @@ initiation and admin login endpoints. Role guards are noted as `[Student]`, `[Ma
 | GET/PATCH | `/admin/reports/{id}` | Admin | View / update report status |
 | GET | `/admin/analytics/overview` | Admin | Dashboard analytics (top stops, report counts) |
 | GET | `/admin/analytics/detailed` | Admin | Expanded booking demand stats |
+| GET | `/admin/analytics/vendor-reliability` | Admin | Breakdown and cancellation counts per shuttle and per vendor |
 | GET | `/admin/trips` | Admin | List TripInstances (filterable by date, status) |
 | POST | `/admin/trips/{id}/shuttles` | Admin | Assign a shuttle to a TripInstance |
+
+**GET `/admin/analytics/vendor-reliability`** — query params: `fromDate`, `toDate` (optional date range)
+```json
+// Response 200
+{
+  "byShuttle": [
+    {
+      "shuttleId": 7,
+      "licensePlate": "EC 837-256",
+      "vendorCompanyName": "Metro Link SA",
+      "breakdownCount": 3,
+      "cancellationCount": 1
+    }
+  ],
+  "byVendor": [
+    {
+      "vendorCompanyName": "Metro Link SA",
+      "totalBreakdowns": 5,
+      "totalCancellations": 2,
+      "shuttleCount": 2
+    }
+  ]
+}
+```
 
 ### Notification Endpoints
 
@@ -505,11 +594,18 @@ RollingInjectionJob():
   6. newTripIds = SELECT TripInstanceId from step 5 inserts
 
   7. FOR EACH newTrip IN newTripIds:
+       // --- Priority Booking injection with first-shuttle pre-assignment ---
        activePS = SELECT ps FROM PrioritySchedules
                   WHERE IsActive=1
                     AND DayOfWeek = dayOfWeek
                     AND ScheduleTimeId = newTrip.ScheduleTimeId
                     AND StopId = newTrip.StopId
+
+       // Determine the front shuttle (OrderPosition = 1) for this trip
+       frontShuttleId = SELECT ShuttleId FROM TripShuttleAllocations
+                        WHERE TripInstanceId = newTrip.TripInstanceId
+                          AND OrderPosition = 1
+                          AND IsOperational = 1
 
        FOR EACH ps IN activePS:
          INSERT Booking (
@@ -518,6 +614,7 @@ RollingInjectionJob():
            BookingStatus='Confirmed',
            BookingType='Priority',
            BoardedStatus='Pending',
+           ShuttleId=frontShuttleId,   // ← Pre-assigned to accessible front shuttle
            QrCodeToken=GenerateUniqueToken()
          )
          // ON CONFLICT (duplicate booking for same student+trip): SKIP
@@ -525,6 +622,11 @@ RollingInjectionJob():
   8. COMMIT transaction
   9. LOG: "Injection complete. Trips created: N, Priority bookings created: M"
 ```
+
+**Priority first-shuttle rule:** Priority Bookings are pre-assigned `Booking.ShuttleId` pointing
+to the shuttle at `OrderPosition = 1`. Since accessible shuttles always get the lowest OrderPositions,
+this ensures disability-cleared students are allocated to the front accessible vehicle. If no
+allocations exist yet for the trip, `ShuttleId` is left NULL and will be assigned at check-in time.
 
 **Idempotency guard**: the `UNIQUE (ScheduleTimeId, StopId, TripDate)` constraint on TripInstances
 prevents duplicate injection if the job is accidentally re-run.
@@ -613,6 +715,43 @@ public async Task<int> GetTotalCapacityAsync(int tripInstanceId)
 This is always computed from the live database — never cached — to ensure breakdown/overwrite
 events are reflected immediately.
 
+### Convoy OrderPosition Assignment
+
+```csharp
+public async Task<int> AssignOrderPositionAsync(int tripInstanceId, int shuttleId)
+{
+    var shuttle = await _db.Shuttles.FindAsync(shuttleId);
+    var existingAllocations = await _db.TripShuttleAllocations
+        .Where(a => a.TripInstanceId == tripInstanceId)
+        .OrderBy(a => a.OrderPosition)
+        .ToListAsync();
+
+    int newPosition;
+    if (shuttle.IsAccessibleVehicle)
+    {
+        // Insert at front: find the next available position among accessible vehicles
+        int accessibleCount = existingAllocations
+            .Count(a => _db.Shuttles.Find(a.ShuttleId).IsAccessibleVehicle);
+        newPosition = accessibleCount + 1;
+
+        // Shift non-accessible allocations up by 1
+        foreach (var alloc in existingAllocations.Where(a => a.OrderPosition >= newPosition))
+            alloc.OrderPosition++;
+    }
+    else
+    {
+        // Append after all existing allocations
+        newPosition = existingAllocations.Count + 1;
+    }
+
+    return newPosition;
+}
+```
+
+**Rule:** Accessible shuttles (`IsAccessibleVehicle = TRUE`) always receive the lowest
+`OrderPosition` values. When a new accessible shuttle is added, existing non-accessible shuttles
+are shifted up. This ensures the front of the convoy is always accessible.
+
 ### Waitlist Promotion Loop
 
 ```csharp
@@ -645,39 +784,72 @@ public async Task<int> RunWaitlistPromotionAsync(int tripInstanceId, IDbTransact
 }
 ```
 
-### Dual-Key Check-In Validation
+### Sequential Convoy Check-In (35-Minute Scan Window + Auto-Assignment)
 
 ```csharp
-public async Task<CheckInResult> CheckInAsync(string qrCodeToken, int shuttleId)
+public async Task<CheckInResult> CheckInAsync(string qrCodeToken)
 {
     var booking = await _db.Bookings
+        .Include(b => b.TripInstance)
+            .ThenInclude(t => t.ScheduleTime)
         .FirstOrDefaultAsync(b => b.QrCodeToken == qrCodeToken);
 
     if (booking is null)
         return CheckInResult.NotFound();
 
+    // --- 35-Minute Scan Window Gate ---
+    var tripInstance = booking.TripInstance;
+    var departureDateTime = tripInstance.TripDate.ToDateTime(tripInstance.ScheduleTime.DepartureTime);
+    var scanWindowStart = departureDateTime.AddMinutes(-35);
+
+    if (DateTime.UtcNow < scanWindowStart)
+        return CheckInResult.ScanWindowNotOpen(scanWindowStart);
+
+    // --- Standard validations ---
     if (booking.BookingStatus != BookingStatus.Confirmed)
         return CheckInResult.NotConfirmed(booking.BookingStatus);
 
     if (booking.BoardedStatus == BoardedStatus.Boarded)
         return CheckInResult.AlreadyBoarded();
 
-    bool shuttleValid = await _db.TripShuttleAllocations.AnyAsync(a =>
-        a.TripInstanceId == booking.TripInstanceId
-        && a.ShuttleId == shuttleId
-        && a.IsOperational);
+    // --- Sequential front-to-back shuttle assignment ---
+    var allocations = await _db.TripShuttleAllocations
+        .Where(a => a.TripInstanceId == booking.TripInstanceId && a.IsOperational)
+        .OrderBy(a => a.OrderPosition)
+        .Select(a => new
+        {
+            a.ShuttleId,
+            a.OrderPosition,
+            Capacity = a.Shuttle.Capacity,
+            BoardedCount = _db.Bookings.Count(b =>
+                b.TripInstanceId == booking.TripInstanceId
+                && b.ShuttleId == a.ShuttleId
+                && b.BoardedStatus == BoardedStatus.Boarded)
+        })
+        .ToListAsync();
 
-    if (!shuttleValid)
-        return CheckInResult.InvalidShuttle();
+    var targetShuttle = allocations
+        .FirstOrDefault(a => a.BoardedCount < a.Capacity);
 
+    if (targetShuttle is null)
+        return CheckInResult.ConvoyFull();
+
+    // --- Record boarding ---
     booking.BoardedStatus = BoardedStatus.Boarded;
     booking.BoardedAt = DateTime.UtcNow;
-    booking.ShuttleId = shuttleId;
+    booking.ShuttleId = targetShuttle.ShuttleId;
     await _db.SaveChangesAsync();
 
-    return CheckInResult.Success(booking);
+    return CheckInResult.Success(booking, targetShuttle.ShuttleId, targetShuttle.OrderPosition);
 }
 ```
+
+**Key changes from previous design:**
+- The `shuttleId` parameter is removed — the system determines assignment automatically.
+- The 35-minute scan window rejects early check-in attempts with HTTP 422.
+- Shuttles are filled front-to-back by `OrderPosition` ASC; each shuttle fills to capacity before
+  the next one receives passengers.
+- If all operational shuttles are at capacity, the check-in is rejected (`ConvoyFull`).
 
 ### QR Code Token Generation
 
@@ -708,7 +880,7 @@ Valid transitions:
   Locked         → InTransit       (Admin manual / marshal action)
   InTransit      → Completed       (Admin manual)
   InTransit      → IncidentActive  (Marshal breakdown flag, in-transit)
-  IncidentActive → InTransit       (Admin standby overwrite restores)
+  IncidentActive → InTransit       (Admin breakdown resolution — replacement assigned)
 ```
 
 Implemented as a switch/guard in `TripStateMachineService`:
@@ -727,6 +899,89 @@ public bool IsValidTransition(TripStatus from, TripStatus to) => (from, to) swit
 ```
 
 On completion, all bookings with `BoardedStatus = Pending` are set to `NoShow`.
+
+### Marshal Breakdown Flag (Simplified Flow)
+
+```csharp
+public async Task<BreakdownFlagResult> FlagBreakdownAsync(int tripInstanceId, int shuttleId, int marshalId)
+{
+    var allocation = await _db.TripShuttleAllocations
+        .FirstOrDefaultAsync(a => a.TripInstanceId == tripInstanceId && a.ShuttleId == shuttleId);
+
+    if (allocation is null || !allocation.IsOperational)
+        return BreakdownFlagResult.InvalidAllocation();
+
+    var shuttle = await _db.Shuttles.FindAsync(shuttleId);
+
+    // 1. Mark allocation as non-operational
+    allocation.IsOperational = false;
+
+    // 2. Create BreakdownLog entry (for analytics)
+    var log = new BreakdownLog
+    {
+        TripInstanceId = tripInstanceId,
+        ShuttleId = shuttleId,
+        VendorCompanyName = shuttle.VendorCompanyName,
+        FlaggedAt = DateTime.UtcNow,
+        FlaggedByMarshalId = marshalId,
+        ResolutionType = null  // Admin resolves later
+    };
+    _db.BreakdownLogs.Add(log);
+
+    // 3. Update trip status
+    var trip = await _db.TripInstances.FindAsync(tripInstanceId);
+    trip.Status = TripStatus.IncidentActive;
+
+    await _db.SaveChangesAsync();
+
+    // 4. NO push notification dispatched here — admin resolves later
+    int newCapacity = await _capacityService.GetTotalCapacityAsync(tripInstanceId);
+    return BreakdownFlagResult.Success(log.BreakdownLogId, newCapacity);
+}
+```
+
+### Admin Breakdown Resolution
+
+```csharp
+public async Task<ResolutionResult> ResolveBreakdownAsync(
+    int breakdownLogId, string resolutionType, int? replacementShuttleId, int adminId)
+{
+    var log = await _db.BreakdownLogs.FindAsync(breakdownLogId);
+    var tripInstanceId = log.TripInstanceId;
+
+    log.ResolutionType = resolutionType;
+    log.ResolvedAt = DateTime.UtcNow;
+    log.ResolvedByAdminId = adminId;
+
+    if (resolutionType == "Replaced" && replacementShuttleId.HasValue)
+    {
+        log.ReplacementShuttleId = replacementShuttleId.Value;
+
+        // Assign replacement shuttle with same OrderPosition
+        var brokenAllocation = await _db.TripShuttleAllocations
+            .FirstAsync(a => a.TripInstanceId == tripInstanceId && a.ShuttleId == log.ShuttleId);
+
+        brokenAllocation.ShuttleId = replacementShuttleId.Value;
+        brokenAllocation.IsOperational = true;
+
+        // Restore trip status
+        var trip = await _db.TripInstances.FindAsync(tripInstanceId);
+        trip.Status = TripStatus.InTransit; // or previous status
+    }
+
+    await _db.SaveChangesAsync();
+
+    // Dispatch notifications ONLY at resolution time
+    int notificationsSent = await _notificationService
+        .DispatchToTripPassengersAsync(tripInstanceId,
+            resolutionType == "Replaced"
+                ? "Shuttle replaced — your trip is continuing as scheduled."
+                : "Shuttle cancelled — please check your trip status.");
+
+    int newCapacity = await _capacityService.GetTotalCapacityAsync(tripInstanceId);
+    return ResolutionResult.Success(newCapacity, notificationsSent);
+}
+```
 
 
 ---
@@ -758,6 +1013,9 @@ NmuShuttle.Api/
 │   ├── TripStateMachineService.cs
 │   ├── WaitlistPromotionService.cs
 │   ├── NotificationService.cs
+│   ├── BreakdownService.cs          # Flag + admin resolution + BreakdownLog writes
+│   ├── ConvoyOrderingService.cs     # OrderPosition assignment logic
+│   ├── VendorAnalyticsService.cs    # Breakdown/cancellation tallying per shuttle & vendor
 │   └── CsvUserImportService.cs
 ├── BackgroundServices/
 │   ├── RollingInjectionHostedService.cs
@@ -791,7 +1049,7 @@ public interface ICapacityService
 
 public interface ICheckInService
 {
-    Task<CheckInResult> CheckInAsync(string qrCodeToken, int shuttleId);
+    Task<CheckInResult> CheckInAsync(string qrCodeToken);
 }
 
 public interface INotificationService
@@ -996,8 +1254,11 @@ public async Task SendAsync(IEnumerable<string> tokens, string title, string bod
 | Event | Trigger Point | Recipients |
 |---|---|---|
 | Waitlist → Confirmed | `LockoutGateHostedService` (promotion loop) | Promoted student |
-| Breakdown flagged | `POST /trips/{id}/breakdown` handler | All confirmed students on trip |
-| Standby overwrite | `PUT /trips/{id}/standby` handler | All confirmed students on trip |
+| Breakdown resolved (replaced) | `POST /trips/{id}/breakdown/{logId}/resolve` (Admin) | All confirmed students on trip |
+| Breakdown resolved (cancelled) | `POST /trips/{id}/breakdown/{logId}/resolve` (Admin) | All confirmed students on trip |
+
+**Important:** No push notification is dispatched when the marshal flags the breakdown. Notifications
+are sent only after admin resolution (replacement assigned or trip cancelled).
 
 ### Notification Record
 
@@ -1058,7 +1319,7 @@ LockoutGate ──► TripInstance.Status = Locked
 | Check-in (scan QR) | — | ✓ | — |
 | View passenger manifest | — | ✓ | ✓ |
 | Flag breakdown | — | ✓ | — |
-| Standby overwrite | — | — | ✓ |
+| Resolve breakdown (replace/cancel) | — | — | ✓ |
 | Admin CRUD (stops, shuttles, users) | — | — | ✓ |
 | Notifications | ✓ | — | — |
 | Submit reports | ✓ | — | — |
@@ -1119,7 +1380,10 @@ public record CheckInResultDto(
     int BookingId,
     string StudentName,
     string BoardedStatus,
-    DateTime? BoardedAt
+    DateTime? BoardedAt,
+    int AssignedShuttleId,
+    string AssignedShuttleLicensePlate,
+    int OrderPosition
 );
 
 // Passenger manifest entry
@@ -1142,6 +1406,8 @@ public record PassengerDto(
 |---|---|
 | Resource not found (non-existent ID, bad QR token) | 404 |
 | Validation failure (empty description, negative capacity) | 422 |
+| Scan window not open (check-in before T-35 min) | 422 |
+| Convoy full (all shuttles at capacity during check-in) | 422 |
 | Business rule conflict (duplicate booking, re-locking) | 409 |
 | Operation forbidden for current trip status (cancel locked trip) | 400 |
 | Authentication failure (expired OTP, wrong password) | 401 |
@@ -1309,9 +1575,10 @@ no two Bookings share a token.
 
 *For any* successfully completed check-in, the Booking.ShuttleId recorded SHALL reference a
 Shuttle that has an IsOperational = TRUE TripShuttleAllocation for the same TripInstance at the
-time of check-in.
+time of check-in, and that shuttle SHALL be the one with the lowest OrderPosition having remaining
+capacity (sequential fill invariant).
 
-**Validates: Requirements 5.7**
+**Validates: Requirements 5.5, 5.8, 27.7**
 
 ---
 
@@ -1324,13 +1591,13 @@ down SHALL reduce Total Capacity by exactly that shuttle's Capacity value.
 
 ---
 
-### Property 16: Capacity Replacement on Standby Overwrite
+### Property 16: Capacity Replacement on Admin Resolution
 
-*For any* breakdown event followed by a standby overwrite replacing shuttle A (capacity cₐ) with
+*For any* breakdown event followed by an admin resolution replacing shuttle A (capacity cₐ) with
 shuttle B (capacity c_b), the resulting Total Capacity SHALL equal the pre-breakdown Total Capacity
 minus cₐ plus c_b.
 
-**Validates: Requirements 6.7**
+**Validates: Requirements 6.6, 6.12**
 
 ---
 
@@ -1370,6 +1637,77 @@ status without having passed through Locked and InTransit.
 
 **Validates: Requirements 22.1, 22.2, 22.5**
 
+---
+
+### Property 21: Priority Booking First-Shuttle Assignment
+
+*For any* Priority Booking created by the Rolling Injection Job, the pre-assigned `Booking.ShuttleId`
+SHALL reference the Shuttle at `OrderPosition = 1` in the TripInstance's convoy (the front accessible
+shuttle).
+
+**Validates: Requirements 8.5, 27.2**
+
+---
+
+### Property 22: Accessible-First Convoy Ordering
+
+*For any* TripInstance, every TripShuttleAllocation where `Shuttle.IsAccessibleVehicle = TRUE` SHALL
+have an `OrderPosition` less than or equal to every TripShuttleAllocation where
+`Shuttle.IsAccessibleVehicle = FALSE`.
+
+**Validates: Requirements 27.2, 27.6**
+
+---
+
+### Property 23: Sequential Front-to-Back Shuttle Fill
+
+*For any* TripInstance with shuttles S₁, S₂, …, Sₙ ordered by OrderPosition, no Booking SHALL be
+assigned to shuttle Sᵢ₊₁ while shuttle Sᵢ is operational and has remaining capacity. The check-in
+algorithm SHALL always assign to the lowest OrderPosition shuttle with available seats.
+
+**Validates: Requirements 27.3, 27.7**
+
+---
+
+### Property 24: 35-Minute Scan Window Time-Gate
+
+*For any* TripInstance with DepartureTime D and any check-in attempt at time t: IF t < D − 35
+minutes THEN the check-in SHALL be rejected with HTTP 422. IF t ≥ D − 35 minutes THEN the
+check-in SHALL proceed to normal validation.
+
+**Validates: Requirements 5.1, 5.2**
+
+---
+
+### Property 25: Breakdown Tallying Integrity
+
+*For any* breakdown flag event on shuttle S with VendorCompanyName V, a BreakdownLog record SHALL
+be created with the correct ShuttleId and VendorCompanyName (denormalized at flag time). The
+per-shuttle count of BreakdownLogs SHALL equal the number of breakdown events for that shuttle,
+and the per-vendor count SHALL equal the sum across all that vendor's shuttles.
+
+**Validates: Requirements 6.10**
+
+---
+
+### Property 26: No Notification at Marshal Flag Time
+
+*For any* breakdown flag event by a Marshal, zero Notifications SHALL be created and zero FCM
+dispatches SHALL occur during the flag operation. Notifications SHALL only be dispatched after
+admin resolution.
+
+**Validates: Requirements 6.9**
+
+---
+
+### Property 27: Boarded Persistence After Breakdown Flag
+
+*For any* Booking with `BoardedStatus = 'Boarded'` assigned to a shuttle that is subsequently
+flagged as `IsOperational = FALSE`, the Booking's `BoardedStatus` SHALL remain 'Boarded'
+unchanged.
+
+**Validates: Requirements 6.4, 6.13**
+
 
 ---
 
@@ -1392,9 +1730,17 @@ Unit tests cover concrete examples, edge cases, and error conditions not capture
 - Non-existent student OTP request returns HTTP 404
 - Check-in with unknown QR token returns HTTP 404
 - Check-in with already-boarded booking returns HTTP 409
+- Check-in before 35-minute window returns HTTP 422 with scan-window message
+- Check-in when all shuttles are at capacity returns HTTP 422 (convoy full)
+- Marshal breakdown flag does NOT dispatch push notifications
+- Admin breakdown resolution DOES dispatch push notifications to all confirmed students
+- BreakdownLog is created on marshal flag with correct VendorCompanyName
+- Priority booking injection pre-assigns ShuttleId to OrderPosition = 1 shuttle
+- Convoy ordering: accessible shuttles always get lower OrderPositions than non-accessible
 - State machine: Scheduling → Completed (direct) is rejected with HTTP 422
 - CSV upload with only duplicate rows returns zero created, full error list
 - Report with empty description returns HTTP 422
+- Vendor reliability analytics returns correct tallies for date-range filter
 
 ### Property-Based Tests
 
@@ -1484,23 +1830,24 @@ Property AllQrCodeTokensAreUnique(PositiveInt bookingCount)
 }
 ```
 
-#### Property 14: Check-In Shuttle Integrity (Req 5.7)
+#### Property 14: Check-In Shuttle Integrity (Req 5.5, 5.8, 27.7)
 ```csharp
-// Feature: nmu-shuttle-management, Property 14: check-in shuttle integrity
+// Feature: nmu-shuttle-management, Property 14: check-in shuttle integrity + sequential fill
 [Property]
-Property CheckInRecordsValidOperationalShuttle(
-    int[] operationalShuttleIds, int[] nonOperationalIds)
+Property CheckInAutoAssignsToLowestOrderPositionWithCapacity(
+    PositiveInt[] shuttleCapacities, int checkInCount)
 {
-    // Generate: random trip with mixed operational/non-operational shuttle allocations
-    // Act: check-in with various shuttleIds
-    // Assert: only check-ins with operationalShuttleIds succeed
-    //         all successful check-ins record a ShuttleId in operationalShuttleIds
+    // Generate: random trip with N shuttles ordered by OrderPosition, varying capacities
+    // Act: perform checkInCount sequential check-ins (no shuttleId provided)
+    // Assert: each check-in assigns to the shuttle with lowest OrderPosition that has space
+    //         no shuttle at position N+1 receives bookings while position N has space
+    //         all assigned ShuttleIds have IsOperational = TRUE
 }
 ```
 
-#### Property 15 & 16: Breakdown and Standby Capacity (Req 6.6, 6.7)
+#### Property 15 & 16: Breakdown and Resolution Capacity (Req 6.6, 6.12)
 ```csharp
-// Feature: nmu-shuttle-management, Property 15+16: breakdown and standby capacity arithmetic
+// Feature: nmu-shuttle-management, Property 15+16: breakdown and resolution capacity arithmetic
 [Property]
 Property BreakdownReducesCapacityByShuttleCapacity(
     PositiveInt[] shuttleCapacities, int shuttleToBreakIndex)
@@ -1511,10 +1858,10 @@ Property BreakdownReducesCapacityByShuttleCapacity(
 }
 
 [Property]
-Property StandbyRestoresCapacityCorrectly(
+Property AdminResolutionRestoresCapacityCorrectly(
     PositiveInt[] shuttleCapacities, int breakIdx, PositiveInt replacementCapacity)
 {
-    // Generate: random convoy, flag breakdown, apply standby overwrite
+    // Generate: random convoy, flag breakdown, admin resolves with replacement
     // Assert: final capacity == original capacity - broken capacity + replacement capacity
 }
 ```
@@ -1533,16 +1880,119 @@ Property OnlyValidTransitionsAreAccepted(
 }
 ```
 
+#### Property 21: Priority Booking First-Shuttle Assignment (Req 8.5, 27.2)
+```csharp
+// Feature: nmu-shuttle-management, Property 21: priority booking first-shuttle assignment
+[Property]
+Property PriorityBookingsPreAssignedToOrderPosition1(
+    PositiveInt convoySize, bool[] accessibleFlags)
+{
+    // Generate: random convoy configuration with varying accessible/non-accessible shuttles
+    // Act: run Rolling Injection Job for a matching PrioritySchedule
+    // Assert: all created Priority Bookings have ShuttleId == shuttle at OrderPosition 1
+}
+```
+
+#### Property 22: Accessible-First Convoy Ordering (Req 27.2, 27.6)
+```csharp
+// Feature: nmu-shuttle-management, Property 22: accessible-first convoy ordering
+[Property]
+Property AccessibleShuttlesAlwaysHaveLowerOrderPositions(
+    (int capacity, bool isAccessible)[] shuttles)
+{
+    // Generate: random mix of accessible and non-accessible shuttles
+    // Act: assign OrderPositions via ConvoyOrderingService
+    // Assert: MAX(OrderPosition where isAccessible) <= MIN(OrderPosition where !isAccessible)
+}
+```
+
+#### Property 23: Sequential Front-to-Back Shuttle Fill (Req 27.3, 27.7)
+```csharp
+// Feature: nmu-shuttle-management, Property 23: sequential front-to-back shuttle fill
+[Property]
+Property CheckInsAssignToLowestOrderPositionWithCapacity(
+    PositiveInt[] shuttleCapacities, PositiveInt checkInCount)
+{
+    // Generate: convoy with N shuttles of random capacities, K check-in requests
+    // Act: perform K sequential check-ins (system auto-assigns)
+    // Assert: shuttle at position i fills to capacity before position i+1 gets assignments
+    //         no student assigned to position N+1 while position N has space
+}
+```
+
+#### Property 24: 35-Minute Scan Window Time-Gate (Req 5.1, 5.2)
+```csharp
+// Feature: nmu-shuttle-management, Property 24: 35-minute scan window time-gate
+[Property]
+Property CheckInRejectedOutsideScanWindow(
+    TimeOnly departureTime, int minutesBefore)
+{
+    // Generate: random departure time, random offset (0-120 minutes before departure)
+    // Act: attempt check-in at DepartureTime - minutesBefore
+    // Assert: if minutesBefore > 35 → HTTP 422 (scan window not open)
+    //         if minutesBefore <= 35 → proceeds to normal validation
+}
+```
+
+#### Property 25: Breakdown Tallying Integrity (Req 6.10)
+```csharp
+// Feature: nmu-shuttle-management, Property 25: breakdown tallying integrity
+[Property]
+Property BreakdownLogAccuratelyTalliesPerShuttleAndVendor(
+    (int shuttleId, string vendor)[] breakdownEvents)
+{
+    // Generate: random sequences of breakdown events across shuttles and vendors
+    // Act: flag breakdowns for each event
+    // Assert: BreakdownLogs count per shuttle matches event count for that shuttle
+    //         BreakdownLogs count per vendor matches sum of events for that vendor's shuttles
+    //         VendorCompanyName in log is denormalized (doesn't change if shuttle vendor updated later)
+}
+```
+
+#### Property 26: No Notification at Marshal Flag Time (Req 6.9)
+```csharp
+// Feature: nmu-shuttle-management, Property 26: no notification at marshal flag time
+[Property]
+Property MarshalBreakdownFlagDoesNotDispatchNotifications(
+    PositiveInt confirmedBookings)
+{
+    // Generate: trip with random confirmed bookings
+    // Act: marshal flags breakdown
+    // Assert: zero Notification records created, zero FCM calls made
+    // Act: admin resolves
+    // Assert: Notification records created == confirmedBookings count
+}
+```
+
+#### Property 27: Boarded Persistence After Breakdown (Req 6.4, 6.13)
+```csharp
+// Feature: nmu-shuttle-management, Property 27: boarded persistence after breakdown
+[Property]
+Property BoardedStudentsRemainBoardedAfterShuttleFlag(
+    PositiveInt boardedCount)
+{
+    // Generate: trip with boardedCount students already checked in to a shuttle
+    // Act: flag that shuttle as broken
+    // Assert: all boardedCount bookings retain BoardedStatus = 'Boarded'
+}
+```
+
 ### Integration Tests
 
 Integration tests use `WebApplicationFactory<Program>` with an in-memory or LocalDB SQL Server:
 
 - End-to-end booking flow: OTP login → create booking → verify in DB → QR token in response
 - Rolling Injection Job: given a mocked clock, verify TripInstances and Priority Bookings are
-  created correctly for weekday, Saturday, and CalendarException dates
+  created correctly for weekday, Saturday, and CalendarException dates; verify Priority Bookings
+  have ShuttleId pre-assigned to OrderPosition = 1
 - Lockout Gate: fast-forward clock to T-60 min, verify trip status changes to Locked and
   waitlist promotions fire
-- Check-in flow: create booking → marshal check-in → verify BoardedStatus = Boarded
+- Check-in flow: create booking → marshal check-in (no shuttleId) → verify system auto-assigns
+  shuttle by OrderPosition → verify sequential fill → verify 35-min scan window rejection
+- Breakdown + Admin resolution flow: marshal flags shuttle → verify no notification sent →
+  admin resolves (replacement) → verify notification dispatched → verify BreakdownLog recorded
+- Vendor reliability analytics: seed breakdown events → query analytics endpoint → verify
+  per-shuttle and per-vendor tallies are correct
 - Admin CSV bulk upload: upload file with valid, duplicate, and malformed rows; verify counts
 
 ### Flutter Testing

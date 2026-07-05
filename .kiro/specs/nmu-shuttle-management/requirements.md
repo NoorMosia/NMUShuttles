@@ -24,9 +24,10 @@ disability-cleared students.
 ## Glossary
 
 - **System**: The NMU Shuttle Management Network backend API and its associated client surfaces.
-- **Student**: An NMU student registered in the System, identified by a student number (e.g., "s2194827").
+- **Student**: An NMU student registered in the System, identified by a student number consisting of
+  the letter "s" followed by exactly 9 digits starting with 31 or 32 (e.g., "s312345678", "s329876543").
 - **Marshal**: Field operations staff deployed at campus boarding platforms, identified by a staff number
-  (e.g., "m77492").
+  consisting of exactly 7 digits (e.g., "4827391").
 - **Admin**: A university administrator with access to the Admin Portal.
 - **Stop**: A defined off-campus residential destination with a name and GPS coordinates.
 - **Campus**: A university campus location used as a marshal deployment and shuttle boarding point.
@@ -35,8 +36,9 @@ disability-cleared students.
   accessibility flag.
 - **CalendarException**: A blackout date (public holiday or university recess) on which no trips are generated.
 - **TripInstance**: A specific daily trip combining a Stop, ScheduleTime, and date.
-- **TripShuttleAllocation**: A record linking one Shuttle to one TripInstance; the IsOperational flag
-  controls whether that shuttle's capacity counts toward the trip total.
+- **TripShuttleAllocation**: A record linking one Shuttle to one TripInstance; includes an OrderPosition
+  field (integer, 1-based) defining the shuttle's front-to-back sequence in the convoy, and an
+  IsOperational flag that controls whether that shuttle's capacity counts toward the trip total.
 - **Booking**: A student seat reservation linked to a TripInstance.
 - **PrioritySchedule**: A recurring travel permit for a disability-cleared Student, enabling automatic
   pre-booking before the general booking window opens.
@@ -44,7 +46,10 @@ disability-cleared students.
 - **Notification**: A push alert delivered to a Student's device via Firebase Cloud Messaging (FCM).
 - **DeviceRegistration**: A mapping between a Student or Marshal identity and an FCM device push token.
 - **OTP**: A one-time password — a 5-digit, time-limited code used to authenticate Students and Marshals.
-- **Convoy**: The set of one or more Shuttles allocated to a single TripInstance.
+- **Convoy**: The set of one or more Shuttles allocated to a single TripInstance, arranged in a defined
+  front-to-back order via each TripShuttleAllocation's OrderPosition.
+- **ScanWindow**: The 35-minute period before a TripInstance's scheduled DepartureTime during which
+  QR code check-in scanning is permitted.
 - **Total Capacity**: The runtime aggregate of Capacity values for all TripShuttleAllocations where
   IsOperational = TRUE for a given TripInstance.
 - **Lockout Time**: The point exactly 60 minutes before a TripInstance's scheduled departure time on its
@@ -74,24 +79,29 @@ one-time password, so that only registered university members can access the Sys
 
 #### Acceptance Criteria
 
-1. WHEN a Student submits a valid StudentNumber, THE System SHALL generate a 5-digit OTP, store
+1. WHEN a Student submits a StudentNumber matching the format "s" followed by exactly 9 digits
+   starting with 31 or 32 (regex: `^s3[12]\d{7}$`), THE System SHALL generate a 5-digit OTP, store
    a hashed copy with an expiry of exactly 5 minutes from generation, and send it to the Student's
    registered UniversityEmail.
-2. WHEN a Marshal submits a valid StaffNumber, THE System SHALL generate a 5-digit OTP, store
-   a hashed copy with an expiry of exactly 5 minutes from generation, and send it to the Marshal's
-   registered UniversityEmail.
+2. WHEN a Marshal submits a StaffNumber matching the format of exactly 7 digits (regex: `^\d{7}$`),
+   THE System SHALL generate a 5-digit OTP, store a hashed copy with an expiry of exactly 5 minutes
+   from generation, and send it to the Marshal's registered UniversityEmail.
 3. WHEN an OTP submission is received within the 5-minute window and matches the stored hashed code,
    THE System SHALL issue a signed authentication token and clear the OTP fields.
 4. IF an OTP submission is received after the 5-minute expiry window, THEN THE System SHALL reject
    the submission with HTTP 401 and clear the expired OTP fields.
 5. IF a StudentNumber or StaffNumber submitted for OTP generation does not exist in the System,
    THEN THE System SHALL return HTTP 404.
-6. THE System SHALL present a role-switcher UI on the login screen allowing the user to select either
+6. IF a StudentNumber is submitted that does not match the format `^s3[12]\d{7}$`, THEN THE System
+   SHALL reject the request with HTTP 422 and a descriptive format error.
+7. IF a StaffNumber is submitted that does not match the format `^\d{7}$`, THEN THE System SHALL
+   reject the request with HTTP 422 and a descriptive format error.
+8. THE System SHALL present a role-switcher UI on the login screen allowing the user to select either
    the Student or Marshal login flow before submitting their identifier.
-7. WHEN a Student or Marshal successfully authenticates, THE System SHALL register or update the
+9. WHEN a Student or Marshal successfully authenticates, THE System SHALL register or update the
    DeviceRegistration record for the authenticated device with the current FCM device token and platform.
-8. FOR ALL valid OTP codes, verifying the code then attempting to verify the same code again SHALL
-   result in rejection on the second attempt (single-use property).
+10. FOR ALL valid OTP codes, verifying the code then attempting to verify the same code again SHALL
+    result in rejection on the second attempt (single-use property).
 
 ---
 
@@ -187,56 +197,76 @@ system can close bookings, promote waitlisted students, and give marshals a stab
 
 ### Requirement 5: Dual-Key QR Check-In
 
-**User Story:** As a Marshal, I want to scan a student's QR code and identify the specific shuttle they
-are boarding, so that the System accurately records which vehicle each student used.
+**User Story:** As a Marshal, I want to scan a student's QR code and have the System assign them to
+the next available shuttle in sequence, so that boarding is orderly and each vehicle fills front-to-back.
 
 #### Acceptance Criteria
 
-1. WHEN a Marshal submits a check-in request with a QrCodeToken and a ShuttleId, THE System SHALL look
-   up the Booking record matching the QrCodeToken.
-2. IF the QrCodeToken does not match any Booking record, THEN THE System SHALL reject the check-in
+1. WHEN a Marshal submits a check-in request with a QrCodeToken and the current time is within 35
+   minutes of the TripInstance's scheduled DepartureTime, THE System SHALL look up the Booking record
+   matching the QrCodeToken.
+2. IF a check-in request is submitted more than 35 minutes before the TripInstance's scheduled
+   DepartureTime, THEN THE System SHALL reject the request with HTTP 422 and a message indicating
+   scanning is not yet available.
+3. IF the QrCodeToken does not match any Booking record, THEN THE System SHALL reject the check-in
    with HTTP 404.
-3. IF the matched Booking has BookingStatus != 'Confirmed', THEN THE System SHALL reject the check-in
+4. IF the matched Booking has BookingStatus != 'Confirmed', THEN THE System SHALL reject the check-in
    with HTTP 422 and return a descriptive error indicating the booking is not in Confirmed status.
-4. IF the ShuttleId provided does not correspond to an active TripShuttleAllocation (IsOperational = TRUE)
-   linked to the TripInstance of the matched Booking, THEN THE System SHALL reject the check-in with
-   HTTP 422.
-5. WHEN all validation assertions pass, THE System SHALL update Booking.BoardedStatus = 'Boarded',
-   Booking.BoardedAt = DateTime.UtcNow (UTC), and Booking.ShuttleId = the provided ShuttleId.
-6. IF a check-in request is submitted for a Booking where BoardedStatus is already 'Boarded', THEN
+5. WHEN all validation assertions pass, THE System SHALL assign the Student to the next shuttle in
+   the convoy that has not yet reached its capacity, following OrderPosition ASC (front-to-back fill).
+6. WHEN the shuttle assignment is determined, THE System SHALL update Booking.BoardedStatus = 'Boarded',
+   Booking.BoardedAt = DateTime.UtcNow (UTC), and Booking.ShuttleId = the assigned ShuttleId.
+7. IF a check-in request is submitted for a Booking where BoardedStatus is already 'Boarded', THEN
    THE System SHALL reject the request with HTTP 409 to prevent duplicate boarding.
-7. FOR ALL successfully checked-in Bookings, the assigned Booking.ShuttleId SHALL reference a Shuttle
+8. FOR ALL successfully checked-in Bookings, the assigned Booking.ShuttleId SHALL reference a Shuttle
    that was IsOperational = TRUE in a TripShuttleAllocation for the same TripInstance at the time of
    check-in (shuttle assignment integrity invariant).
-8. THE System SHALL generate a unique QrCodeToken for each Booking at creation time such that no two
+9. THE System SHALL generate a unique QrCodeToken for each Booking at creation time such that no two
    Bookings share the same token (uniqueness invariant).
+10. FOR ALL check-in operations on a TripInstance, Bookings SHALL be assigned to shuttles in
+    OrderPosition ASC order, filling each shuttle to capacity before advancing to the next
+    (sequential fill invariant).
 
 ---
 
-### Requirement 6: Vehicle Breakdown and Standby Overwrite
+### Requirement 6: Vehicle Breakdown and Admin Resolution
 
-**User Story:** As a Marshal, I want to flag a specific shuttle in a convoy as broken down, so that the
-System reflects reduced capacity without cancelling the whole trip; and as an Admin, I want to replace
-the broken shuttle with a standby vehicle to restore capacity.
+**User Story:** As a Marshal, I want to simply flag a shuttle as not arrived or broken down with minimal
+effort, so that I can focus on boarding; and as an Admin, I want to fill in replacement details or cancel
+the trip, so that accurate records are maintained and students are notified appropriately.
 
 #### Acceptance Criteria
 
 1. WHEN a Marshal submits a breakdown flag for a ShuttleId on a TripInstance, THE System SHALL set the
-   corresponding TripShuttleAllocation.IsOperational = FALSE and recalculate Total Capacity downward.
-2. WHEN a breakdown is flagged, THE System SHALL set TripInstance.Status = 'Incident Active'.
-3. IF flagging a breakdown would reduce Total Capacity below the current count of Confirmed Bookings,
-   THE System SHALL still accept the flag and set IsOperational = FALSE, but SHALL dispatch FCM
-   notifications to all Confirmed Booking holders for that TripInstance informing them of the incident.
-4. WHEN an Admin submits a standby overwrite with a replacement ShuttleId for an Incident Active
-   TripInstance, THE System SHALL update TripShuttleAllocation.ShuttleId to the replacement, set
-   IsOperational = TRUE, recalculate Total Capacity upward, and set TripInstance.Status back to
-   the appropriate pre-incident status.
-5. WHEN a standby overwrite is applied, THE System SHALL dispatch FCM notifications to all Confirmed
-   Booking holders for the affected TripInstance informing them of the vehicle replacement.
-6. FOR ALL breakdown flags, the Total Capacity after flagging SHALL equal the Total Capacity before
-   flagging minus the flagged Shuttle's Capacity (capacity reduction invariant).
-7. FOR ALL standby overwrites, the Total Capacity after overwrite SHALL reflect the replacement
-   Shuttle's Capacity in place of the removed Shuttle's Capacity (capacity replacement invariant).
+   corresponding TripShuttleAllocation.IsOperational = FALSE, recalculate Total Capacity downward, and
+   record the flag timestamp.
+2. THE Marshal breakdown flag interface SHALL require only a single action (select shuttle and confirm flag)
+   — the Marshal SHALL NOT be required to provide replacement shuttle details, reasons, or resolution steps.
+3. WHEN a breakdown is flagged, THE System SHALL set TripInstance.Status = 'Incident Active'.
+4. WHEN a shuttle is flagged as not arrived or broken down, Students already scanned (BoardedStatus =
+   'Boarded') onto that shuttle SHALL remain registered as 'Boarded' in the System — the flag SHALL NOT
+   alter their BoardedStatus.
+5. WHEN an Admin opens an Incident Active TripInstance in the Admin Portal, THE Admin Portal SHALL
+   present an incident resolution form with options to: (a) assign a replacement ShuttleId, or
+   (b) mark the affected allocation as cancelled.
+6. WHEN an Admin submits a replacement ShuttleId for an Incident Active TripInstance, THE System SHALL
+   update TripShuttleAllocation.ShuttleId to the replacement, set IsOperational = TRUE, recalculate
+   Total Capacity upward, and set TripInstance.Status back to the appropriate pre-incident status.
+7. WHEN an Admin marks the incident as cancelled (no replacement available), THE System SHALL keep
+   TripShuttleAllocation.IsOperational = FALSE and record the cancellation reason.
+8. WHEN an Admin completes the incident resolution (either replacement assigned or trip cancelled),
+   THE System SHALL dispatch FCM push notifications to all Confirmed Booking holders for the affected
+   TripInstance with details of the resolution (replacement vehicle info or cancellation notice).
+9. THE System SHALL NOT dispatch any push notification to Students at the time the Marshal flags the
+   breakdown — notifications SHALL only be sent after Admin resolution.
+10. THE System SHALL tally each breakdown and cancellation event against both the specific Shuttle record
+    and the Shuttle's VendorCompanyName for analytics reporting purposes.
+11. FOR ALL breakdown flags, the Total Capacity after flagging SHALL equal the Total Capacity before
+    flagging minus the flagged Shuttle's Capacity (capacity reduction invariant).
+12. FOR ALL replacement overwrites, the Total Capacity after overwrite SHALL reflect the replacement
+    Shuttle's Capacity in place of the removed Shuttle's Capacity (capacity replacement invariant).
+13. FOR ALL Students with BoardedStatus = 'Boarded' on a flagged shuttle, their BoardedStatus SHALL
+    remain 'Boarded' after the flag is applied (boarded persistence invariant).
 
 ---
 
@@ -290,11 +320,16 @@ so that their seats are reserved automatically before the general booking window
    DayOfWeek and the matching TripInstance exists, THE System SHALL create a Priority Booking even
    if a standard Booking for that Student on that TripInstance already exists (the Priority record
    replaces contention with pre-clearance).
-5. FOR ALL Priority Bookings auto-created by the Rolling Injection Job, BookingType SHALL equal
+5. WHEN a Priority Booking is auto-created by the Rolling Injection Job, THE System SHALL pre-assign
+   the Booking to the shuttle with OrderPosition = 1 (the first, accessible shuttle in the convoy)
+   so that disability-cleared Students are allocated to the front accessible vehicle.
+6. FOR ALL Priority Bookings auto-created by the Rolling Injection Job, BookingType SHALL equal
    'Priority' and BookingStatus SHALL equal 'Confirmed' at creation (priority pre-clearance invariant).
-6. FOR ALL Priority Bookings auto-created by the Rolling Injection Job, the creation of those bookings
+7. FOR ALL Priority Bookings auto-created by the Rolling Injection Job, the creation of those bookings
    SHALL occur before any general student can access the TripInstance for booking (pre-clearance
    ordering invariant).
+8. FOR ALL Priority Bookings auto-created by the Rolling Injection Job, the pre-assigned ShuttleId
+   SHALL reference the Shuttle at OrderPosition = 1 in the convoy (first-shuttle assignment invariant).
 
 ---
 
@@ -308,10 +343,11 @@ informed of waitlist promotions, vehicle changes, and trip incidents without ope
 1. WHEN a Booking transitions from Waiting List to Confirmed during the Waitlist Promotion Loop,
    THE System SHALL dispatch an FCM push notification to all DeviceRegistration tokens associated
    with that Student.
-2. WHEN a breakdown incident is flagged on a TripInstance, THE System SHALL dispatch an FCM push
-   notification to all Students with Confirmed Bookings on that TripInstance.
-3. WHEN a standby vehicle overwrite is applied to a TripInstance, THE System SHALL dispatch an FCM
-   push notification to all Students with Confirmed Bookings on that TripInstance.
+2. WHEN an Admin completes the incident resolution for a TripInstance (replacement shuttle assigned
+   or trip cancelled), THE System SHALL dispatch an FCM push notification to all Students with
+   Confirmed Bookings on that TripInstance containing the resolution details.
+3. THE System SHALL NOT dispatch breakdown-related push notifications at the time a Marshal flags
+   the incident — notifications SHALL only be sent after Admin resolution.
 4. THE App SHALL display all Notification records for the authenticated Student in the Alerts screen,
    ordered by CreatedAt DESC.
 5. WHEN a Student views a Notification, THE System SHALL update Notification.IsRead = TRUE.
@@ -428,8 +464,9 @@ boarded by scanning their QR code, so that I can maintain an accurate boarding r
    in the Passenger List without requiring a full screen refresh.
 5. IF the QR scanner returns a token that fails check-in validation, THE App SHALL display an inline
    error message on the scan screen indicating the reason (not confirmed, wrong shuttle, already boarded).
-6. THE App SHALL allow a Marshal to flag a shuttle as broken down from the Passenger List or trip
-   detail screen, triggering the Vehicle Breakdown flow.
+6. THE App SHALL allow a Marshal to flag a shuttle as "not arrived" or "broken down" from the
+   Passenger List or trip detail screen with a single confirmation action, triggering the Vehicle
+   Breakdown flow without requiring the Marshal to enter replacement details.
 
 ---
 
@@ -467,9 +504,12 @@ so that I can quickly assess the health of the shuttle network.
    the lowest total Confirmed Booking counts, with relative progress bars.
 4. THE Dashboard SHALL display a Reports Summary panel showing the count of Reports in each of the
    three statuses: Submitted, Under Review, and Resolved.
-5. THE Dashboard SHALL provide a "View Detailed Analytics" button that navigates to a detailed
-   analytics view with expanded booking and demand statistics.
-6. THE Dashboard SHALL use a persistent sidebar navigation with links to: Overview, Shuttle Stops,
+5. THE Dashboard SHALL display a "Breakdown & Cancellation Analytics" panel showing the count of
+   breakdowns and cancellations tallied per individual Shuttle and per VendorCompanyName, with the
+   ability to view trends over a configurable date range.
+6. THE Dashboard SHALL provide a "View Detailed Analytics" button that navigates to a detailed
+   analytics view with expanded booking, demand, and reliability statistics.
+7. THE Dashboard SHALL use a persistent sidebar navigation with links to: Overview, Shuttle Stops,
    Shuttles, Users, and Reports.
 
 ---
@@ -534,11 +574,16 @@ that I can provision system access for new university members.
    email in real time.
 4. THE Admin Portal SHALL provide an "Add Single User" form that accepts role (Student / Marshal /
    Admin), identifier (StudentNumber or StaffNumber), FirstName, LastName, and UniversityEmail.
-5. WHEN a new user is submitted with a UniversityEmail that already exists, THE System SHALL reject
+5. WHEN a new Student user is submitted, THE System SHALL validate that the StudentNumber matches
+   the format `^s3[12]\d{7}$` (letter "s" followed by 9 digits starting with 31 or 32) and reject
+   with HTTP 422 if the format is invalid.
+6. WHEN a new Marshal user is submitted, THE System SHALL validate that the StaffNumber matches
+   the format `^\d{7}$` (exactly 7 digits) and reject with HTTP 422 if the format is invalid.
+7. WHEN a new user is submitted with a UniversityEmail that already exists, THE System SHALL reject
    the request with HTTP 409.
-6. WHEN a new user is submitted with a StudentNumber or StaffNumber that already exists, THE System
+8. WHEN a new user is submitted with a StudentNumber or StaffNumber that already exists, THE System
    SHALL reject the request with HTTP 409.
-7. THE Admin Portal SHALL allow an Admin to edit a user's FirstName, LastName, UniversityEmail, and
+9. THE Admin Portal SHALL allow an Admin to edit a user's FirstName, LastName, UniversityEmail, and
    IsPriorityUser flag via an edit form.
 
 ---
@@ -555,16 +600,20 @@ I can efficiently onboard large cohorts at the start of an academic year.
 2. THE System SHALL enforce a maximum CSV file size of 10 MB.
 3. WHEN a CSV file is uploaded, THE System SHALL parse each row and validate that each row contains
    a role, identifier, FirstName, LastName, and UniversityEmail before processing.
-4. IF any row in the CSV contains a duplicate UniversityEmail or identifier (either within the file
+4. WHEN a CSV file is uploaded, THE System SHALL validate that each Student identifier matches the
+   format `^s3[12]\d{7}$` and each Marshal identifier matches `^\d{7}$`, skipping rows with invalid
+   formats and recording them as format errors.
+5. IF any row in the CSV contains a duplicate UniversityEmail or identifier (either within the file
    or against existing records), THE System SHALL skip that row, record it as an error, and continue
    processing the remaining rows.
-5. WHEN processing completes, THE System SHALL return a summary of successfully created records and
+6. WHEN processing completes, THE System SHALL return a summary of successfully created records and
    a list of skipped rows with their error reasons.
-6. THE Admin Portal SHALL display a confirmation screen after upload showing the count of successfully
+7. THE Admin Portal SHALL display a confirmation screen after upload showing the count of successfully
    added users and the list of failed rows with error reasons.
-7. WHEN a CSV is uploaded, THE System SHALL not overwrite any existing user record.
-8. FOR ALL users created via CSV upload, the same uniqueness rules as individual add SHALL apply
-   (email uniqueness, identifier uniqueness) — (idempotent bulk-add invariant).
+8. WHEN a CSV is uploaded, THE System SHALL not overwrite any existing user record.
+9. FOR ALL users created via CSV upload, the same uniqueness and format rules as individual add SHALL
+   apply (email uniqueness, identifier uniqueness, identifier format validation) — (idempotent
+   bulk-add invariant).
 
 ---
 
@@ -698,6 +747,34 @@ and return structured errors, so that client applications can handle failures gr
    HTTP 403.
 7. FOR ALL API error responses, the HTTP status code in the response body SHALL match the HTTP
    status code in the response header (consistency invariant).
+
+---
+
+### Requirement 27: Convoy Ordering and Sequential Shuttle Fill
+
+**User Story:** As an Admin, I want shuttles in a convoy to be arranged in a defined front-to-back order
+with accessible vehicles placed first, so that students are assigned sequentially and priority students
+board the front accessible shuttle.
+
+#### Acceptance Criteria
+
+1. THE System SHALL store an OrderPosition (integer, 1-based) on each TripShuttleAllocation record,
+   defining the shuttle's front-to-back position within the convoy.
+2. WHEN TripShuttleAllocations are created for a TripInstance, THE System SHALL assign accessible
+   shuttles (IsAccessibleVehicle = TRUE) to the lowest OrderPosition values (front of convoy).
+3. WHEN a Student is checked in via QR scan, THE System SHALL assign the Student to the operational
+   shuttle with the lowest OrderPosition that has not yet reached its Capacity, filling shuttles
+   sequentially from front to back.
+4. WHEN all operational shuttles in a convoy have reached capacity, THE System SHALL reject further
+   check-in attempts with HTTP 422 and a message indicating the convoy is full.
+5. FOR ALL TripShuttleAllocations on a given TripInstance, OrderPosition values SHALL be unique and
+   contiguous starting from 1 (ordering uniqueness invariant).
+6. FOR ALL convoys, every TripShuttleAllocation where Shuttle.IsAccessibleVehicle = TRUE SHALL have
+   an OrderPosition less than or equal to every TripShuttleAllocation where
+   Shuttle.IsAccessibleVehicle = FALSE (accessible-first ordering invariant).
+7. FOR ALL check-in sequences on a TripInstance, a Student SHALL NOT be assigned to a shuttle at
+   OrderPosition N+1 while the shuttle at OrderPosition N is operational and has remaining capacity
+   (sequential fill invariant).
 
 ---
 
@@ -872,7 +949,7 @@ For any latitude l outside [-90, 90] or longitude g outside [-180, 180]:
 
 ### P12 — Breakdown Capacity Reduction (Invariant)
 
-**Source:** Requirement 6.6
+**Source:** Requirement 6.11
 
 ```
 For any TripInstance T and shuttle S in T's convoy:
@@ -887,7 +964,7 @@ capacity delta equals the sum of flagged shuttle capacities.
 
 ### P13 — Standby Overwrite Capacity Replacement (Invariant)
 
-**Source:** Requirement 6.7
+**Source:** Requirement 6.12
 
 ```
 For any TripInstance T replacing shuttle S_old with S_new:
@@ -933,7 +1010,7 @@ holds after TripInstance is transitioned to Completed.
 
 ### P16 — Bulk CSV Idempotence (Idempotence)
 
-**Source:** Requirement 20.8
+**Source:** Requirement 20.9
 
 ```
 For any CSV file F uploaded twice:
@@ -957,3 +1034,123 @@ For any error API response R:
 
 **Test approach:** Generate requests designed to trigger all documented error paths (401, 403, 404,
 409, 422); parse response headers and bodies; assert the status codes match.
+
+---
+
+### P18 — Scan Window Time-Gate (Error Condition)
+
+**Source:** Requirement 5.2
+
+```
+For any TripInstance T with DepartureTime D and any check-in attempt at time t:
+  IF t < D - 35 minutes THEN CheckIn(token, T) == Rejected (HTTP 422)
+  IF t >= D - 35 minutes THEN CheckIn(token, T) proceeds to normal validation
+```
+
+**Test approach:** Generate TripInstances with random departure times; simulate check-in attempts
+at various offsets from departure; assert rejection for attempts outside the 35-minute window and
+acceptance within.
+
+---
+
+### P19 — Sequential Front-to-Back Shuttle Fill (Invariant)
+
+**Source:** Requirement 27.7
+
+```
+For any TripInstance T with shuttles S1, S2, ..., Sn ordered by OrderPosition:
+  No Booking is assigned to Si+1 while Si is operational and
+  COUNT(Bookings assigned to Si) < Si.Capacity
+```
+
+**Test approach:** Generate convoys with multiple shuttles of varying capacities; simulate sequential
+check-in streams; assert each shuttle fills to capacity before the next shuttle receives assignments.
+
+---
+
+### P20 — Accessible Shuttle Front Ordering (Invariant)
+
+**Source:** Requirement 27.6
+
+```
+For any TripInstance T:
+  MAX(OrderPosition where IsAccessibleVehicle = TRUE)
+    <= MIN(OrderPosition where IsAccessibleVehicle = FALSE)
+```
+
+**Test approach:** Generate convoys with random mixes of accessible and non-accessible shuttles;
+assert all accessible shuttles have lower OrderPosition values than non-accessible ones.
+
+---
+
+### P21 — Priority Booking First-Shuttle Assignment (Invariant)
+
+**Source:** Requirement 8.8
+
+```
+For any Priority Booking B created by the Rolling Injection Job:
+  B.ShuttleId == TripShuttleAllocation.ShuttleId WHERE OrderPosition = 1
+```
+
+**Test approach:** Run the injection job for various TripInstances with different convoy configurations;
+assert all Priority Bookings are pre-assigned to the shuttle at OrderPosition 1.
+
+---
+
+### P22 — Boarded Persistence After Breakdown Flag (Invariant)
+
+**Source:** Requirement 6.4, 6.13
+
+```
+For any Booking B with BoardedStatus = 'Boarded' assigned to shuttle S:
+  After flagging S as IsOperational = FALSE:
+    B.BoardedStatus == 'Boarded' (unchanged)
+```
+
+**Test approach:** Create bookings, board students onto shuttles, then flag those shuttles; assert
+BoardedStatus remains 'Boarded' for all previously boarded students.
+
+---
+
+### P23 — Student Number Format Validation (Error Condition)
+
+**Source:** Requirements 1.6, 19.5, 20.4
+
+```
+For any identifier I submitted as a StudentNumber:
+  IF I does not match ^s3[12]\d{7}$ THEN System rejects with HTTP 422
+  IF I matches ^s3[12]\d{7}$ THEN System proceeds with normal validation
+```
+
+**Test approach:** Generate strings that violate the pattern (wrong prefix, wrong length, non-numeric
+suffixes) and valid strings; assert rejection for invalid and acceptance for valid formats.
+
+---
+
+### P24 — Staff Number Format Validation (Error Condition)
+
+**Source:** Requirements 1.7, 19.6, 20.4
+
+```
+For any identifier I submitted as a StaffNumber:
+  IF I does not match ^\d{7}$ THEN System rejects with HTTP 422
+  IF I matches ^\d{7}$ THEN System proceeds with normal validation
+```
+
+**Test approach:** Generate strings of varying lengths, with non-numeric characters, and valid 7-digit
+strings; assert rejection for invalid and acceptance for valid formats.
+
+---
+
+### P25 — Breakdown Notification Deferred Until Admin Action (Metamorphic)
+
+**Source:** Requirement 6.8, 6.9, 9.3
+
+```
+For any breakdown flag event at time T_flag and admin resolution at time T_resolve:
+  COUNT(notifications dispatched at T_flag) == 0
+  COUNT(notifications dispatched at T_resolve) > 0
+```
+
+**Test approach:** Simulate breakdown flag events; assert no notifications are created; then simulate
+admin resolution; assert notifications are dispatched to all affected students.

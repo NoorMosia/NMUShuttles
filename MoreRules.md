@@ -21,3 +21,6 @@ Populate the seedData.
 students numbers should start with s31 or s32 then 7 more random numbers. meaning, letter s plus 9 numbers.
 staff numbers are just 7 random numbers.
 everything else thats not given, populate it based on whats required in our db
+
+5. 
+for a stop, add the fullAddress attribute, to be used later in the app UI, to search. thus the search will be by name and by full address

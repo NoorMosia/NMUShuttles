@@ -26,10 +26,10 @@ disability-cleared students.
 - **System**: The NMU Shuttle Management Network backend API and its associated client surfaces.
 - **Student**: An NMU student registered in the System, identified by a student number consisting of
   the letter "s" followed by exactly 9 digits starting with 31 or 32 (e.g., "s312345678", "s329876543").
-- **Marshal**: Field operations staff deployed at campus boarding platforms, identified by a staff number
-  consisting of exactly 7 digits (e.g., "4827391").
+- **Marshal**: Field operations staff deployed at campus boarding platforms or off-campus stop
+  locations, identified by a staff number consisting of exactly 7 digits (e.g., "4827391").
 - **Admin**: A university administrator with access to the Admin Portal.
-- **Stop**: A defined off-campus residential destination with a name and GPS coordinates.
+- **Stop**: A defined off-campus residential destination with a name, full street address, and GPS coordinates.
 - **Campus**: A university campus location used as a marshal deployment and shuttle boarding point.
 - **ScheduleTime**: A master timetable entry defining departure time, direction, and schedule type.
 - **Shuttle**: A physical transit vehicle with a license plate, seating capacity, vendor company, and
@@ -197,8 +197,10 @@ system can close bookings, promote waitlisted students, and give marshals a stab
 
 ### Requirement 5: Dual-Key QR Check-In
 
-**User Story:** As a Marshal, I want to scan a student's QR code and have the System assign them to
-the next available shuttle in sequence, so that boarding is orderly and each vehicle fills front-to-back.
+**User Story:** As a Marshal, I want to scan a student's QR code at the boarding point and have the
+System assign them to the next available shuttle in sequence, so that boarding is orderly and each
+vehicle fills front-to-back. For "To Campus" trips, boarding and scanning occur at the off-campus
+Stop. For "From Campus" trips, boarding and scanning occur at the on-campus platform.
 
 #### Acceptance Criteria
 
@@ -208,24 +210,32 @@ the next available shuttle in sequence, so that boarding is orderly and each veh
 2. IF a check-in request is submitted more than 35 minutes before the TripInstance's scheduled
    DepartureTime, THEN THE System SHALL reject the request with HTTP 422 and a message indicating
    scanning is not yet available.
-3. IF the QrCodeToken does not match any Booking record, THEN THE System SHALL reject the check-in
+3. WHEN the Booking's TripInstance is looked up, THE System SHALL verify that the Marshal's assigned
+   location matches the trip's boarding point: for "ToCampus" trips, the Marshal's AssignedStopId
+   must equal the TripInstance's StopId; for "FromCampus" trips, the Marshal's AssignedCampusId must
+   equal the TripInstance's CampusId (via ScheduleTime). IF the locations do not match, THE System
+   SHALL reject the check-in with HTTP 403 and a message indicating the marshal is not authorised
+   to scan at this location.
+4. IF the QrCodeToken does not match any Booking record, THEN THE System SHALL reject the check-in
    with HTTP 404.
-4. IF the matched Booking has BookingStatus != 'Confirmed', THEN THE System SHALL reject the check-in
+5. IF the matched Booking has BookingStatus != 'Confirmed', THEN THE System SHALL reject the check-in
    with HTTP 422 and return a descriptive error indicating the booking is not in Confirmed status.
-5. WHEN all validation assertions pass, THE System SHALL assign the Student to the next shuttle in
+6. WHEN all validation assertions pass, THE System SHALL assign the Student to the next shuttle in
    the convoy that has not yet reached its capacity, following OrderPosition ASC (front-to-back fill).
-6. WHEN the shuttle assignment is determined, THE System SHALL update Booking.BoardedStatus = 'Boarded',
+7. WHEN the shuttle assignment is determined, THE System SHALL update Booking.BoardedStatus = 'Boarded',
    Booking.BoardedAt = DateTime.UtcNow (UTC), and Booking.ShuttleId = the assigned ShuttleId.
-7. IF a check-in request is submitted for a Booking where BoardedStatus is already 'Boarded', THEN
+8. IF a check-in request is submitted for a Booking where BoardedStatus is already 'Boarded', THEN
    THE System SHALL reject the request with HTTP 409 to prevent duplicate boarding.
-8. FOR ALL successfully checked-in Bookings, the assigned Booking.ShuttleId SHALL reference a Shuttle
+9. FOR ALL successfully checked-in Bookings, the assigned Booking.ShuttleId SHALL reference a Shuttle
    that was IsOperational = TRUE in a TripShuttleAllocation for the same TripInstance at the time of
    check-in (shuttle assignment integrity invariant).
-9. THE System SHALL generate a unique QrCodeToken for each Booking at creation time such that no two
-   Bookings share the same token (uniqueness invariant).
-10. FOR ALL check-in operations on a TripInstance, Bookings SHALL be assigned to shuttles in
+10. THE System SHALL generate a unique QrCodeToken for each Booking at creation time such that no two
+    Bookings share the same token (uniqueness invariant).
+11. FOR ALL check-in operations on a TripInstance, Bookings SHALL be assigned to shuttles in
     OrderPosition ASC order, filling each shuttle to capacity before advancing to the next
     (sequential fill invariant).
+12. FOR ALL check-in attempts, the Marshal's assigned location (Campus or Stop) SHALL match the
+    TripInstance's boarding location for the scan to succeed (location binding invariant).
 
 ---
 
@@ -399,7 +409,7 @@ I can find and navigate to my boarding point.
 3. WHEN a Student selects "Get Directions" for a Stop, THE App SHALL launch the device's navigation
    intent with the Stop's GpsCoordinates as the destination.
 4. THE App SHALL provide a search field on the Maps screen that filters the displayed Stop markers
-   by StopName in real time.
+   by StopName or FullAddress in real time.
 5. THE App SHALL provide a "Nearby Stops" view on the Maps screen that lists Stops sorted by
    approximate proximity to the Student's current device location.
 6. IF the Student has denied location permission, THE App SHALL display a permission prompt before
@@ -433,8 +443,11 @@ for my shift, so that I can efficiently manage boarding at my platform.
 #### Acceptance Criteria
 
 1. THE App SHALL display a Marshal Home screen (presented when a Marshal role is authenticated)
-   showing the Marshal's assigned Campus boarding point and a chronological list of upcoming
-   TripInstances scheduled for that Campus on the current date.
+   showing the Marshal's assigned boarding location (Campus or Stop) and a chronological list of
+   upcoming TripInstances scheduled at that location on the current date. For marshals assigned to
+   a Campus, the screen SHALL show TripInstances with Direction = 'FromCampus' at that Campus.
+   For marshals assigned to a Stop, the screen SHALL show TripInstances with Direction = 'ToCampus'
+   at that Stop.
 2. THE App SHALL display a "Next Boarding" card on the Marshal Home screen showing the departure time
    and status of the soonest TripInstance that is not yet Completed.
 3. THE App SHALL present the remaining schedule as a list of departure times for TripInstances that
@@ -442,7 +455,7 @@ for my shift, so that I can efficiently manage boarding at my platform.
 4. THE App SHALL provide a prominent QR Code Scanner button on the Marshal Home screen that navigates
    to the scan interface.
 5. THE App SHALL show a directions button on the Marshal Home screen that launches navigation to the
-   Marshal's assigned Campus stop.
+   Marshal's assigned location (Campus or Stop) using its GPS coordinates.
 
 ---
 
@@ -522,15 +535,15 @@ reflects the university's current set of off-campus residential destinations.
 #### Acceptance Criteria
 
 1. THE Admin Portal SHALL display a Stops management screen listing all Stop records with columns for
-   StopName and GpsCoordinates.
-2. THE Admin Portal SHALL provide a "New Stop" form with fields for StopName and GpsCoordinates,
-   with a submit action that creates the Stop record.
+   StopName, FullAddress, and GpsCoordinates.
+2. THE Admin Portal SHALL provide a "New Stop" form with fields for StopName, FullAddress, and
+   GpsCoordinates, with a submit action that creates the Stop record.
 3. IF a Stop is submitted with a StopName that already exists, THEN THE System SHALL reject the
    request with HTTP 409 and display a uniqueness error in the form.
-4. THE Admin Portal SHALL provide an "Edit Stop" form pre-filled with the existing StopName and
-   GpsCoordinates, with a submit action that updates the record.
-5. FOR ALL Stop records, StopName SHALL be non-empty and GpsCoordinates SHALL be a non-empty string
-   (completeness invariant).
+4. THE Admin Portal SHALL provide an "Edit Stop" form pre-filled with the existing StopName,
+   FullAddress, and GpsCoordinates, with a submit action that updates the record.
+5. FOR ALL Stop records, StopName SHALL be non-empty, FullAddress SHALL be non-empty, and
+   GpsCoordinates SHALL be a non-empty string (completeness invariant).
 6. WHEN a Stop is deleted and one or more TripInstances reference that Stop, THE System SHALL reject
    the deletion with HTTP 409 and return a descriptive error.
 

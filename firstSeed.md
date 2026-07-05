@@ -25,16 +25,16 @@ This file contains the initial seed data for development and testing. All values
 
 ## Stops (Off-Campus Residential)
 
-| StopId | StopName | GpsCoordinates | IsActive |
-|---|---|---|---|
-| 1 | Summerstrand Village | -33.9680,25.6450 | TRUE |
-| 2 | Humewood | -33.9630,25.6280 | TRUE |
-| 3 | Newton Park | -33.9480,25.5750 | TRUE |
-| 4 | Walmer Heights | -33.9850,25.6100 | TRUE |
-| 5 | Lorraine | -33.9320,25.5620 | TRUE |
-| 6 | Bluewater Bay | -33.8710,25.5590 | TRUE |
-| 7 | Framesby | -33.9260,25.5810 | TRUE |
-| 8 | Greenacres | -33.9410,25.5870 | TRUE |
+| StopId | StopName | FullAddress | GpsCoordinates | IsActive |
+|---|---|---|---|---|
+| 1 | Summerstrand Village | 12 Marine Drive, Summerstrand, Gqeberha, 6001 | -33.9680,25.6450 | TRUE |
+| 2 | Humewood | 45 Beach Road, Humewood, Gqeberha, 6001 | -33.9630,25.6280 | TRUE |
+| 3 | Newton Park | 78 Cape Road, Newton Park, Gqeberha, 6045 | -33.9480,25.5750 | TRUE |
+| 4 | Walmer Heights | 23 Heugh Road, Walmer Heights, Gqeberha, 6070 | -33.9850,25.6100 | TRUE |
+| 5 | Lorraine | 91 Circular Drive, Lorraine, Gqeberha, 6070 | -33.9320,25.5620 | TRUE |
+| 6 | Bluewater Bay | 5 Seaview Crescent, Bluewater Bay, Gqeberha, 6210 | -33.8710,25.5590 | TRUE |
+| 7 | Framesby | 14 Langenhoven Drive, Framesby, Gqeberha, 6045 | -33.9260,25.5810 | TRUE |
+| 8 | Greenacres | 30 Ring Road, Greenacres, Gqeberha, 6045 | -33.9410,25.5870 | TRUE |
 
 ---
 
@@ -62,11 +62,19 @@ This file contains the initial seed data for development and testing. All values
 
 ## Marshals
 
-| MarshalId | StaffNumber | FirstName | LastName | UniversityEmail | AssignedCampusId |
-|---|---|---|---|---|---|
-| 1 | 4827391 | Bongani | Cele | b.cele@mandela.ac.za | 1 |
-| 2 | 5914826 | Karen | Swart | k.swart@mandela.ac.za | 2 |
-| 3 | 3208574 | Vuyo | Mabena | v.mabena@mandela.ac.za | 3 |
+| MarshalId | StaffNumber | FirstName | LastName | UniversityEmail | AssignedCampusId | AssignedStopId |
+|---|---|---|---|---|---|---|
+| 1 | 4827391 | Bongani | Cele | b.cele@mandela.ac.za | 1 | NULL |
+| 2 | 5914826 | Karen | Swart | k.swart@mandela.ac.za | 2 | NULL |
+| 3 | 3208574 | Vuyo | Mabena | v.mabena@mandela.ac.za | 3 | NULL |
+| 4 | 6153042 | Thulani | Ngcobo | t.ngcobo@mandela.ac.za | NULL | 1 |
+| 5 | 7294185 | Lindiwe | Shabalala | l.shabalala@mandela.ac.za | NULL | 2 |
+| 6 | 8401267 | Pieter | Venter | p.venter@mandela.ac.za | NULL | 3 |
+| 7 | 9537148 | Nombuso | Mkhize | n.mkhize@mandela.ac.za | NULL | 4 |
+| 8 | 2648309 | Craig | Daniels | c.daniels@mandela.ac.za | NULL | 5 |
+| 9 | 1785423 | Noluthando | Mthethwa | n.mthethwa@mandela.ac.za | NULL | 6 |
+| 10 | 4062891 | Willem | Pretorius | w.pretorius@mandela.ac.za | NULL | 7 |
+| 11 | 5379216 | Zandile | Mdluli | z.mdluli@mandela.ac.za | NULL | 8 |
 
 ---
 

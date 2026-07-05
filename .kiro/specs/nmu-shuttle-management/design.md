@@ -118,10 +118,15 @@ CalendarException (standalone)
 | FirstName | NVARCHAR(100) | NOT NULL |
 | LastName | NVARCHAR(100) | NOT NULL |
 | UniversityEmail | NVARCHAR(200) | UNIQUE NOT NULL |
-| AssignedCampusId | INT | FK → Campuses NOT NULL |
+| AssignedCampusId | INT | FK → Campuses NULL |
+| AssignedStopId | INT | FK → Stops NULL |
 | OtpHash | NVARCHAR(256) | NULL |
 | OtpExpiry | DATETIME2 | NULL |
 | CreatedAt | DATETIME2 | NOT NULL DEFAULT GETUTCDATE() |
+
+**Assignment rule:** A Marshal is assigned to either a Campus (on-campus boarding point) OR a Stop
+(off-campus boarding point), but not both. Exactly one of `AssignedCampusId` or `AssignedStopId`
+must be non-NULL (XOR constraint enforced via a CHECK constraint).
 
 #### Admins
 | Column | Type | Constraints |
@@ -145,6 +150,7 @@ CalendarException (standalone)
 |---|---|---|
 | StopId | INT IDENTITY | PK |
 | StopName | NVARCHAR(100) | UNIQUE NOT NULL |
+| FullAddress | NVARCHAR(300) | NOT NULL |
 | GpsCoordinates | NVARCHAR(50) | NOT NULL |
 | IsActive | BIT | NOT NULL DEFAULT 1 |
 
@@ -1603,8 +1609,8 @@ minus cₐ plus c_b.
 
 ### Property 17: Stop Data Completeness
 
-*For any* Stop creation attempt where StopName is empty or whitespace, or GpsCoordinates is empty
-or whitespace, the System SHALL reject the request with a validation error.
+*For any* Stop creation attempt where StopName is empty or whitespace, or FullAddress is empty
+or whitespace, or GpsCoordinates is empty or whitespace, the System SHALL reject the request with a validation error.
 
 **Validates: Requirements 17.5**
 

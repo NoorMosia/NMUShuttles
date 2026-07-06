@@ -13,7 +13,7 @@
 
 ## Frontend
 
-- **Mobile app**: Flutter (Android + iOS) — serves both Student and Marshal roles (role-switched via JWT claims)
+- **Mobile app**: Flutter (Android only) — serves both Student and Marshal roles (role-switched via JWT claims). No iOS build target.
 - **Admin portal**: Flutter Web
 - **UI design system**: Material Design 3 (native Flutter Material widgets, no Tailwind)
 - **Typography**: Hanken Grotesk font family (via Google Fonts package)

@@ -16,8 +16,8 @@ University transit platform for Nelson Mandela University (NMU) in Gqeberha, Sou
 
 | Role | Auth Method | Platform |
 |------|-------------|----------|
-| Student | OTP via university email | Flutter mobile (Android/iOS) |
-| Marshal | OTP via university email | Flutter mobile (role-switched) |
+| Student | OTP via university email | Flutter mobile (Android only) |
+| Marshal | OTP via university email | Flutter mobile (Android only, role-switched) |
 | Admin | Email + password | Flutter web portal |
 
 ## Key Business Rules

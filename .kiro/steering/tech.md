@@ -23,8 +23,9 @@
 
 ## Infrastructure
 
-- **Cloud**: Azure (SQL Database)
-- **Notifications**: Firebase Cloud Messaging
+- **Cloud**: Azure (SQL Database, Communication Services)
+- **Email**: Azure Communication Services (Email) — used exclusively for OTP delivery to students and marshals
+- **Notifications**: Firebase Cloud Messaging (push notifications to devices)
 - **Time zone**: SAST (UTC+2) for all scheduling logic
 
 ## API Conventions
@@ -74,3 +75,5 @@ dotnet test
 | JWT_SECRET | JWT signing key (min 32 chars) |
 | FCM_SERVICE_ACCOUNT_PATH | Path to Firebase service account JSON |
 | OTP_EXPIRY_MINUTES | OTP lifetime (default: 5) |
+| AZURE_COMM_CONNECTION_STRING | Azure Communication Services connection string |
+| AZURE_COMM_SENDER_ADDRESS | Verified sender email (e.g., DoNotReply@your-domain.azurecomm.net) |

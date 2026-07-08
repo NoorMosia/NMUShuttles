@@ -17,7 +17,7 @@
 - **Admin portal**: Flutter Web
 - **UI design system**: Material Design 3 (native Flutter Material widgets, no Tailwind)
 - **Typography**: Hanken Grotesk font family (via Google Fonts package)
-- **Color system**: Material You token-based (primary gold #ffcc00, surface whites/warm neutrals) — implemented with Flutter's `ColorScheme.fromSeed` or custom `ThemeData`
+- **Color system**: University brand colors — primary gold `#ffcc00` and navy `#132e51`. Both light and dark themes supported, light mode is the default. Use `ColorScheme.fromSeed` or custom `ColorScheme` definitions in `ThemeData`.
 - **Icons**: Material Symbols Outlined (via Flutter's built-in Icons or material_symbols package)
 - **Styling**: Native Flutter widgets and theming only — no CSS frameworks. The HTML prototypes in this repo use Tailwind for visual reference but the actual Flutter implementation must use Flutter's native styling (BoxDecoration, ThemeData, etc.)
 

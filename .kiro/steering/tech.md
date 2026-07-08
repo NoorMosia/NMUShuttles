@@ -2,7 +2,7 @@
 
 ## Backend
 
-- **Runtime**: .NET 8 (ASP.NET Core Web API)
+- **Runtime**: .NET 9 (ASP.NET Core Web API)
 - **ORM**: Entity Framework Core (Code-First migrations)
 - **Database**: Azure SQL Server (SQL Server)
 - **Auth**: JWT Bearer tokens (3 roles: Student, Marshal, Admin)

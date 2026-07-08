@@ -37,7 +37,7 @@ endpoint (development builds only).
 │                          NMU Shuttle Platform                            │
 │                                                                          │
 │  ┌─────────────────────┐    HTTPS/REST    ┌────────────────────────┐    │
-│  │  Flutter Mobile App │◄───────────────►│  .NET 8 Web API        │    │
+│  │  Flutter Mobile App │◄───────────────►│  .NET 9 Web API        │    │
 │  │  (Android / iOS)    │                 │  (ASP.NET Core)        │    │
 │  │  Student + Marshal  │                 │                        │    │
 │  └─────────────────────┘                 │  ┌──────────────────┐  │    │
@@ -62,7 +62,7 @@ endpoint (development builds only).
 
 | Component | Responsibility |
 |---|---|
-| .NET 8 Web API | All business logic, data access, JWT issuance, FCM dispatch orchestration |
+| .NET 9 Web API | All business logic, data access, JWT issuance, FCM dispatch orchestration |
 | SQL Server | Authoritative persistent store for all domain entities |
 | Rolling Injection Job | Nightly TripInstance generation + Priority Booking pre-population |
 | Lockout Gate Service | Per-trip countdown timer — fires at T-60 min to lock trips and run waitlist promotion |
@@ -994,7 +994,7 @@ public async Task<ResolutionResult> ResolveBreakdownAsync(
 
 ## Components and Interfaces
 
-### Backend Layer Structure (.NET 8)
+### Backend Layer Structure (.NET 9)
 
 ```
 NmuShuttle.Api/

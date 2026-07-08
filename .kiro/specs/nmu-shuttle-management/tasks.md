@@ -2,13 +2,13 @@
 
 ## Overview
 
-This plan implements the full NMU Shuttle Management Network across five phases: backend foundation, backend domain features, Flutter mobile app, Flutter web admin portal, and cross-cutting concerns (property-based tests, integration tests, security hardening). The backend is .NET 8 Web API with EF Core and Azure SQL; the mobile app and admin portal are Flutter with Riverpod, go_router, and Dio.
+This plan implements the full NMU Shuttle Management Network across five phases: backend foundation, backend domain features, Flutter mobile app, Flutter web admin portal, and cross-cutting concerns (property-based tests, integration tests, security hardening). The backend is .NET 9 Web API with EF Core and Azure SQL; the mobile app and admin portal are Flutter with Riverpod, go_router, and Dio.
 
 ## Tasks
 
 - [ ] 1. Backend Foundation — Project Setup, Data Layer, Auth, and Seed Data
 
-  - [ ] 1.1 Create .NET 8 Web API project structure and configure dependencies
+  - [ ] 1.1 Create .NET 9 Web API project structure and configure dependencies
     - Create solution `NmuShuttle.sln` with project `NmuShuttle.Api`
     - Add NuGet packages: `Microsoft.EntityFrameworkCore.SqlServer`, `Microsoft.AspNetCore.Authentication.JwtBearer`, `FluentValidation.AspNetCore`, `FirebaseAdmin`, `FsCheck`, `FsCheck.Xunit`, `BCrypt.Net-Next`, `Swashbuckle.AspNetCore`
     - Create folder structure: Controllers/, Controllers/Admin/, Services/, BackgroundServices/, Data/, Models/, DTOs/, Infrastructure/, Validators/
@@ -450,7 +450,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
 - Checkpoints ensure incremental validation at phase boundaries
 - Property tests validate the 27 universal correctness properties defined in the design document using FsCheck (.NET)
 - Integration tests validate end-to-end flows using WebApplicationFactory
-- The backend uses C# (.NET 8), the mobile app uses Flutter (Dart), and the admin portal uses Flutter Web (Dart)
+- The backend uses C# (.NET 9), the mobile app uses Flutter (Dart), and the admin portal uses Flutter Web (Dart)
 - Stop search in the booking form filters by StopName OR FullAddress (Requirement 11.4)
 - Marshal location binding is enforced at the API level (Requirement 5.3) — not just the UI
 - BreakdownLogs denormalize VendorCompanyName at flag time for stable vendor analytics

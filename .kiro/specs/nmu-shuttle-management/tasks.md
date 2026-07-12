@@ -8,14 +8,14 @@ This plan implements the full NMU Shuttle Management Network across five phases:
 
 - [ ] 1. Backend Foundation — Project Setup, Data Layer, Auth, and Seed Data
 
-  - [ ] 1.1 Create .NET 9 Web API project structure and configure dependencies
+  - [x] 1.1 Create .NET 9 Web API project structure and configure dependencies
     - Create solution `NmuShuttle.sln` with project `NmuShuttle.Api`
     - Add NuGet packages: `Microsoft.EntityFrameworkCore.SqlServer`, `Microsoft.AspNetCore.Authentication.JwtBearer`, `FluentValidation.AspNetCore`, `FirebaseAdmin`, `FsCheck`, `FsCheck.Xunit`, `BCrypt.Net-Next`, `Swashbuckle.AspNetCore`
     - Create folder structure: Controllers/, Controllers/Admin/, Services/, BackgroundServices/, Data/, Models/, DTOs/, Infrastructure/, Validators/
     - Configure `Program.cs` with DI registrations, CORS, rate limiting, Swagger, and ProblemDetails exception handler
     - _Requirements: 26.3, 26.4, 26.5, 26.6_
 
-  - [ ] 1.2 Define EF Core entity models with all constraints
+  - [x] 1.2 Define EF Core entity models with all constraints
     - Create entity classes: Student, Marshal, Admin, Campus, Stop, ScheduleTime, CalendarException, Shuttle, TripInstance, TripShuttleAllocation, Booking, PrioritySchedule, DeviceRegistration, Notification, Report, BreakdownLog
     - Stop entity MUST include `FullAddress` (NVARCHAR 300, NOT NULL)
     - Marshal entity MUST include nullable `AssignedCampusId` and nullable `AssignedStopId` with XOR CHECK constraint
@@ -25,7 +25,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Apply all CHECK constraints, UNIQUE constraints, and filtered indexes as defined in the design schema
     - _Requirements: 1.1, 3.1, 5.9, 6.10, 17.5, 18.6, 24.1, 27.1, 27.5_
 
-  - [ ] 1.3 Create ShuttleDbContext with Fluent API configuration and key indexes
+  - [x] 1.3 Create ShuttleDbContext with Fluent API configuration and key indexes
     - Configure all entity relationships, cascade behaviors, and navigation properties
     - Add XOR CHECK constraint on Marshal: `CHECK ((AssignedCampusId IS NOT NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NULL AND AssignedStopId IS NOT NULL))`
     - Add filtered unique index on Bookings: `UNIQUE (StudentId, TripInstanceId) WHERE BookingStatus != 'Cancelled'`
@@ -33,14 +33,14 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Add all performance indexes from design (IX_Bookings_TripInstanceId_Status, IX_BreakdownLogs_VendorCompanyName, etc.)
     - _Requirements: 3.8, 5.10, 27.5_
 
-  - [ ] 1.4 Create initial EF Core migration and seed data from firstSeed.md
+  - [x] 1.4 Create initial EF Core migration and seed data from firstSeed.md
     - Generate initial migration with `dotnet ef migrations add InitialCreate`
     - Implement `IEntityTypeConfiguration` seed or a `HasData()` approach for: 2 admins (BCrypt-hashed passwords), 3 campuses, 8 stops (with FullAddress), 15 students (3 priority), 11 marshals (3 campus-assigned + 8 stop-assigned), 8 shuttles (2 accessible), 18 schedule times, 10 calendar exceptions, 14 priority schedules
     - Admin passwords seeded as BCrypt hashes (cost factor 12)
     - Marshal seed data must respect XOR constraint (CampusId XOR StopId)
     - _Requirements: 2.1, 8.1_
 
-  - [ ] 1.5 Implement JWT token service and authentication middleware
+  - [x] 1.5 Implement JWT token service and authentication middleware
     - Create `JwtTokenService` issuing HS256 tokens with claims: `sub` (userId), `role` (Student/Marshal/Admin), identifier (studentNumber/staffNumber/email)
     - Student/Marshal tokens: 24-hour expiry; Admin tokens: 8-hour expiry
     - Configure ASP.NET Core `AddAuthentication().AddJwtBearer()` with validation parameters

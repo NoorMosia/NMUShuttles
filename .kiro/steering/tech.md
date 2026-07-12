@@ -53,16 +53,17 @@
 
 ```bash
 # Restore NuGet packages
+cd Backend
 dotnet restore
 
 # Run migrations
-dotnet ef database update
+dotnet ef database update --project NmuShuttle.Api
 
 # Add a new migration
-dotnet ef migrations add <MigrationName>
+dotnet ef migrations add <MigrationName> --project NmuShuttle.Api
 
 # Run the API in development
-dotnet run
+dotnet run --project NmuShuttle.Api
 
 # Build
 dotnet build

@@ -29,3 +29,7 @@ for a stop, add the fullAddress attribute, to be used later in the app UI, to se
 For UI, I don't want a top bar, 
 I only want a hamburger icon with white background square background, this square background should a some small border radius. 
 The logout button will be in the sidebar, pinned to the bottom.
+
+7. 
+On the qr code, the center image will be the logo.svg file in the assets folder.
+the main logo for the website, is 1.png file in the logos folder, this is the picture that will also be used on the login pages.

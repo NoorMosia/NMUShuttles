@@ -21,6 +21,9 @@
 - **Icons**: Material Symbols Outlined (via Flutter's built-in Icons or material_symbols package)
 - **Styling**: Native Flutter widgets and theming only — no CSS frameworks. The HTML prototypes in this repo use Tailwind for visual reference but the actual Flutter implementation must use Flutter's native styling (BoxDecoration, ThemeData, etc.)
 - **Navigation pattern**: No top AppBar. Use a floating hamburger icon (top-left) with a white square background and small border radius (`BorderRadius.circular(8)`). Tapping it opens a Drawer sidebar. The Logout button is pinned to the bottom of the sidebar (use a `Column` with `Spacer` or `mainAxisAlignment: end`).
+- **Branding assets**:
+  - QR code center image: `assets/logo.svg`
+  - Main logo (website header + login pages): `assets/logos/1.png`
 
 ## Infrastructure
 

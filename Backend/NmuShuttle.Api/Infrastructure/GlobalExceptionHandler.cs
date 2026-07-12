@@ -25,6 +25,13 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         var (statusCode, title) = exception switch
         {
+            CheckInException checkInEx => (checkInEx.StatusCode, checkInEx.StatusCode switch
+            {
+                StatusCodes.Status403Forbidden => "Forbidden",
+                StatusCodes.Status409Conflict => "Conflict",
+                StatusCodes.Status422UnprocessableEntity => "Unprocessable Entity",
+                _ => "Check-In Error"
+            }),
             ArgumentException => (StatusCodes.Status400BadRequest, "Bad Request"),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
             KeyNotFoundException => (StatusCodes.Status404NotFound, "Not Found"),

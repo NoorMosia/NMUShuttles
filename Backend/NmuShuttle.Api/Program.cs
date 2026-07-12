@@ -1,7 +1,9 @@
 using System.Text;
 using System.Threading.RateLimiting;
+using FirebaseAdmin;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +11,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NmuShuttle.Api.BackgroundServices;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.Infrastructure;
 using NmuShuttle.Api.Services;
@@ -62,6 +65,66 @@ builder.Services.AddAuthorization(options =>
 // JWT Token Service
 // ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+// ──────────────────────────────────────────────────────────────────
+// OTP Service
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<IOtpService, OtpService>();
+
+// ──────────────────────────────────────────────────────────────────
+// Trip State Machine Service
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<ITripStateMachineService, TripStateMachineService>();
+
+// ──────────────────────────────────────────────────────────────────
+// Capacity & Convoy Ordering Services
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<ICapacityService, CapacityService>();
+builder.Services.AddScoped<IConvoyOrderingService, ConvoyOrderingService>();
+
+// ──────────────────────────────────────────────────────────────────
+// Notification Services
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddSingleton<IFcmSender, FcmNotificationSender>();
+
+// ──────────────────────────────────────────────────────────────────
+// Firebase initialization (optional — graceful if not configured)
+// ──────────────────────────────────────────────────────────────────
+var fcmPath = builder.Configuration["Firebase:ServiceAccountPath"];
+if (!string.IsNullOrEmpty(fcmPath) && File.Exists(fcmPath))
+{
+    FirebaseApp.Create(new AppOptions { Credential = GoogleCredential.FromFile(fcmPath) });
+}
+else
+{
+    Console.WriteLine("⚠️  Firebase service account not configured. FCM push notifications disabled.");
+}
+
+// ──────────────────────────────────────────────────────────────────
+// CSV User Import Service
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<ICsvUserImportService, CsvUserImportService>();
+
+// ──────────────────────────────────────────────────────────────────
+// Booking Service
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<IBookingService, BookingService>();
+
+// ──────────────────────────────────────────────────────────────────
+// Check-In Service
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<ICheckInService, CheckInService>();
+
+// ──────────────────────────────────────────────────────────────────
+// Breakdown Service
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<IBreakdownService, BreakdownService>();
+
+// ──────────────────────────────────────────────────────────────────
+// Vendor Analytics Service
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<IVendorAnalyticsService, VendorAnalyticsService>();
 
 // ──────────────────────────────────────────────────────────────────
 // CORS — restricted to known Flutter Web origin
@@ -141,6 +204,17 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+// ──────────────────────────────────────────────────────────────────
+// Waitlist Promotion Service
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<IWaitlistPromotionService, WaitlistPromotionService>();
+
+// ──────────────────────────────────────────────────────────────────
+// Background Services
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddHostedService<RollingInjectionService>();
+builder.Services.AddHostedService<LockoutGateService>();
 
 // ──────────────────────────────────────────────────────────────────
 // Controllers

@@ -6,7 +6,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
 
 ## Tasks
 
-- [ ] 1. Backend Foundation — Project Setup, Data Layer, Auth, and Seed Data
+- [x] 1. Backend Foundation — Project Setup, Data Layer, Auth, and Seed Data
 
   - [x] 1.1 Create .NET 9 Web API project structure and configure dependencies
     - Create solution `NmuShuttle.sln` with project `NmuShuttle.Api`
@@ -48,7 +48,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Secret key loaded from environment variable / configuration
     - _Requirements: 1.3, 15.2, 26.4, 26.5, 26.6_
 
-  - [ ] 1.6 Implement OTP authentication endpoints (Student and Marshal)
+  - [x] 1.6 Implement OTP authentication endpoints (Student and Marshal)
     - Create `OtpService` with: `GenerateOtp()` (5-digit numeric), `HashOtp()` (SHA-256), verification logic with expiry check and single-use clearing
     - Create `AuthController` with endpoints: `POST /api/v1/auth/student/otp/request`, `POST /api/v1/auth/student/otp/verify`, `POST /api/v1/auth/marshal/otp/request`, `POST /api/v1/auth/marshal/otp/verify`
     - Validate StudentNumber format: `^s3[12]\d{7}$` — reject with HTTP 422 if invalid
@@ -58,31 +58,31 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Rate limiting: 5 requests/minute per IP on OTP request endpoints
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.10_
 
-  - [ ] 1.7 Implement Admin email+password login endpoint
+  - [x] 1.7 Implement Admin email+password login endpoint
     - Create `POST /api/v1/auth/admin/login` accepting email + password
     - Verify against BCrypt-hashed password in Admins table
     - Return JWT on success, HTTP 401 on failure (no disclosure of which field was wrong)
     - _Requirements: 15.1, 15.2, 15.3_
 
-  - [ ] 1.8 Implement device registration endpoint and global error handling middleware
+  - [x] 1.8 Implement device registration endpoint and global error handling middleware
     - Create `POST /api/v1/auth/device/register` (Student + Marshal roles) — upsert DeviceRegistration with FcmToken and Platform
     - Implement `IExceptionHandler` middleware returning RFC 7807 ProblemDetails JSON for all errors
     - Ensure HTTP status in response header matches status in body (consistency invariant)
     - _Requirements: 1.9, 9.8, 26.1, 26.2, 26.3, 26.7_
 
-- [ ] 2. Checkpoint — Backend foundation verified
+- [x] 2. Checkpoint — Backend foundation verified
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 3. Backend Domain Features — Bookings, Capacity, Check-In, Breakdown, Background Services
+- [x] 3. Backend Domain Features — Bookings, Capacity, Check-In, Breakdown, Background Services
 
-  - [ ] 3.1 Implement CapacityService and ConvoyOrderingService
+  - [x] 3.1 Implement CapacityService and ConvoyOrderingService
     - Create `ICapacityService` with `GetTotalCapacityAsync(tripInstanceId)` — SUM of operational shuttle capacities
     - Create `IConvoyOrderingService` with `AssignOrderPositionAsync(tripInstanceId, shuttleId)` — accessible shuttles get lowest positions, non-accessible appended after
     - When accessible shuttle added: shift non-accessible allocations up by 1
     - Ensure OrderPosition values are contiguous starting from 1
     - _Requirements: 3.1, 3.7, 27.1, 27.2, 27.5, 27.6_
 
-  - [ ] 3.2 Implement BookingService with capacity enforcement and waitlist logic
+  - [x] 3.2 Implement BookingService with capacity enforcement and waitlist logic
     - Create `IBookingService` with `CreateBookingAsync`, `CancelBookingAsync`, `GetStudentBookingsAsync`
     - On create: if confirmed count < Total Capacity → BookingStatus = 'Confirmed'; else → 'WaitingList'
     - Generate QrCodeToken via `Guid.NewGuid().ToString("N")` (32 hex chars) with retry loop (up to 3 attempts)
@@ -91,14 +91,14 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - On cancel: only allowed while TripInstance.Status = 'Scheduling'; reject otherwise with HTTP 400
     - _Requirements: 3.2, 3.3, 3.6, 3.8, 7.4, 7.8, 7.9, 23.1, 25.1_
 
-  - [ ] 3.3 Implement Booking and Trip API controllers (Student-facing)
+  - [x] 3.3 Implement Booking and Trip API controllers (Student-facing)
     - Create `BookingsController` with: `POST /api/v1/bookings`, `GET /api/v1/bookings`, `GET /api/v1/bookings/{id}`, `DELETE /api/v1/bookings/{id}`
     - Create `TripsController` with: `GET /api/v1/trips` (query: date, stopId, direction) returning availability with capacity summary
     - `GET /api/v1/trips/{id}` for trip detail (Student + Marshal + Admin)
     - Apply `[Authorize(Roles = "Student")]` on booking endpoints
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9_
 
-  - [ ] 3.4 Implement CheckInService with 35-min scan window, location binding, and auto-assignment
+  - [x] 3.4 Implement CheckInService with 35-min scan window, location binding, and auto-assignment
     - Create `ICheckInService.CheckInAsync(qrCodeToken, marshalId)` implementing the full check-in algorithm:
       1. Look up Booking by QrCodeToken (HTTP 404 if not found)
       2. Verify scan window: reject if current time < DepartureTime - 35 min (HTTP 422)
@@ -111,12 +111,12 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - No `shuttleId` input from marshal — system determines assignment automatically
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.11, 5.12, 27.3, 27.4, 27.7_
 
-  - [ ] 3.5 Implement CheckIn and Marshal Trip API controllers
+  - [x] 3.5 Implement CheckIn and Marshal Trip API controllers
     - Create `CheckInController` with `POST /api/v1/checkin` (Marshal role) — extracts marshalId from JWT, delegates to CheckInService
     - Create `GET /api/v1/trips/{tripId}/passengers` (Marshal role) — returns passenger manifest with counts (totalConfirmed, boardedCount, pendingCount) and passenger list
     - _Requirements: 5.1, 14.1, 14.2_
 
-  - [ ] 3.6 Implement BreakdownService (Marshal flag + Admin resolution + BreakdownLog)
+  - [x] 3.6 Implement BreakdownService (Marshal flag + Admin resolution + BreakdownLog)
     - Create `IBreakdownService.FlagBreakdownAsync(tripInstanceId, shuttleId, marshalId)`:
       1. Set TripShuttleAllocation.IsOperational = false
       2. Create BreakdownLog with denormalized VendorCompanyName from Shuttle record at flag time
@@ -130,14 +130,14 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Create trip management endpoints: `POST /api/v1/trips/{tripId}/breakdown` (Marshal), `POST /api/v1/trips/{tripId}/breakdown/{breakdownLogId}/resolve` (Admin)
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.11, 6.12, 6.13_
 
-  - [ ] 3.7 Implement TripStateMachineService and status transition endpoint
+  - [x] 3.7 Implement TripStateMachineService and status transition endpoint
     - Create `ITripStateMachineService.IsValidTransition(from, to)` implementing valid transitions: Scheduling→Locked, Scheduling→IncidentActive, Locked→InTransit, InTransit→Completed, InTransit→IncidentActive, IncidentActive→InTransit
     - On transition to Completed: set all Pending BoardedStatus bookings to 'NoShow'
     - Record transition timestamps (LockedAt, InTransitAt, CompletedAt)
     - Create `PATCH /api/v1/trips/{id}/status` (Admin role) — reject invalid transitions with HTTP 422
     - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5_
 
-  - [ ] 3.8 Implement RollingInjectionHostedService (nightly trip generation + priority bookings)
+  - [x] 3.8 Implement RollingInjectionHostedService (nightly trip generation + priority bookings)
     - Implement `IHostedService` firing at 00:00:00 SAST daily
     - Algorithm: calculate TargetDate = today + 3; skip if in CalendarExceptions or Sunday
     - Determine ScheduleType (Weekday/Saturday); create TripInstances for each matching ScheduleTime with Status='Scheduling'
@@ -147,7 +147,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Pre-assign ShuttleId to the shuttle at OrderPosition=1 (front accessible shuttle) if allocations exist; else leave NULL
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 8.4, 8.5, 8.6, 8.7, 8.8_
 
-  - [ ] 3.9 Implement LockoutGateHostedService (1-hour lockout + waitlist promotion)
+  - [x] 3.9 Implement LockoutGateHostedService (1-hour lockout + waitlist promotion)
     - Implement `IHostedService` that loops: query next Scheduling trip, sleep until T-60 min, then lock
     - `LockTrip()` within SERIALIZABLE transaction with UPDLOCK: set Status='Locked', LockedAt=UtcNow
     - Implement `IWaitlistPromotionService.RunAsync(tripInstanceId)`: promote WaitingList bookings in CreatedAt ASC order up to available capacity
@@ -155,20 +155,20 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - After lock: reject all booking creates and cancellations for that trip (HTTP 400)
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8_
 
-  - [ ] 3.10 Implement NotificationService and FCM dispatch
+  - [x] 3.10 Implement NotificationService and FCM dispatch
     - Create `INotificationService` with `DispatchAsync(studentId, title, message, tripInstanceId?)` and `DispatchToTripPassengersAsync(tripInstanceId, title, message)`
     - Create `FcmNotificationSender` wrapping FirebaseAdmin SDK MulticastMessage
     - On partial failure: log per-token failure, continue dispatching remaining tokens (never abort)
     - Always create a Notification DB record alongside the FCM dispatch
     - _Requirements: 9.1, 9.2, 9.3, 9.8_
 
-  - [ ] 3.11 Implement Notification and Report student-facing endpoints
+  - [x] 3.11 Implement Notification and Report student-facing endpoints
     - Create `NotificationsController`: `GET /api/v1/notifications` (Student), `PATCH /api/v1/notifications/{id}/read` (Student)
     - Create `ReportsController`: `POST /api/v1/reports` (Student), `GET /api/v1/reports` (Student)
     - Validate Report.Description is non-empty (HTTP 422 if empty)
     - _Requirements: 9.4, 9.5, 10.1, 10.2, 10.3, 10.4_
 
-  - [ ] 3.12 Implement Admin CRUD endpoints (Stops, Shuttles, Users, Schedule, Calendar, Priority)
+  - [x] 3.12 Implement Admin CRUD endpoints (Stops, Shuttles, Users, Schedule, Calendar, Priority)
     - Create Admin controllers: `StopsController`, `ShuttlesController`, `UsersController`, `ScheduleController`
     - Stops: GET/POST `/admin/stops`, GET/PUT/DELETE `/admin/stops/{id}` — validate StopName, FullAddress, GpsCoordinates non-empty; validate GPS format as decimal lat,lon with range checks; reject deletion if TripInstances reference stop (HTTP 409)
     - Shuttles: GET/POST `/admin/shuttles`, GET/PUT `/admin/shuttles/{id}` — validate Capacity > 0; reject duplicate LicensePlate (HTTP 409); recalculate capacity for affected trips on capacity edit
@@ -179,7 +179,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - When PrioritySchedule created for non-priority student: auto-set IsPriorityUser=true
     - _Requirements: 8.1, 8.2, 8.3, 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 19.1, 19.4, 19.5, 19.6, 19.7, 19.8, 19.9, 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7, 24.1, 24.2, 24.3, 24.4, 24.5_
 
-  - [ ] 3.13 Implement CsvUserImportService and bulk upload endpoint
+  - [x] 3.13 Implement CsvUserImportService and bulk upload endpoint
     - Create `POST /api/v1/admin/users/bulk` (Admin) accepting multipart/form-data .csv file
     - Enforce max 10 MB file size via `[RequestSizeLimit]`
     - Parse rows: validate role, identifier format, firstName, lastName, email per row
@@ -188,20 +188,20 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Never overwrite existing records (idempotent)
     - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.8, 20.9_
 
-  - [ ] 3.14 Implement VendorAnalyticsService and admin analytics endpoints
+  - [x] 3.14 Implement VendorAnalyticsService and admin analytics endpoints
     - Create `IVendorAnalyticsService` querying BreakdownLogs grouped by ShuttleId and VendorCompanyName
     - Create `GET /api/v1/admin/analytics/overview` — top 3 most/least in-demand stops, report status counts, breakdown/cancellation tallies
     - Create `GET /api/v1/admin/analytics/detailed` — expanded booking demand stats
     - Create `GET /api/v1/admin/analytics/vendor-reliability` — per-shuttle and per-vendor breakdown/cancellation counts with optional date range filter (fromDate, toDate)
     - _Requirements: 6.10, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6_
 
-  - [ ] 3.15 Implement Admin trip management and shuttle assignment endpoints
+  - [x] 3.15 Implement Admin trip management and shuttle assignment endpoints
     - Create `GET /api/v1/admin/trips` — list TripInstances filterable by date, status
     - Create `POST /api/v1/admin/trips/{id}/shuttles` — assign shuttle to trip using ConvoyOrderingService (accessible-first ordering)
     - Create `GET /api/v1/admin/reports`, `GET/PATCH /api/v1/admin/reports/{id}` — report review with status update and AdminNotes
     - _Requirements: 10.5, 10.6, 10.7, 16.7, 27.2_
 
-- [ ] 4. Checkpoint — Backend domain features verified
+- [x] 4. Checkpoint — Backend domain features verified
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 5. Flutter Mobile App — Auth, Student Screens, Marshal Screens

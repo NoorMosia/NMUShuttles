@@ -24,3 +24,8 @@ everything else thats not given, populate it based on whats required in our db
 
 5. 
 for a stop, add the fullAddress attribute, to be used later in the app UI, to search. thus the search will be by name and by full address
+
+6. 
+For UI, I don't want a top bar, 
+I only want a hamburger icon with white background square background, this square background should a some small border radius. 
+The logout button will be in the sidebar, pinned to the bottom.

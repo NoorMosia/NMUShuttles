@@ -52,6 +52,16 @@
 ## Common Commands
 
 ```bash
+# Flutter commands (SDK not on PATH)
+C:\Users\s229895735\Documents\flutter\bin\flutter.bat pub get
+C:\Users\s229895735\Documents\flutter\bin\flutter.bat build apk
+C:\Users\s229895735\Documents\flutter\bin\flutter.bat run
+
+# .NET commands (SDK not on PATH)
+$env:DOTNET_ROOT = "C:\Users\s229895735\Documents\dotnet-sdk-9.0.315-win-x64"
+& "C:\Users\s229895735\Documents\dotnet-sdk-9.0.315-win-x64\dotnet.exe" build
+& "C:\Users\s229895735\Documents\dotnet-sdk-9.0.315-win-x64\dotnet.exe" run
+
 # Restore NuGet packages
 cd Backend
 dotnet restore

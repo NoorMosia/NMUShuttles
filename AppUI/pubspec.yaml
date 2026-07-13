@@ -1,0 +1,36 @@
+name: nmu_shuttle_app
+description: NMU Shuttle Management Mobile App
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.16.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.4.0
+  go_router: ^14.0.0
+  dio: ^5.4.0
+  flutter_secure_storage: ^9.0.0
+  mobile_scanner: ^5.0.0
+  google_maps_flutter: ^2.5.0
+  url_launcher: ^6.2.0
+  geolocator: ^11.0.0
+  jwt_decoder: ^2.0.1
+  qr_flutter: ^4.1.0
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/logos/

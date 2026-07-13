@@ -204,16 +204,16 @@ This plan implements the full NMU Shuttle Management Network across five phases:
 - [x] 4. Checkpoint — Backend domain features verified
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Flutter Mobile App — Auth, Student Screens, Marshal Screens
+- [x] 5. Flutter Mobile App — Auth, Student Screens, Marshal Screens
 
-  - [ ] 5.1 Create Flutter mobile project structure with Riverpod, go_router, and Dio
+  - [x] 5.1 Create Flutter mobile project structure with Riverpod, go_router, and Dio
     - Initialize Flutter project with folder structure: `lib/core/api/`, `lib/core/auth/`, `lib/core/router/`, `lib/features/`, `lib/shared/`
     - Add dependencies: `flutter_riverpod`, `go_router`, `dio`, `flutter_secure_storage`, `mobile_scanner`, `google_maps_flutter`, `jwt_decoder`, `qr_flutter`
     - Configure Dio HTTP client with base URL, JWT interceptor (attaches Bearer token), and error interceptor
     - Set up `flutter_secure_storage` for token persistence
     - _Requirements: 7.11, 12.4_
 
-  - [ ] 5.2 Implement auth flow with role-switcher login screen
+  - [x] 5.2 Implement auth flow with role-switcher login screen
     - Create login screen with Student/Marshal role selector toggle
     - Student flow: identifier input (StudentNumber) → OTP request → OTP verify → JWT stored → route to `/student/home`
     - Marshal flow: identifier input (StaffNumber) → OTP request → OTP verify → JWT stored → route to `/marshal/home`
@@ -221,7 +221,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Register FCM device token on successful auth via `POST /auth/device/register`
     - _Requirements: 1.8, 1.9_
 
-  - [ ] 5.3 Implement Student Home screen with Upcoming/Past tabs and bottom navigation
+  - [x] 5.3 Implement Student Home screen with Upcoming/Past tabs and bottom navigation
     - Create `StudentHomeScreen` with tab bar: Upcoming (TripDate >= today, BookingStatus != Cancelled) and Past (TripDate < today or Cancelled)
     - Display booking cards with direction, stop, campus, date, time, and status
     - Add floating action button (FAB) navigating to New Booking form
@@ -229,7 +229,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Create Riverpod providers: `upcomingBookingsProvider`, `pastBookingsProvider`
     - _Requirements: 7.6, 7.7, 7.10, 7.11_
 
-  - [ ] 5.4 Implement New Booking form with direction selector, stop search, and capacity display
+  - [x] 5.4 Implement New Booking form with direction selector, stop search, and capacity display
     - Create booking form with: direction selector (ToCampus/FromCampus), stop search field (filters by StopName OR FullAddress), campus selector, 4-day date picker (today through today+3), departure time selector
     - Query `GET /api/v1/trips` with selected filters to show available trips
     - Display available capacity: show "Confirm Booking" button if seats available, or "Place on Waiting List" with capacity notice if full
@@ -237,13 +237,13 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Create `tripAvailabilityProvider` with family parameter for query
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-  - [ ] 5.5 Implement Booking Detail screen with QR code display
+  - [x] 5.5 Implement Booking Detail screen with QR code display
     - Display booking info: direction, stop, campus, date, departure time, booking status
     - Render QR code from `QrCodeToken` using `qr_flutter` at minimum 256×256 logical pixels
     - Provide "Download QR Code" action saving QR image to device gallery
     - _Requirements: 7.5, 23.2, 23.3, 23.4_
 
-  - [ ] 5.6 Implement Maps screen with stop markers, search, nearby stops, and directions
+  - [x] 5.6 Implement Maps screen with stop markers, search, nearby stops, and directions
     - Display interactive Google Maps with markers for all active stops (using GpsCoordinates)
     - On marker tap: show popup with StopName, FullAddress, and "Get Directions" button
     - "Get Directions" launches device navigation intent to stop's GPS coordinates
@@ -252,7 +252,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Handle location permission denied: show permission prompt before GPS access
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6_
 
-  - [ ] 5.7 Implement Alerts screen with notification list and unread badge
+  - [x] 5.7 Implement Alerts screen with notification list and unread badge
     - Create Alerts screen listing all notifications from `GET /api/v1/notifications` ordered by CreatedAt DESC
     - Mark notification as read on view: `PATCH /api/v1/notifications/{id}/read`
     - Show Alert Detail screen with full Title and Message on tap
@@ -260,7 +260,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Create `unreadNotificationCountProvider`
     - _Requirements: 9.4, 9.5, 9.6, 9.7_
 
-  - [ ] 5.8 Implement Profile screen with logout and report filing
+  - [x] 5.8 Implement Profile screen with logout and report filing
     - Display: FirstName, LastName, StudentNumber, UniversityEmail
     - Show "My Reports" list ordered by CreatedAt DESC (Category + Status per item)
     - Tap report → navigate to Report detail (Category, Description, Status, AdminNotes)
@@ -268,7 +268,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Logout action: clear stored JWT, navigate to login screen
     - _Requirements: 10.1, 10.2, 10.3, 12.1, 12.2, 12.3, 12.4_
 
-  - [ ] 5.9 Implement Marshal Home screen with direction-filtered trip list and location display
+  - [x] 5.9 Implement Marshal Home screen with direction-filtered trip list and location display
     - Display Marshal's assigned location (Campus name or Stop name) at top
     - Show chronological list of upcoming TripInstances on current date matching marshal's location AND correct direction:
       - Campus-assigned marshals: show trips with Direction='FromCampus' at their campus
@@ -279,7 +279,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Directions button launching navigation to assigned location GPS coordinates
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
 
-  - [ ] 5.10 Implement Marshal Passenger List and QR scan check-in flow
+  - [x] 5.10 Implement Marshal Passenger List and QR scan check-in flow
     - Passenger List screen: show all Confirmed bookings for selected trip with student name + BoardedStatus
     - Display real-time counts: total confirmed, boarded, pending
     - QR Scanner using `mobile_scanner` package: decode QrCodeToken from scanned code
@@ -290,7 +290,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Polling: `passengerManifestProvider` with 30-second Stream.periodic refresh
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
 
-- [ ] 6. Checkpoint — Flutter mobile app verified
+- [x] 6. Checkpoint — Flutter mobile app verified
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 7. Flutter Web Admin Portal — Auth, Dashboard, CRUD, Breakdown Resolution

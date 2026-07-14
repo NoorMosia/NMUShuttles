@@ -26,11 +26,16 @@ public class PriorityAdminController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var schedules = await _context.PrioritySchedules
+            .Include(ps => ps.Student)
+            .Include(ps => ps.Stop)
             .Select(ps => new PriorityScheduleResponseDto
             {
                 PriorityScheduleId = ps.PriorityScheduleId,
                 StudentId = ps.StudentId,
+                StudentNumber = ps.Student.StudentNumber,
+                StudentName = ps.Student.FirstName + " " + ps.Student.LastName,
                 StopId = ps.StopId,
+                StopName = ps.Stop.StopName,
                 ScheduleTimeId = ps.ScheduleTimeId,
                 DayOfWeek = ps.DayOfWeek,
                 IsActive = ps.IsActive,

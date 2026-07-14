@@ -1,0 +1,11 @@
+{
+  "name": "NMU Shuttle Admin",
+  "short_name": "NMU Admin",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffcc00",
+  "description": "NMU Shuttle Management Admin Portal",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}

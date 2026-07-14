@@ -19,11 +19,11 @@ public static class SeedData
     // Pre-computed BCrypt hashes (cost factor 12)
     // "Admin@2025!" hashed with BCrypt cost 12
     private const string AdminPasswordHash =
-        "$2a$12$LJ3m4sMKfRzG8WkBVcXKxeQ9rF7bY1tZ5dN0pA2vH6wX4uC8yE3Oi";
+        "$2a$12$UnzkP2CPSCL04uIvla3UKOpZAVQZFEPRngF12SJyE2.gdVhHlZBk6";
 
     // "Transport@2025!" hashed with BCrypt cost 12
     private const string TransportPasswordHash =
-        "$2a$12$Qp7n5RRKgTzH9WmDVdYLxeA8sG6cZ2uW4jM1oB3vI7xY5wE9kF4Rj";
+        "$2a$12$YqZo4jPNiOcMGYhDRJ4CleeMqptACgPleJfWR/n.UJKTol9pZfE0i";
 
     /// <summary>
     /// Applies all seed data to the model builder.
@@ -140,7 +140,9 @@ public static class SeedData
             new Shuttle { ShuttleId = 5, LicensePlate = "EC 628-945", Capacity = 35, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, CreatedAt = SeedDate },
             new Shuttle { ShuttleId = 6, LicensePlate = "EC 714-382", Capacity = 22, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, CreatedAt = SeedDate },
             new Shuttle { ShuttleId = 7, LicensePlate = "EC 837-256", Capacity = 28, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 8, LicensePlate = "EC 948-617", Capacity = 35, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, CreatedAt = SeedDate }
+            new Shuttle { ShuttleId = 8, LicensePlate = "EC 948-617", Capacity = 35, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 9, LicensePlate = "EC 103-475", Capacity = 22, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 10, LicensePlate = "EC 217-864", Capacity = 28, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, CreatedAt = SeedDate }
         );
     }
 
@@ -167,7 +169,12 @@ public static class SeedData
             new ScheduleTime { ScheduleTimeId = 15, DepartureTime = new TimeOnly(8, 0), Direction = "ToCampus", ScheduleType = "Saturday", CampusId = 1, StopId = 1 },
             new ScheduleTime { ScheduleTimeId = 16, DepartureTime = new TimeOnly(8, 0), Direction = "ToCampus", ScheduleType = "Saturday", CampusId = 1, StopId = 2 },
             new ScheduleTime { ScheduleTimeId = 17, DepartureTime = new TimeOnly(13, 0), Direction = "FromCampus", ScheduleType = "Saturday", CampusId = 1, StopId = 1 },
-            new ScheduleTime { ScheduleTimeId = 18, DepartureTime = new TimeOnly(13, 0), Direction = "FromCampus", ScheduleType = "Saturday", CampusId = 1, StopId = 2 }
+            new ScheduleTime { ScheduleTimeId = 18, DepartureTime = new TimeOnly(13, 0), Direction = "FromCampus", ScheduleType = "Saturday", CampusId = 1, StopId = 2 },
+            // Stops 7 & 8 Weekday (4 entries)
+            new ScheduleTime { ScheduleTimeId = 19, DepartureTime = new TimeOnly(7, 45), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 7 },
+            new ScheduleTime { ScheduleTimeId = 20, DepartureTime = new TimeOnly(8, 0), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 2, StopId = 8 },
+            new ScheduleTime { ScheduleTimeId = 21, DepartureTime = new TimeOnly(16, 30), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 7 },
+            new ScheduleTime { ScheduleTimeId = 22, DepartureTime = new TimeOnly(17, 00), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 2, StopId = 8 }
         );
     }
 

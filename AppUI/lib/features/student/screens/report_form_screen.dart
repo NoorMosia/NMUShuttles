@@ -6,7 +6,9 @@ import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dar
 /// Screen for filing a new report.
 /// Category dropdown, description text area, optional trip ID, submit button.
 class ReportFormScreen extends ConsumerStatefulWidget {
-  const ReportFormScreen({super.key});
+  const ReportFormScreen({super.key, this.tripInstanceId});
+
+  final int? tripInstanceId;
 
   @override
   ConsumerState<ReportFormScreen> createState() => _ReportFormScreenState();
@@ -33,6 +35,14 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
     'VehicleQuality': 'Vehicle Quality',
     'Other': 'Other',
   };
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.tripInstanceId != null) {
+      _tripIdController.text = widget.tripInstanceId.toString();
+    }
+  }
 
   @override
   void dispose() {
@@ -212,7 +222,7 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  elevation: 2,
+                  elevation: 0,
                 ),
                 child: _isSubmitting
                     ? const SizedBox(

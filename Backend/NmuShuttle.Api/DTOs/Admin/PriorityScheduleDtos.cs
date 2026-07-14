@@ -12,7 +12,10 @@ public class PriorityScheduleResponseDto
 {
     public int PriorityScheduleId { get; set; }
     public int StudentId { get; set; }
+    public string StudentNumber { get; set; } = string.Empty;
+    public string StudentName { get; set; } = string.Empty;
     public int StopId { get; set; }
+    public string StopName { get; set; } = string.Empty;
     public int ScheduleTimeId { get; set; }
     public string DayOfWeek { get; set; } = string.Empty;
     public bool IsActive { get; set; }

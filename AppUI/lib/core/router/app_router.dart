@@ -11,9 +11,10 @@ import 'package:nmu_shuttle_app/features/student/screens/profile_screen.dart';
 import 'package:nmu_shuttle_app/features/student/screens/report_form_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/marshal_home_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/passenger_list_screen.dart';
+import 'package:nmu_shuttle_app/shared/widgets/student_shell.dart';
 
 /// Application router configuration using go_router.
-/// Includes redirect logic for authentication guard.
+/// Uses ShellRoute to keep the bottom navigation bar persistent across student screens.
 class AppRouter {
   AppRouter({AuthService? authService})
       : _authService = authService ?? AuthService();
@@ -29,12 +30,35 @@ class AppRouter {
         name: 'login',
         builder: (context, state) => const LoginScreen(),
       ),
-      // Student routes
-      GoRoute(
-        path: '/student/home',
-        name: 'studentHome',
-        builder: (context, state) => const StudentHomeScreen(),
+
+      // ─── Student Shell (persistent bottom nav) ───────────────
+      ShellRoute(
+        builder: (context, state, child) => StudentShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/student/home',
+            name: 'studentHome',
+            builder: (context, state) => const StudentHomeScreen(),
+          ),
+          GoRoute(
+            path: '/student/maps',
+            name: 'maps',
+            builder: (context, state) => const MapsScreen(),
+          ),
+          GoRoute(
+            path: '/student/alerts',
+            name: 'alerts',
+            builder: (context, state) => const AlertsScreen(),
+          ),
+          GoRoute(
+            path: '/student/profile',
+            name: 'profile',
+            builder: (context, state) => const ProfileScreen(),
+          ),
+        ],
       ),
+
+      // ─── Student routes outside the shell (no bottom nav) ────
       GoRoute(
         path: '/student/booking/new',
         name: 'newBooking',
@@ -49,26 +73,12 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/student/maps',
-        name: 'maps',
-        builder: (context, state) => const MapsScreen(),
-      ),
-      GoRoute(
-        path: '/student/alerts',
-        name: 'alerts',
-        builder: (context, state) => const AlertsScreen(),
-      ),
-      GoRoute(
-        path: '/student/profile',
-        name: 'profile',
-        builder: (context, state) => const ProfileScreen(),
-      ),
-      GoRoute(
         path: '/student/report/new',
         name: 'newReport',
         builder: (context, state) => const ReportFormScreen(),
       ),
-      // Marshal routes
+
+      // ─── Marshal routes ──────────────────────────────────────
       GoRoute(
         path: '/marshal/home',
         name: 'marshalHome',
@@ -87,6 +97,7 @@ class AppRouter {
 
   /// Global redirect: if not authenticated, force to /login.
   /// If authenticated and on /login, redirect to appropriate home.
+  /// If marshal tries to access student routes, redirect to marshal home.
   Future<String?> _globalRedirect(
     BuildContext context,
     GoRouterState state,
@@ -104,6 +115,22 @@ class AppRouter {
         return '/marshal/home';
       }
       return '/student/home';
+    }
+
+    // Prevent marshals from accessing student routes
+    if (isAuthenticated && state.matchedLocation.startsWith('/student')) {
+      final role = await _authService.getUserRole();
+      if (role == 'Marshal') {
+        return '/marshal/home';
+      }
+    }
+
+    // Prevent students from accessing marshal routes
+    if (isAuthenticated && state.matchedLocation.startsWith('/marshal')) {
+      final role = await _authService.getUserRole();
+      if (role == 'Student') {
+        return '/student/home';
+      }
     }
 
     return null;

@@ -27,4 +27,7 @@ class ApiConstants {
 
   // Report endpoints
   static const String reports = '/reports';
+
+  // Student profile endpoint
+  static const String studentProfile = '/students/me';
 }

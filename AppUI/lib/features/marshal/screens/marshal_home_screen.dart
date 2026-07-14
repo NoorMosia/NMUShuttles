@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
-import 'package:nmu_shuttle_app/shared/widgets/app_drawer.dart';
+import 'package:nmu_shuttle_app/shared/widgets/marshal_drawer.dart';
 import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
 import 'package:nmu_shuttle_app/features/marshal/models/marshal_trip_model.dart';
 import 'package:nmu_shuttle_app/features/marshal/providers/marshal_home_provider.dart';
@@ -18,7 +18,7 @@ class MarshalHomeScreen extends ConsumerWidget {
     final state = ref.watch(marshalHomeProvider);
 
     return Scaffold(
-      drawer: AppDrawer(
+      drawer: MarshalDrawer(
         onLogout: () => context.go('/login'),
       ),
       body: Stack(
@@ -178,13 +178,6 @@ class MarshalHomeScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppTheme.primaryGold,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryGold.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,7 +372,7 @@ class MarshalHomeScreen extends ConsumerWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              elevation: 2,
+              elevation: 0,
             ),
             icon: const Icon(Icons.qr_code_scanner, size: 28),
             label: const Text(

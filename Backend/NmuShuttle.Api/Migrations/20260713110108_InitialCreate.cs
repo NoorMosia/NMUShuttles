@@ -459,8 +459,8 @@ namespace NmuShuttle.Api.Migrations
                 columns: new[] { "AdminId", "CreatedAt", "Email", "FirstName", "LastName", "PasswordHash" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "admin@mandela.ac.za", "Thabo", "Mokoena", "$2a$12$LJ3m4sMKfRzG8WkBVcXKxeQ9rF7bY1tZ5dN0pA2vH6wX4uC8yE3Oi" },
-                    { 2, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "transport@mandela.ac.za", "Nomsa", "Dlamini", "$2a$12$Qp7n5RRKgTzH9WmDVdYLxeA8sG6cZ2uW4jM1oB3vI7xY5wE9kF4Rj" }
+                    { 1, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "admin@mandela.ac.za", "Thabo", "Mokoena", "$2a$12$UnzkP2CPSCL04uIvla3UKOpZAVQZFEPRngF12SJyE2.gdVhHlZBk6" },
+                    { 2, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "transport@mandela.ac.za", "Nomsa", "Dlamini", "$2a$12$YqZo4jPNiOcMGYhDRJ4CleeMqptACgPleJfWR/n.UJKTol9pZfE0i" }
                 });
 
             migrationBuilder.InsertData(

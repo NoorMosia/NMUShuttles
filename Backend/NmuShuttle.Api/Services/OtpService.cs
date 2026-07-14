@@ -86,7 +86,7 @@ public class OtpService : IOtpService
         if (!isValid)
             return null;
 
-        return _jwtTokenService.GenerateStudentToken(student.StudentId, student.StudentNumber);
+        return _jwtTokenService.GenerateStudentToken(student.StudentId, student.StudentNumber, student.FirstName, student.LastName, student.UniversityEmail);
     }
 
     /// <inheritdoc />

@@ -10,8 +10,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/models/booking_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
+import 'package:nmu_shuttle_app/features/student/screens/report_form_screen.dart';
 import 'package:nmu_shuttle_app/shared/widgets/app_drawer.dart';
-import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
+import 'package:nmu_shuttle_app/shared/widgets/back_button.dart';
 
 /// Booking detail screen with QR code display.
 class BookingDetailScreen extends ConsumerStatefulWidget {
@@ -114,6 +115,14 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     }
   }
 
+  void _navigateToReport(BuildContext context, BookingModel booking) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ReportFormScreen(tripInstanceId: booking.bookingId),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bookingId = int.tryParse(widget.bookingId) ?? 0;
@@ -145,7 +154,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
             ),
             data: (booking) => _buildContent(context, booking),
           ),
-          const HamburgerMenuButton(),
+          const FloatingBackButton(),
         ],
       ),
     );
@@ -188,13 +197,6 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: QrImageView(
                     data: booking.qrCodeToken!,
@@ -227,7 +229,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
             // Booking info card
             Card(
-              elevation: 1,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               child: Padding(
@@ -310,6 +312,25 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                   ),
                 ),
               ),
+
+            // Report issue button
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _navigateToReport(context, booking),
+                icon: const Icon(Icons.report_outlined),
+                label: const Text('Report an Issue'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.navy,
+                  side: BorderSide(color: Colors.grey.shade400),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
           ],
         ),
       ),

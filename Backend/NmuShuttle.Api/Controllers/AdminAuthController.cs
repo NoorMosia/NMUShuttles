@@ -41,8 +41,18 @@ public class AdminAuthController : ControllerBase
             return Unauthorized(new { message = "Invalid credentials" });
         }
 
-        // Verify password against BCrypt hash
-        bool passwordValid = BCrypt.Net.BCrypt.Verify(dto.Password, admin.PasswordHash);
+        // DEV BYPASS: skip password check in Development environment
+        // TODO: Remove this before production deployment
+        var env = HttpContext.RequestServices.GetRequiredService<IHostEnvironment>();
+        bool passwordValid;
+        if (env.IsDevelopment())
+        {
+            passwordValid = true; // Skip BCrypt verification in dev
+        }
+        else
+        {
+            passwordValid = BCrypt.Net.BCrypt.Verify(dto.Password, admin.PasswordHash);
+        }
 
         if (!passwordValid)
         {

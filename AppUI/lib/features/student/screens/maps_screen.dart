@@ -296,7 +296,6 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
     final stopsAsync = ref.watch(mapStopsProvider);
 
     return Scaffold(
-      drawer: null, // Drawer handled by parent shell
       body: stopsAsync.when(
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppTheme.primaryGold),
@@ -359,7 +358,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                 left: 64,
                 right: 16,
                 child: Material(
-                  elevation: 3,
+                  elevation: 0,
                   borderRadius: BorderRadius.circular(12),
                   child: TextField(
                     controller: _searchController,
@@ -401,7 +400,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                   left: 16,
                   right: 16,
                   child: Material(
-                    elevation: 2,
+                    elevation: 0,
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.orange.shade50,
                     child: Padding(
@@ -441,7 +440,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                   left: 64,
                   right: 16,
                   child: Material(
-                    elevation: 4,
+                    elevation: 0,
                     borderRadius: BorderRadius.circular(12),
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxHeight: 200),
@@ -560,13 +559,6 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
       ),
       child: Column(
         children: [

@@ -133,12 +133,23 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFlutterWeb", policy =>
     {
-        policy.WithOrigins(
-                builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-                ?? new[] { "http://localhost:8080" })
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        if (builder.Environment.IsDevelopment())
+        {
+            // In development, allow any localhost origin (Flutter Web uses random ports)
+            policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+        else
+        {
+            policy.WithOrigins(
+                    builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                    ?? new[] { "http://localhost:8080" })
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
     });
 });
 
@@ -211,10 +222,10 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IWaitlistPromotionService, WaitlistPromotionService>();
 
 // ──────────────────────────────────────────────────────────────────
-// Background Services
+// Background Services (disabled temporarily for local dev — re-enable for production)
 // ──────────────────────────────────────────────────────────────────
-builder.Services.AddHostedService<RollingInjectionService>();
-builder.Services.AddHostedService<LockoutGateService>();
+// builder.Services.AddHostedService<RollingInjectionService>();
+// builder.Services.AddHostedService<LockoutGateService>();
 
 // ──────────────────────────────────────────────────────────────────
 // Controllers
@@ -258,6 +269,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Generate trips on startup (today through today+3) so there's data immediately
+await NmuShuttle.Api.Infrastructure.StartupTripGenerator.GenerateTripsAsync(app.Services);
 
 app.Run();
 

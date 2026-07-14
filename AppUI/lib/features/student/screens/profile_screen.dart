@@ -7,11 +7,9 @@ import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/models/report_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dart';
 import 'package:nmu_shuttle_app/features/student/screens/report_detail_screen.dart';
-import 'package:nmu_shuttle_app/features/student/screens/report_form_screen.dart';
-import 'package:nmu_shuttle_app/shared/widgets/app_drawer.dart';
 import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
 
-/// Profile screen displaying student info, reports list, and logout.
+/// Profile screen displaying student info, strike points, reports list, and logout.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -21,9 +19,6 @@ class ProfileScreen extends ConsumerWidget {
     final reportsAsync = ref.watch(reportsProvider);
 
     return Scaffold(
-      drawer: AppDrawer(
-        onLogout: () => _handleLogout(context),
-      ),
       body: Stack(
         children: [
           RefreshIndicator(
@@ -41,24 +36,25 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 // ─── Profile Card ─────────────────────────────
                 _buildProfileCard(context, profileAsync),
+                const SizedBox(height: 16),
+                // ─── Strike Points Section ────────────────────
+                _buildStrikeSection(context, profileAsync),
                 const SizedBox(height: 24),
                 // ─── My Reports Section ───────────────────────
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'My Reports',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.navy,
-                          ),
+                Container(
+                  padding: const EdgeInsets.only(top: 16),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: Colors.grey.shade300, width: 1),
                     ),
-                    TextButton.icon(
-                      onPressed: () => _navigateToReportForm(context),
-                      icon: const Icon(Icons.add, size: 18),
-                      label: const Text('New'),
-                    ),
-                  ],
+                  ),
+                  child: Text(
+                    'My Reports',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.navy,
+                        ),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 _buildReportsList(context, reportsAsync),
@@ -86,10 +82,6 @@ class ProfileScreen extends ConsumerWidget {
           const HamburgerMenuButton(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToReportForm(context),
-        child: const Icon(Icons.report_outlined),
-      ),
     );
   }
 
@@ -99,12 +91,14 @@ class ProfileScreen extends ConsumerWidget {
   ) {
     return profileAsync.when(
       loading: () => const Card(
+        elevation: 0,
         child: Padding(
           padding: EdgeInsets.all(24),
           child: Center(child: CircularProgressIndicator()),
         ),
       ),
       error: (_, __) => Card(
+        elevation: 0,
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Center(
@@ -118,6 +112,7 @@ class ProfileScreen extends ConsumerWidget {
       data: (profile) {
         if (profile == null) {
           return Card(
+            elevation: 0,
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Center(
@@ -129,83 +124,191 @@ class ProfileScreen extends ConsumerWidget {
             ),
           );
         }
-        return Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.shade200),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                // Avatar placeholder
-                CircleAvatar(
-                  radius: 36,
-                  backgroundColor: AppTheme.navy,
-                  child: Text(
-                    '${profile.firstName.isNotEmpty ? profile.firstName[0] : ''}${profile.lastName.isNotEmpty ? profile.lastName[0] : ''}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+          child: Row(
+            children: [
+              // Avatar placeholder
+              CircleAvatar(
+                radius: 36,
+                backgroundColor: AppTheme.navy,
+                child: Text(
+                  '${profile.firstName.isNotEmpty ? profile.firstName[0] : ''}${profile.lastName.isNotEmpty ? profile.lastName[0] : ''}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 16),
-                // Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${profile.firstName} ${profile.lastName}',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.navy,
-                                ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.badge_outlined,
-                              size: 16, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(
-                            profile.studentNumber,
+              ),
+              const SizedBox(width: 16),
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${profile.firstName} ${profile.lastName}',
+                      style:
+                          Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.navy,
+                              ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.badge_outlined,
+                            size: 16, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(
+                          profile.studentNumber,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: Colors.grey.shade700),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Icon(Icons.email_outlined,
+                            size: 16, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            profile.email,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(color: Colors.grey.shade700),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          const Icon(Icons.email_outlined,
-                              size: 16, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              profile.email,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(color: Colors.grey.shade700),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildStrikeSection(
+    BuildContext context,
+    AsyncValue<StudentProfile?> profileAsync,
+  ) {
+    return profileAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (profile) {
+        if (profile == null) return const SizedBox.shrink();
+
+        final noShowCount = profile.noShowCount;
+        final cancelledCount = profile.cancelledCount;
+        final clampedStrikes = profile.strikePoints;
+        const maxStrikes = 6;
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Strike Points',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.navy,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              // Strike progress bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: clampedStrikes / maxStrikes,
+                  minHeight: 10,
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    clampedStrikes >= maxStrikes
+                        ? Colors.red
+                        : clampedStrikes >= 4
+                            ? Colors.orange
+                            : AppTheme.primaryGold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$clampedStrikes / $maxStrikes strike points',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: clampedStrikes >= maxStrikes
+                          ? Colors.red
+                          : AppTheme.navy,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              // Breakdown row
+              Row(
+                children: [
+                  _buildStrikeStat(
+                    context,
+                    icon: Icons.person_off_outlined,
+                    label: 'No-shows',
+                    count: noShowCount,
+                    color: Colors.red.shade600,
+                  ),
+                  const SizedBox(width: 24),
+                  _buildStrikeStat(
+                    context,
+                    icon: Icons.cancel_outlined,
+                    label: 'Cancelled',
+                    count: cancelledCount,
+                    color: Colors.orange.shade700,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStrikeStat(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required int count,
+    required Color color,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 6),
+        Text(
+          '$count $label',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
+        ),
+      ],
     );
   }
 
@@ -275,12 +378,6 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _navigateToReportForm(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const ReportFormScreen()),
-    );
-  }
-
   void _navigateToReportDetail(BuildContext context, ReportModel report) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => ReportDetailScreen(report: report)),
@@ -306,6 +403,7 @@ class _ReportCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
+      elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         onTap: onTap,
@@ -347,7 +445,6 @@ class _ReportCard extends StatelessWidget {
   }
 
   String _formatCategory(String category) {
-    // Insert spaces before capital letters for display
     return category.replaceAllMapped(
       RegExp(r'([a-z])([A-Z])'),
       (match) => '${match.group(1)} ${match.group(2)}',

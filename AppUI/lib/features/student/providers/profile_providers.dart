@@ -1,55 +1,54 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:nmu_shuttle_app/core/api/api_constants.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 import 'package:nmu_shuttle_app/features/student/models/report_model.dart';
 import 'package:nmu_shuttle_app/features/student/repositories/report_repository.dart';
 
 // ─── Student Profile ───────────────────────────────────────────
 
-/// Simple model holding student profile info extracted from JWT claims.
+/// Model holding student profile info fetched from the API.
 class StudentProfile {
   const StudentProfile({
     required this.firstName,
     required this.lastName,
     required this.studentNumber,
     required this.email,
+    required this.isPriorityUser,
+    required this.noShowCount,
+    required this.cancelledCount,
+    required this.strikePoints,
   });
 
   final String firstName;
   final String lastName;
   final String studentNumber;
   final String email;
+  final bool isPriorityUser;
+  final int noShowCount;
+  final int cancelledCount;
+  final int strikePoints;
+
+  factory StudentProfile.fromJson(Map<String, dynamic> json) {
+    return StudentProfile(
+      firstName: json['firstName'] as String? ?? '',
+      lastName: json['lastName'] as String? ?? '',
+      studentNumber: json['studentNumber'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      isPriorityUser: json['isPriorityUser'] as bool? ?? false,
+      noShowCount: json['noShowCount'] as int? ?? 0,
+      cancelledCount: json['cancelledCount'] as int? ?? 0,
+      strikePoints: json['strikePoints'] as int? ?? 0,
+    );
+  }
 }
 
-/// Provider that extracts student profile information from the stored JWT.
+/// Provider that fetches the student profile from the API.
 final studentProfileProvider = FutureProvider<StudentProfile?>((ref) async {
-  final authService = ref.watch(authServiceProvider);
-  final token = await authService.getToken();
-  if (token == null || token.isEmpty) return null;
+  final dioClient = ref.watch(dioClientProvider);
 
   try {
-    final claims = JwtDecoder.decode(token);
-
-    final firstName = claims['firstName'] as String? ??
-        claims['given_name'] as String? ??
-        'Student';
-    final lastName = claims['lastName'] as String? ??
-        claims['family_name'] as String? ??
-        '';
-    final studentNumber = claims['studentNumber'] as String? ??
-        claims['sub'] as String? ??
-        '';
-    final email = claims['email'] as String? ??
-        claims['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress']
-            as String? ??
-        '';
-
-    return StudentProfile(
-      firstName: firstName,
-      lastName: lastName,
-      studentNumber: studentNumber,
-      email: email,
-    );
+    final response = await dioClient.dio.get(ApiConstants.studentProfile);
+    return StudentProfile.fromJson(response.data as Map<String, dynamic>);
   } catch (_) {
     return null;
   }

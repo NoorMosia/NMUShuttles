@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
-import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 import 'package:nmu_shuttle_app/features/student/widgets/booking_card.dart';
-import 'package:nmu_shuttle_app/shared/widgets/app_drawer.dart';
 import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
 
 /// Student home screen with Upcoming/Past tabs and bottom navigation.
@@ -19,8 +17,6 @@ class StudentHomeScreen extends ConsumerStatefulWidget {
 class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  int _currentNavIndex = 0;
-
   @override
   void initState() {
     super.initState();
@@ -33,31 +29,9 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
     super.dispose();
   }
 
-  void _onNavTap(int index) {
-    if (index == _currentNavIndex && index == 0) return;
-    setState(() => _currentNavIndex = index);
-    switch (index) {
-      case 0:
-        // Already on home
-        break;
-      case 1:
-        context.push('/student/maps');
-        break;
-      case 2:
-        context.push('/student/alerts');
-        break;
-      case 3:
-        context.push('/student/profile');
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(
-        onLogout: () => context.go('/login'),
-      ),
       body: Stack(
         children: [
           Column(
@@ -109,51 +83,9 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
         icon: const Icon(Icons.add),
         label: const Text('New Booking'),
       ),
-      bottomNavigationBar: _buildBottomNav(ref),
     );
   }
 
-  Widget _buildBottomNav(WidgetRef ref) {
-    final unreadCountAsync = ref.watch(unreadNotificationCountProvider);
-    final unreadCount = unreadCountAsync.valueOrNull ?? 0;
-
-    return NavigationBar(
-      selectedIndex: _currentNavIndex,
-      onDestinationSelected: _onNavTap,
-      destinations: [
-        const NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        const NavigationDestination(
-          icon: Icon(Icons.map_outlined),
-          selectedIcon: Icon(Icons.map),
-          label: 'Maps',
-        ),
-        NavigationDestination(
-          icon: unreadCount > 0
-              ? Badge(
-                  label: Text('$unreadCount'),
-                  child: const Icon(Icons.notifications_outlined),
-                )
-              : const Icon(Icons.notifications_outlined),
-          selectedIcon: unreadCount > 0
-              ? Badge(
-                  label: Text('$unreadCount'),
-                  child: const Icon(Icons.notifications),
-                )
-              : const Icon(Icons.notifications),
-          label: 'Alerts',
-        ),
-        const NavigationDestination(
-          icon: Icon(Icons.person_outlined),
-          selectedIcon: Icon(Icons.person),
-          label: 'Profile',
-        ),
-      ],
-    );
-  }
 }
 
 /// Upcoming bookings tab content.

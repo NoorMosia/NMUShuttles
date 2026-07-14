@@ -7,7 +7,7 @@ import 'package:nmu_shuttle_app/features/student/models/trip_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/trip_providers.dart';
 import 'package:nmu_shuttle_app/shared/widgets/app_drawer.dart';
-import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
+import 'package:nmu_shuttle_app/shared/widgets/back_button.dart';
 
 /// New booking screen with direction, stop search, and capacity display.
 class NewBookingScreen extends ConsumerStatefulWidget {
@@ -173,7 +173,7 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
               ],
             ),
           ),
-          const HamburgerMenuButton(),
+          const FloatingBackButton(),
         ],
       ),
     );
@@ -234,18 +234,14 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
                 margin: const EdgeInsets.only(top: 4),
                 constraints: const BoxConstraints(maxHeight: 200),
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
-                child: ListView.separated(
+                child: Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  clipBehavior: Clip.antiAlias,
+                  child: ListView.separated(
                   shrinkWrap: true,
                   padding: EdgeInsets.zero,
                   itemCount: filtered.length,
@@ -274,6 +270,7 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
                       },
                     );
                   },
+                ),
                 ),
               );
             },
@@ -406,7 +403,7 @@ class _TripCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 1,
+      elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),

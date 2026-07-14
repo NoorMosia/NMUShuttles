@@ -1,10 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:nmu_shuttle_app/core/api/dio_client.dart';
-import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 import 'package:nmu_shuttle_app/features/marshal/models/marshal_trip_model.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 /// Marshal assignment info extracted from JWT claims.
 class MarshalAssignment {
@@ -79,15 +77,12 @@ class MarshalHomeState {
 class MarshalHomeNotifier extends StateNotifier<MarshalHomeState> {
   MarshalHomeNotifier({
     required DioClient dioClient,
-    required AuthService authService,
   })  : _dioClient = dioClient,
-        _authService = authService,
         super(const MarshalHomeState()) {
     loadData();
   }
 
   final DioClient _dioClient;
-  final AuthService _authService;
 
   /// Loads the marshal's assignment and today's trips.
   Future<void> loadData() async {
@@ -120,42 +115,15 @@ class MarshalHomeNotifier extends StateNotifier<MarshalHomeState> {
     }
   }
 
-  /// Extracts the marshal assignment info from the JWT token or API.
+  /// Fetches the marshal assignment info from the API.
   Future<MarshalAssignment?> _getMarshalAssignment() async {
-    final token = await _authService.getToken();
-    if (token == null) return null;
-
-    try {
-      final decoded = JwtDecoder.decode(token);
-
-      // Try to extract assignment from JWT claims
-      final campusId = _parseInt(decoded['assignedCampusId']);
-      final campusName = decoded['assignedCampusName'] as String?;
-      final stopId = _parseInt(decoded['assignedStopId']);
-      final stopName = decoded['assignedStopName'] as String?;
-      final gps = decoded['assignedGpsCoordinates'] as String?;
-
-      if (campusId != null || stopId != null) {
-        return MarshalAssignment(
-          assignedCampusId: campusId,
-          assignedCampusName: campusName,
-          assignedStopId: stopId,
-          assignedStopName: stopName,
-          gpsCoordinates: gps,
-        );
-      }
-
-      // Fallback: fetch assignment from API
-      return await _fetchAssignmentFromApi();
-    } catch (_) {
-      return await _fetchAssignmentFromApi();
-    }
+    return await _fetchAssignmentFromApi();
   }
 
   /// Fetches marshal assignment from the API as fallback.
   Future<MarshalAssignment?> _fetchAssignmentFromApi() async {
     try {
-      final response = await _dioClient.dio.get('/marshal/assignment');
+      final response = await _dioClient.dio.get('/marshal/me');
       final data = response.data as Map<String, dynamic>;
       return MarshalAssignment(
         assignedCampusId: _parseInt(data['assignedCampusId']),
@@ -218,6 +186,5 @@ final marshalHomeProvider =
     StateNotifierProvider<MarshalHomeNotifier, MarshalHomeState>((ref) {
   return MarshalHomeNotifier(
     dioClient: ref.watch(dioClientProvider),
-    authService: ref.watch(authServiceProvider),
   );
 });

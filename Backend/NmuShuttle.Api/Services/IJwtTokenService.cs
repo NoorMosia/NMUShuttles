@@ -8,7 +8,7 @@ public interface IJwtTokenService
     /// <summary>
     /// Generates a JWT for an authenticated Student (24-hour expiry, role=Student).
     /// </summary>
-    string GenerateStudentToken(int studentId, string studentNumber);
+    string GenerateStudentToken(int studentId, string studentNumber, string firstName, string lastName, string email);
 
     /// <summary>
     /// Generates a JWT for an authenticated Marshal (24-hour expiry, role=Marshal).

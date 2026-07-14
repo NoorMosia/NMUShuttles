@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 
@@ -48,22 +49,34 @@ class AppDrawer extends StatelessWidget {
                   ListTile(
                     leading: const Icon(Icons.home_outlined),
                     title: const Text('Home'),
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/student/home');
+                    },
                   ),
                   ListTile(
                     leading: const Icon(Icons.map_outlined),
                     title: const Text('Maps'),
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/student/maps');
+                    },
                   ),
                   ListTile(
                     leading: const Icon(Icons.notifications_outlined),
                     title: const Text('Alerts'),
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/student/alerts');
+                    },
                   ),
                   ListTile(
                     leading: const Icon(Icons.person_outlined),
                     title: const Text('Profile'),
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/student/profile');
+                    },
                   ),
                 ],
               ),

@@ -4,9 +4,7 @@ import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/models/notification_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 import 'package:nmu_shuttle_app/features/student/screens/alert_detail_screen.dart';
-import 'package:nmu_shuttle_app/shared/widgets/app_drawer.dart';
 import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
-import 'package:go_router/go_router.dart';
 
 /// Alerts screen listing all notifications ordered by CreatedAt DESC.
 /// Uses a floating hamburger menu (no AppBar) and pull-to-refresh.
@@ -18,9 +16,6 @@ class AlertsScreen extends ConsumerWidget {
     final notificationsAsync = ref.watch(notificationsProvider);
 
     return Scaffold(
-      drawer: AppDrawer(
-        onLogout: () => context.go('/login'),
-      ),
       body: Stack(
         children: [
           Column(
@@ -96,7 +91,7 @@ class _NotificationCard extends ConsumerWidget {
       child: Material(
         color: isUnread ? AppTheme.primaryGold.withValues(alpha: 0.05) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        elevation: isUnread ? 2 : 1,
+        elevation: 0,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () => _onTap(context, ref),

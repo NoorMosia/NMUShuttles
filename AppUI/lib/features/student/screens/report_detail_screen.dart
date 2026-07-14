@@ -26,7 +26,7 @@ class ReportDetailScreen extends StatelessWidget {
           children: [
             // ─── Status & Category Header ───────────────────
             Card(
-              elevation: 2,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -87,7 +87,7 @@ class ReportDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Card(
-              elevation: 1,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -113,7 +113,7 @@ class ReportDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Card(
-                elevation: 1,
+                elevation: 0,
                 color: Colors.blue.shade50,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

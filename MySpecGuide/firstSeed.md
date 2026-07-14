@@ -90,6 +90,8 @@ This file contains the initial seed data for development and testing. All values
 | 6 | EC 714-382 | 22 | Coastal Movers | FALSE |
 | 7 | EC 837-256 | 28 | Metro Link SA | FALSE |
 | 8 | EC 948-617 | 35 | Metro Link SA | FALSE |
+| 9 | EC 103-475 | 22 | Metro Link SA | TRUE |
+| 10 | EC 217-864 | 28 | Bay Transit Corp | FALSE |
 
 ---
 
@@ -115,6 +117,10 @@ This file contains the initial seed data for development and testing. All values
 | 16 | 08:00 | ToCampus | Saturday | 1 | 2 |
 | 17 | 13:00 | FromCampus | Saturday | 1 | 1 |
 | 18 | 13:00 | FromCampus | Saturday | 1 | 2 |
+| 19 | 07:45 | ToCampus | Weekday | 1 | 7 |
+| 20 | 08:00 | ToCampus | Weekday | 2 | 8 |
+| 21 | 16:30 | FromCampus | Weekday | 1 | 7 |
+| 22 | 17:00 | FromCampus | Weekday | 2 | 8 |
 
 ---
 

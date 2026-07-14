@@ -205,7 +205,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
               bottom: 40,
               child: Card(
                 color: Colors.red.shade50,
-                elevation: 4,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(color: Colors.red.shade300),

@@ -293,9 +293,9 @@ This plan implements the full NMU Shuttle Management Network across five phases:
 - [x] 6. Checkpoint — Flutter mobile app verified
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Flutter Web Admin Portal — Auth, Dashboard, CRUD, Breakdown Resolution
+- [x] 7. Flutter Web Admin Portal — Auth, Dashboard, CRUD, Breakdown Resolution
 
-  - [ ] 7.1 Create Flutter Web admin portal project with shared architecture
+  - [x] 7.1 Create Flutter Web admin portal project with shared architecture
     - Initialize separate Flutter web entry point under `admin_portal/` directory
     - Set up folder structure: `lib/core/api/`, `lib/core/auth/`, `lib/core/router/`, `lib/features/`
     - Configure Dio client with admin JWT interceptor (token stored in localStorage for web)
@@ -303,7 +303,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Active route highlight via `GoRouterState`
     - _Requirements: 16.7_
 
-  - [ ] 7.2 Implement Admin login screen and session management
+  - [x] 7.2 Implement Admin login screen and session management
     - Email + password login form
     - On success: store JWT, redirect to Operations Overview dashboard
     - On failure: inline error message (no disclosure of which field was wrong)
@@ -311,7 +311,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Logout action in sidebar: invalidate token, return to login
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
 
-  - [ ] 7.3 Implement Operations Overview dashboard with analytics panels
+  - [x] 7.3 Implement Operations Overview dashboard with analytics panels
     - Display as default landing page after login
     - "Top 3 Most In-Demand Stops" panel with progress bars (from `/admin/analytics/overview`)
     - "Top 3 Least In-Demand Stops" panel with progress bars
@@ -320,7 +320,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - "View Detailed Analytics" button navigating to detailed view
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.6_
 
-  - [ ] 7.4 Implement Stop and Shuttle management screens
+  - [x] 7.4 Implement Stop and Shuttle management screens
     - Stops list: table with StopName, FullAddress, GpsCoordinates columns
     - "New Stop" form: StopName, FullAddress, GpsCoordinates fields with validation
     - "Edit Stop" form pre-filled with existing values
@@ -330,7 +330,7 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - Display validation errors inline (uniqueness, format)
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 18.1, 18.2, 18.3, 18.4_
 
-  - [ ] 7.5 Implement User management with individual add, edit, and bulk CSV upload
+  - [x] 7.5 Implement User management with individual add, edit, and bulk CSV upload
     - User list: searchable, paginated table with identifier, name, role, email columns
     - Role-based filter buttons: All, Students, Marshals, Admins
     - Real-time search by name, identifier, or email
@@ -341,26 +341,26 @@ This plan implements the full NMU Shuttle Management Network across five phases:
     - After upload: confirmation screen showing success count + skipped rows with error reasons
     - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 19.6, 19.7, 19.8, 19.9, 20.1, 20.6, 20.7_
 
-  - [ ] 7.6 Implement Schedule, Calendar Exception, and Priority Schedule management screens
+  - [x] 7.6 Implement Schedule, Calendar Exception, and Priority Schedule management screens
     - ScheduleTimes: list view, create form (DepartureTime, Direction, ScheduleType, CampusId, StopId), edit/delete
     - CalendarExceptions: list in date order, create form (TargetDate, ExceptionType, Description), delete action
     - PrioritySchedules: list view, create form (StudentId, StopId, ScheduleTimeId, DayOfWeek), deactivate action
     - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7, 8.1, 8.3_
 
-  - [ ] 7.7 Implement Trip management with breakdown resolution and shuttle assignment
+  - [x] 7.7 Implement Trip management with breakdown resolution and shuttle assignment
     - Trip list: filterable by date and status, showing TripInstance details
     - Trip detail: show convoy allocations, passenger count, current status
     - Incident resolution form for IncidentActive trips: options to assign replacement ShuttleId OR mark as cancelled
     - Shuttle assignment: `POST /admin/trips/{id}/shuttles` with shuttle selector
     - _Requirements: 6.5, 6.6, 6.7, 6.8_
 
-  - [ ] 7.8 Implement Reports management screen
+  - [x] 7.8 Implement Reports management screen
     - Paginated report list with columns: report ID, category, student ID, submission date, status
     - Report detail view: full Description, AdminNotes, linked TripInstance, status
     - Status update form: transition to 'Under Review' or 'Resolved', add AdminNotes
     - _Requirements: 10.5, 10.6, 10.7_
 
-- [ ] 8. Checkpoint — Flutter web admin portal verified
+- [x] 8. Checkpoint — Flutter web admin portal verified
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 9. Cross-Cutting — FsCheck Property-Based Tests, Integration Tests, Security Hardening

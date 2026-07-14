@@ -12,8 +12,8 @@ using NmuShuttle.Api.Data;
 namespace NmuShuttle.Api.Migrations
 {
     [DbContext(typeof(ShuttleDbContext))]
-    [Migration("20260712135036_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260714073722_AddStops7And8SchedulesAndNewShuttles")]
+    partial class AddStops7And8SchedulesAndNewShuttles
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,7 +73,7 @@ namespace NmuShuttle.Api.Migrations
                             Email = "admin@mandela.ac.za",
                             FirstName = "Thabo",
                             LastName = "Mokoena",
-                            PasswordHash = "$2a$12$LJ3m4sMKfRzG8WkBVcXKxeQ9rF7bY1tZ5dN0pA2vH6wX4uC8yE3Oi"
+                            PasswordHash = "$2a$12$UnzkP2CPSCL04uIvla3UKOpZAVQZFEPRngF12SJyE2.gdVhHlZBk6"
                         },
                         new
                         {
@@ -82,7 +82,7 @@ namespace NmuShuttle.Api.Migrations
                             Email = "transport@mandela.ac.za",
                             FirstName = "Nomsa",
                             LastName = "Dlamini",
-                            PasswordHash = "$2a$12$Qp7n5RRKgTzH9WmDVdYLxeA8sG6cZ2uW4jM1oB3vI7xY5wE9kF4Rj"
+                            PasswordHash = "$2a$12$YqZo4jPNiOcMGYhDRJ4CleeMqptACgPleJfWR/n.UJKTol9pZfE0i"
                         });
                 });
 
@@ -1098,6 +1098,42 @@ namespace NmuShuttle.Api.Migrations
                             Direction = "FromCampus",
                             ScheduleType = "Saturday",
                             StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 19,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 20,
+                            CampusId = 2,
+                            DepartureTime = new TimeOnly(8, 0, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 21,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 22,
+                            CampusId = 2,
+                            DepartureTime = new TimeOnly(17, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
                         });
                 });
 
@@ -1214,6 +1250,24 @@ namespace NmuShuttle.Api.Migrations
                             IsAccessibleVehicle = false,
                             LicensePlate = "EC 948-617",
                             VendorCompanyName = "Metro Link SA"
+                        },
+                        new
+                        {
+                            ShuttleId = 9,
+                            Capacity = 22,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = true,
+                            LicensePlate = "EC 103-475",
+                            VendorCompanyName = "Metro Link SA"
+                        },
+                        new
+                        {
+                            ShuttleId = 10,
+                            Capacity = 28,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = false,
+                            LicensePlate = "EC 217-864",
+                            VendorCompanyName = "Bay Transit Corp"
                         });
                 });
 

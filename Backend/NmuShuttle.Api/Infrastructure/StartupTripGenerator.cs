@@ -83,6 +83,9 @@ public static class StartupTripGenerator
                 await db.SaveChangesAsync();
                 tripsCreated++;
 
+                // Allocate a shuttle to this trip so it has capacity
+                await AllocateShuttleAsync(db, trip);
+
                 // Inject priority bookings for this trip
                 await InjectPriorityBookingsAsync(db, trip, targetDate);
             }
@@ -92,6 +95,9 @@ public static class StartupTripGenerator
                 db.Entry(trip).State = EntityState.Detached;
             }
         }
+
+        // Also allocate shuttles to any existing trips that have no allocations
+        await BackfillShuttleAllocationsAsync(db, targetDate);
 
         if (tripsCreated > 0)
             logger.LogInformation("Created {Count} trips for {Date} ({Type}).", tripsCreated, targetDate, scheduleType);
@@ -140,5 +146,68 @@ public static class StartupTripGenerator
             db.Bookings.Add(booking);
             await db.SaveChangesAsync();
         }
+    }
+
+    /// <summary>
+    /// Allocates a shuttle to a newly created trip using round-robin from available shuttles.
+    /// Prefers accessible vehicles at OrderPosition 1.
+    /// </summary>
+    private static async Task AllocateShuttleAsync(ShuttleDbContext db, TripInstance trip)
+    {
+        // Pick an accessible shuttle first, then any shuttle
+        var shuttle = await db.Shuttles
+            .OrderByDescending(s => s.IsAccessibleVehicle)
+            .ThenBy(s => s.ShuttleId)
+            .FirstOrDefaultAsync();
+
+        if (shuttle == null) return;
+
+        var allocation = new TripShuttleAllocation
+        {
+            TripInstanceId = trip.TripInstanceId,
+            ShuttleId = shuttle.ShuttleId,
+            OrderPosition = 1,
+            IsOperational = true,
+            AssignedAt = DateTime.UtcNow
+        };
+
+        db.TripShuttleAllocations.Add(allocation);
+        await db.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Backfills shuttle allocations for trips on a given date that have no shuttles assigned.
+    /// </summary>
+    private static async Task BackfillShuttleAllocationsAsync(ShuttleDbContext db, DateOnly targetDate)
+    {
+        var tripsWithoutShuttles = await db.TripInstances
+            .Where(t => t.TripDate == targetDate &&
+                        !db.TripShuttleAllocations.Any(a => a.TripInstanceId == t.TripInstanceId))
+            .ToListAsync();
+
+        if (!tripsWithoutShuttles.Any()) return;
+
+        var shuttle = await db.Shuttles
+            .OrderByDescending(s => s.IsAccessibleVehicle)
+            .ThenBy(s => s.ShuttleId)
+            .FirstOrDefaultAsync();
+
+        if (shuttle == null) return;
+
+        foreach (var trip in tripsWithoutShuttles)
+        {
+            var allocation = new TripShuttleAllocation
+            {
+                TripInstanceId = trip.TripInstanceId,
+                ShuttleId = shuttle.ShuttleId,
+                OrderPosition = 1,
+                IsOperational = true,
+                AssignedAt = DateTime.UtcNow
+            };
+
+            db.TripShuttleAllocations.Add(allocation);
+        }
+
+        await db.SaveChangesAsync();
     }
 }

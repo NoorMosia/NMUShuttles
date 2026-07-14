@@ -112,6 +112,7 @@ public class BookingService : IBookingService
             .Where(b => b.StudentId == studentId)
             .Include(b => b.TripInstance)
                 .ThenInclude(t => t.ScheduleTime)
+                    .ThenInclude(st => st.Campus)
             .Include(b => b.TripInstance)
                 .ThenInclude(t => t.Stop)
             .OrderByDescending(b => b.CreatedAt)
@@ -125,6 +126,7 @@ public class BookingService : IBookingService
             .Where(b => b.BookingId == bookingId && b.StudentId == studentId)
             .Include(b => b.TripInstance)
                 .ThenInclude(t => t.ScheduleTime)
+                    .ThenInclude(st => st.Campus)
             .Include(b => b.TripInstance)
                 .ThenInclude(t => t.Stop)
             .FirstOrDefaultAsync();

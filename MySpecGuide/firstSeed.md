@@ -97,30 +97,15 @@ This file contains the initial seed data for development and testing. All values
 
 ## Schedule Times
 
-| ScheduleTimeId | DepartureTime | Direction | ScheduleType | CampusId | StopId |
-|---|---|---|---|---|---|
-| 1 | 06:30 | ToCampus | Weekday | 1 | 1 |
-| 2 | 06:30 | ToCampus | Weekday | 1 | 2 |
-| 3 | 07:15 | ToCampus | Weekday | 1 | 3 |
-| 4 | 07:15 | ToCampus | Weekday | 2 | 4 |
-| 5 | 07:45 | ToCampus | Weekday | 2 | 5 |
-| 6 | 08:30 | ToCampus | Weekday | 3 | 6 |
-| 7 | 12:30 | FromCampus | Weekday | 1 | 1 |
-| 8 | 12:30 | FromCampus | Weekday | 1 | 2 |
-| 9 | 14:00 | FromCampus | Weekday | 1 | 3 |
-| 10 | 14:00 | FromCampus | Weekday | 2 | 4 |
-| 11 | 16:30 | FromCampus | Weekday | 1 | 1 |
-| 12 | 16:30 | FromCampus | Weekday | 1 | 2 |
-| 13 | 16:30 | FromCampus | Weekday | 2 | 5 |
-| 14 | 17:15 | FromCampus | Weekday | 3 | 6 |
-| 15 | 08:00 | ToCampus | Saturday | 1 | 1 |
-| 16 | 08:00 | ToCampus | Saturday | 1 | 2 |
-| 17 | 13:00 | FromCampus | Saturday | 1 | 1 |
-| 18 | 13:00 | FromCampus | Saturday | 1 | 2 |
-| 19 | 07:45 | ToCampus | Weekday | 1 | 7 |
-| 20 | 08:00 | ToCampus | Weekday | 2 | 8 |
-| 21 | 16:30 | FromCampus | Weekday | 1 | 7 |
-| 22 | 17:00 | FromCampus | Weekday | 2 | 8 |
+Every stop shares the same timetable (all serving South Campus):
+
+**Weekday — To Campus:** 06:45, 07:45, 08:45, 09:45
+**Weekday — From Campus:** 12:30, 14:30, 16:00, 17:30, 18:30, 20:30, 22:00
+**Saturday — To Campus:** 06:45, 07:45, 08:45, 09:45
+**Saturday — From Campus:** 12:30, 14:30, 16:00, 17:30
+
+This yields 19 schedule time entries per stop × 8 stops = 152 total entries.
+ScheduleTimeIds are assigned sequentially: Stop 1 = IDs 1–19, Stop 2 = IDs 20–38, ..., Stop 8 = IDs 134–152.
 
 ---
 

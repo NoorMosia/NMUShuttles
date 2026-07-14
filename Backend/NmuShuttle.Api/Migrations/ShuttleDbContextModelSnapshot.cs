@@ -730,7 +730,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Monday",
                             IsActive = true,
-                            ScheduleTimeId = 11,
+                            ScheduleTimeId = 7,
                             StopId = 1,
                             StudentId = 3
                         },
@@ -740,7 +740,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Wednesday",
                             IsActive = true,
-                            ScheduleTimeId = 11,
+                            ScheduleTimeId = 7,
                             StopId = 1,
                             StudentId = 3
                         },
@@ -750,7 +750,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Friday",
                             IsActive = true,
-                            ScheduleTimeId = 11,
+                            ScheduleTimeId = 7,
                             StopId = 1,
                             StudentId = 3
                         },
@@ -760,7 +760,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Tuesday",
                             IsActive = true,
-                            ScheduleTimeId = 2,
+                            ScheduleTimeId = 20,
                             StopId = 2,
                             StudentId = 6
                         },
@@ -770,7 +770,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Thursday",
                             IsActive = true,
-                            ScheduleTimeId = 2,
+                            ScheduleTimeId = 20,
                             StopId = 2,
                             StudentId = 6
                         },
@@ -780,7 +780,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Tuesday",
                             IsActive = true,
-                            ScheduleTimeId = 12,
+                            ScheduleTimeId = 26,
                             StopId = 2,
                             StudentId = 6
                         },
@@ -790,7 +790,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Thursday",
                             IsActive = true,
-                            ScheduleTimeId = 12,
+                            ScheduleTimeId = 26,
                             StopId = 2,
                             StudentId = 6
                         },
@@ -800,7 +800,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Monday",
                             IsActive = true,
-                            ScheduleTimeId = 4,
+                            ScheduleTimeId = 58,
                             StopId = 4,
                             StudentId = 13
                         },
@@ -810,7 +810,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Wednesday",
                             IsActive = true,
-                            ScheduleTimeId = 4,
+                            ScheduleTimeId = 58,
                             StopId = 4,
                             StudentId = 13
                         },
@@ -820,7 +820,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Monday",
                             IsActive = true,
-                            ScheduleTimeId = 10,
+                            ScheduleTimeId = 63,
                             StopId = 4,
                             StudentId = 13
                         },
@@ -830,7 +830,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayOfWeek = "Wednesday",
                             IsActive = true,
-                            ScheduleTimeId = 10,
+                            ScheduleTimeId = 63,
                             StopId = 4,
                             StudentId = 13
                         });
@@ -938,7 +938,7 @@ namespace NmuShuttle.Api.Migrations
                         {
                             ScheduleTimeId = 1,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(6, 30, 0),
+                            DepartureTime = new TimeOnly(6, 45, 0),
                             Direction = "ToCampus",
                             ScheduleType = "Weekday",
                             StopId = 1
@@ -947,52 +947,52 @@ namespace NmuShuttle.Api.Migrations
                         {
                             ScheduleTimeId = 2,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(6, 30, 0),
+                            DepartureTime = new TimeOnly(7, 45, 0),
                             Direction = "ToCampus",
                             ScheduleType = "Weekday",
-                            StopId = 2
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 3,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(7, 15, 0),
+                            DepartureTime = new TimeOnly(8, 45, 0),
                             Direction = "ToCampus",
                             ScheduleType = "Weekday",
-                            StopId = 3
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 4,
-                            CampusId = 2,
-                            DepartureTime = new TimeOnly(7, 15, 0),
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
                             Direction = "ToCampus",
                             ScheduleType = "Weekday",
-                            StopId = 4
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 5,
-                            CampusId = 2,
-                            DepartureTime = new TimeOnly(7, 45, 0),
-                            Direction = "ToCampus",
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
                             ScheduleType = "Weekday",
-                            StopId = 5
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 6,
-                            CampusId = 3,
-                            DepartureTime = new TimeOnly(8, 30, 0),
-                            Direction = "ToCampus",
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
                             ScheduleType = "Weekday",
-                            StopId = 6
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 7,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(12, 30, 0),
+                            DepartureTime = new TimeOnly(16, 0, 0),
                             Direction = "FromCampus",
                             ScheduleType = "Weekday",
                             StopId = 1
@@ -1001,34 +1001,34 @@ namespace NmuShuttle.Api.Migrations
                         {
                             ScheduleTimeId = 8,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(12, 30, 0),
+                            DepartureTime = new TimeOnly(17, 30, 0),
                             Direction = "FromCampus",
                             ScheduleType = "Weekday",
-                            StopId = 2
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 9,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(14, 0, 0),
+                            DepartureTime = new TimeOnly(18, 30, 0),
                             Direction = "FromCampus",
                             ScheduleType = "Weekday",
-                            StopId = 3
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 10,
-                            CampusId = 2,
-                            DepartureTime = new TimeOnly(14, 0, 0),
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(20, 30, 0),
                             Direction = "FromCampus",
                             ScheduleType = "Weekday",
-                            StopId = 4
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 11,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(16, 30, 0),
+                            DepartureTime = new TimeOnly(22, 0, 0),
                             Direction = "FromCampus",
                             ScheduleType = "Weekday",
                             StopId = 1
@@ -1037,34 +1037,34 @@ namespace NmuShuttle.Api.Migrations
                         {
                             ScheduleTimeId = 12,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(16, 30, 0),
-                            Direction = "FromCampus",
-                            ScheduleType = "Weekday",
-                            StopId = 2
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 13,
-                            CampusId = 2,
-                            DepartureTime = new TimeOnly(16, 30, 0),
-                            Direction = "FromCampus",
-                            ScheduleType = "Weekday",
-                            StopId = 5
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 14,
-                            CampusId = 3,
-                            DepartureTime = new TimeOnly(17, 15, 0),
-                            Direction = "FromCampus",
-                            ScheduleType = "Weekday",
-                            StopId = 6
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 15,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(8, 0, 0),
+                            DepartureTime = new TimeOnly(9, 45, 0),
                             Direction = "ToCampus",
                             ScheduleType = "Saturday",
                             StopId = 1
@@ -1073,16 +1073,16 @@ namespace NmuShuttle.Api.Migrations
                         {
                             ScheduleTimeId = 16,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(8, 0, 0),
-                            Direction = "ToCampus",
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
                             ScheduleType = "Saturday",
-                            StopId = 2
+                            StopId = 1
                         },
                         new
                         {
                             ScheduleTimeId = 17,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(13, 0, 0),
+                            DepartureTime = new TimeOnly(14, 30, 0),
                             Direction = "FromCampus",
                             ScheduleType = "Saturday",
                             StopId = 1
@@ -1091,14 +1091,887 @@ namespace NmuShuttle.Api.Migrations
                         {
                             ScheduleTimeId = 18,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(13, 0, 0),
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 19,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 20,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 21,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 22,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 23,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 24,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 25,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 26,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 27,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 28,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(18, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 29,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(20, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 30,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(22, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 31,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 32,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 33,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 34,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 35,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
                             Direction = "FromCampus",
                             ScheduleType = "Saturday",
                             StopId = 2
                         },
                         new
                         {
-                            ScheduleTimeId = 19,
+                            ScheduleTimeId = 36,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 37,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 38,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 2
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 39,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 40,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 41,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 42,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 43,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 44,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 45,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 46,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 47,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(18, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 48,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(20, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 49,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(22, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 50,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 51,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 52,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 53,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 54,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 55,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 56,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 57,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 3
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 58,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 59,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 60,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 61,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 62,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 63,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 64,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 65,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 66,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(18, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 67,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(20, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 68,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(22, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 69,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 70,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 71,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 72,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 73,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 74,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 75,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 76,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 4
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 77,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 78,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 79,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 80,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 81,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 82,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 83,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 84,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 85,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(18, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 86,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(20, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 87,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(22, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 88,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 89,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 90,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 91,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 92,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 93,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 94,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 95,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 5
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 96,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 97,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 98,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 99,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 100,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 101,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 102,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 103,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 104,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(18, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 105,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(20, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 106,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(22, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 107,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 108,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 109,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 110,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 111,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 112,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 113,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 114,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 6
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 115,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 116,
                             CampusId = 1,
                             DepartureTime = new TimeOnly(7, 45, 0),
                             Direction = "ToCampus",
@@ -1107,29 +1980,326 @@ namespace NmuShuttle.Api.Migrations
                         },
                         new
                         {
-                            ScheduleTimeId = 20,
-                            CampusId = 2,
-                            DepartureTime = new TimeOnly(8, 0, 0),
+                            ScheduleTimeId = 117,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
                             Direction = "ToCampus",
                             ScheduleType = "Weekday",
-                            StopId = 8
+                            StopId = 7
                         },
                         new
                         {
-                            ScheduleTimeId = 21,
+                            ScheduleTimeId = 118,
                             CampusId = 1,
-                            DepartureTime = new TimeOnly(16, 30, 0),
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 119,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
                             Direction = "FromCampus",
                             ScheduleType = "Weekday",
                             StopId = 7
                         },
                         new
                         {
-                            ScheduleTimeId = 22,
-                            CampusId = 2,
-                            DepartureTime = new TimeOnly(17, 0, 0),
+                            ScheduleTimeId = 120,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
                             Direction = "FromCampus",
                             ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 121,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 122,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 123,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(18, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 124,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(20, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 125,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(22, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 126,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 127,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 128,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 129,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 130,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 131,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 132,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 133,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 7
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 134,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 135,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 136,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 137,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 138,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 139,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 140,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 141,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 142,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(18, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 143,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(20, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 144,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(22, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Weekday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 145,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(6, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 146,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(7, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 147,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(8, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 148,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(9, 45, 0),
+                            Direction = "ToCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 149,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(12, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 150,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(14, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 151,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(16, 0, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
+                            StopId = 8
+                        },
+                        new
+                        {
+                            ScheduleTimeId = 152,
+                            CampusId = 1,
+                            DepartureTime = new TimeOnly(17, 30, 0),
+                            Direction = "FromCampus",
+                            ScheduleType = "Saturday",
                             StopId = 8
                         });
                 });

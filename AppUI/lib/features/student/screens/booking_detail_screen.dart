@@ -203,7 +203,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                     version: QrVersions.auto,
                     size: 256,
                     embeddedImage:
-                        const AssetImage('assets/logos/1.png'),
+                        const AssetImage('assets/logos/qrImg.png'),
                     embeddedImageStyle: const QrEmbeddedImageStyle(
                       size: Size(48, 48),
                     ),

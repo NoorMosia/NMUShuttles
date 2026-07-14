@@ -38,22 +38,27 @@ public class BookingsController : ControllerBase
         {
             var booking = await _bookingService.CreateBookingAsync(studentId, dto.TripInstanceId);
 
+            // Reload with navigation properties for response DTO
+            var fullBooking = await _bookingService.GetBookingByIdAsync(booking.BookingId, studentId);
+            if (fullBooking == null)
+                return StatusCode(500, new ProblemDetails { Detail = "Booking created but could not be retrieved" });
+
             var response = new BookingResponseDto
             {
-                BookingId = booking.BookingId,
-                BookingStatus = booking.BookingStatus,
-                BookingType = booking.BookingType,
-                QrCodeToken = booking.QrCodeToken,
-                TripDate = booking.TripInstance.TripDate,
-                DepartureTime = booking.TripInstance.ScheduleTime.DepartureTime,
-                Direction = booking.TripInstance.ScheduleTime.Direction,
-                StopName = booking.TripInstance.Stop.StopName,
-                CampusName = booking.TripInstance.ScheduleTime.Campus.CampusName,
-                BoardedStatus = booking.BoardedStatus,
-                CreatedAt = booking.CreatedAt
+                BookingId = fullBooking.BookingId,
+                BookingStatus = fullBooking.BookingStatus,
+                BookingType = fullBooking.BookingType,
+                QrCodeToken = fullBooking.QrCodeToken,
+                TripDate = fullBooking.TripInstance.TripDate,
+                DepartureTime = fullBooking.TripInstance.ScheduleTime.DepartureTime,
+                Direction = fullBooking.TripInstance.ScheduleTime.Direction,
+                StopName = fullBooking.TripInstance.Stop.StopName,
+                CampusName = fullBooking.TripInstance.ScheduleTime.Campus.CampusName,
+                BoardedStatus = fullBooking.BoardedStatus,
+                CreatedAt = fullBooking.CreatedAt
             };
 
-            return CreatedAtAction(nameof(GetBooking), new { id = booking.BookingId }, response);
+            return CreatedAtAction(nameof(GetBooking), new { id = fullBooking.BookingId }, response);
         }
         catch (KeyNotFoundException ex)
         {

@@ -351,7 +351,24 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
         ),
       ),
       data: (trips) {
-        if (trips.isEmpty) {
+        // Filter out trips whose departure time has already passed (today only)
+        final now = DateTime.now();
+        final isToday = _selectedDate.year == now.year &&
+            _selectedDate.month == now.month &&
+            _selectedDate.day == now.day;
+
+        final visibleTrips = isToday
+            ? trips.where((trip) {
+                final parts = trip.departureTime.split(':');
+                if (parts.length < 2) return true;
+                final tripHour = int.tryParse(parts[0]) ?? 0;
+                final tripMinute = int.tryParse(parts[1]) ?? 0;
+                return tripHour > now.hour ||
+                    (tripHour == now.hour && tripMinute > now.minute);
+              }).toList()
+            : trips;
+
+        if (visibleTrips.isEmpty) {
           return Container(
             padding: const EdgeInsets.all(24),
             alignment: Alignment.center,
@@ -372,12 +389,12 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: trips.length,
+          itemCount: visibleTrips.length,
           itemBuilder: (context, index) =>
               _TripCard(
-                trip: trips[index],
+                trip: visibleTrips[index],
                 isBooking: _isBooking,
-                onConfirm: () => _confirmBooking(trips[index]),
+                onConfirm: () => _confirmBooking(visibleTrips[index]),
               ),
         );
       },

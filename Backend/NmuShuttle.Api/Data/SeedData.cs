@@ -148,34 +148,38 @@ public static class SeedData
 
     private static void SeedScheduleTimes(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ScheduleTime>().HasData(
-            // ToCampus Weekday (6 entries)
-            new ScheduleTime { ScheduleTimeId = 1, DepartureTime = new TimeOnly(6, 30), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 1 },
-            new ScheduleTime { ScheduleTimeId = 2, DepartureTime = new TimeOnly(6, 30), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 2 },
-            new ScheduleTime { ScheduleTimeId = 3, DepartureTime = new TimeOnly(7, 15), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 3 },
-            new ScheduleTime { ScheduleTimeId = 4, DepartureTime = new TimeOnly(7, 15), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 2, StopId = 4 },
-            new ScheduleTime { ScheduleTimeId = 5, DepartureTime = new TimeOnly(7, 45), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 2, StopId = 5 },
-            new ScheduleTime { ScheduleTimeId = 6, DepartureTime = new TimeOnly(8, 30), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 3, StopId = 6 },
-            // FromCampus Weekday (8 entries)
-            new ScheduleTime { ScheduleTimeId = 7, DepartureTime = new TimeOnly(12, 30), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 1 },
-            new ScheduleTime { ScheduleTimeId = 8, DepartureTime = new TimeOnly(12, 30), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 2 },
-            new ScheduleTime { ScheduleTimeId = 9, DepartureTime = new TimeOnly(14, 0), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 3 },
-            new ScheduleTime { ScheduleTimeId = 10, DepartureTime = new TimeOnly(14, 0), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 2, StopId = 4 },
-            new ScheduleTime { ScheduleTimeId = 11, DepartureTime = new TimeOnly(16, 30), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 1 },
-            new ScheduleTime { ScheduleTimeId = 12, DepartureTime = new TimeOnly(16, 30), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 2 },
-            new ScheduleTime { ScheduleTimeId = 13, DepartureTime = new TimeOnly(16, 30), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 2, StopId = 5 },
-            new ScheduleTime { ScheduleTimeId = 14, DepartureTime = new TimeOnly(17, 15), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 3, StopId = 6 },
-            // Saturday (4 entries)
-            new ScheduleTime { ScheduleTimeId = 15, DepartureTime = new TimeOnly(8, 0), Direction = "ToCampus", ScheduleType = "Saturday", CampusId = 1, StopId = 1 },
-            new ScheduleTime { ScheduleTimeId = 16, DepartureTime = new TimeOnly(8, 0), Direction = "ToCampus", ScheduleType = "Saturday", CampusId = 1, StopId = 2 },
-            new ScheduleTime { ScheduleTimeId = 17, DepartureTime = new TimeOnly(13, 0), Direction = "FromCampus", ScheduleType = "Saturday", CampusId = 1, StopId = 1 },
-            new ScheduleTime { ScheduleTimeId = 18, DepartureTime = new TimeOnly(13, 0), Direction = "FromCampus", ScheduleType = "Saturday", CampusId = 1, StopId = 2 },
-            // Stops 7 & 8 Weekday (4 entries)
-            new ScheduleTime { ScheduleTimeId = 19, DepartureTime = new TimeOnly(7, 45), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 7 },
-            new ScheduleTime { ScheduleTimeId = 20, DepartureTime = new TimeOnly(8, 0), Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 2, StopId = 8 },
-            new ScheduleTime { ScheduleTimeId = 21, DepartureTime = new TimeOnly(16, 30), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 1, StopId = 7 },
-            new ScheduleTime { ScheduleTimeId = 22, DepartureTime = new TimeOnly(17, 00), Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 2, StopId = 8 }
-        );
+        var id = 1;
+        var schedules = new List<ScheduleTime>();
+
+        // All 8 stops share the same timetable, assigned to South Campus (CampusId = 1)
+        for (var stopId = 1; stopId <= 8; stopId++)
+        {
+            // Weekday ToCampus: 06:45, 07:45, 08:45, 09:45
+            foreach (var time in new[] { new TimeOnly(6, 45), new TimeOnly(7, 45), new TimeOnly(8, 45), new TimeOnly(9, 45) })
+            {
+                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 1, StopId = stopId });
+            }
+
+            // Weekday FromCampus: 12:30, 14:30, 16:00, 17:30, 18:30, 20:30, 22:00
+            foreach (var time in new[] { new TimeOnly(12, 30), new TimeOnly(14, 30), new TimeOnly(16, 0), new TimeOnly(17, 30), new TimeOnly(18, 30), new TimeOnly(20, 30), new TimeOnly(22, 0) })
+            {
+                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 1, StopId = stopId });
+            }
+
+            // Saturday ToCampus: 06:45, 07:45, 08:45, 09:45
+            foreach (var time in new[] { new TimeOnly(6, 45), new TimeOnly(7, 45), new TimeOnly(8, 45), new TimeOnly(9, 45) })
+            {
+                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "ToCampus", ScheduleType = "Saturday", CampusId = 1, StopId = stopId });
+            }
+
+            // Saturday FromCampus: 12:30, 14:30, 16:00, 17:30
+            foreach (var time in new[] { new TimeOnly(12, 30), new TimeOnly(14, 30), new TimeOnly(16, 0), new TimeOnly(17, 30) })
+            {
+                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "FromCampus", ScheduleType = "Saturday", CampusId = 1, StopId = stopId });
+            }
+        }
+
+        modelBuilder.Entity<ScheduleTime>().HasData(schedules.ToArray());
     }
 
     private static void SeedCalendarExceptions(ModelBuilder modelBuilder)
@@ -196,24 +200,29 @@ public static class SeedData
 
     private static void SeedPrioritySchedules(ModelBuilder modelBuilder)
     {
+        // New ScheduleTimeId mapping (19 entries per stop):
+        // Stop 1: 1-19, Stop 2: 20-38, Stop 3: 39-57, Stop 4: 58-76, ...
+        // Within each stop: [1-4] ToCampus Weekday (06:45,07:45,08:45,09:45)
+        //                    [5-11] FromCampus Weekday (12:30,14:30,16:00,17:30,18:30,20:30,22:00)
+        //                    [12-15] ToCampus Saturday, [16-19] FromCampus Saturday
         modelBuilder.Entity<PrioritySchedule>().HasData(
-            // Student 3 (Ayanda Mthembu) - Stop 1 (Summerstrand Village)
+            // Student 3 (Ayanda Mthembu) - Stop 1: ToCampus 06:45 (ID=1), FromCampus 16:00 (ID=7)
             new PrioritySchedule { PriorityScheduleId = 1, StudentId = 3, StopId = 1, ScheduleTimeId = 1, DayOfWeek = "Monday", IsActive = true, CreatedAt = SeedDate },
             new PrioritySchedule { PriorityScheduleId = 2, StudentId = 3, StopId = 1, ScheduleTimeId = 1, DayOfWeek = "Wednesday", IsActive = true, CreatedAt = SeedDate },
             new PrioritySchedule { PriorityScheduleId = 3, StudentId = 3, StopId = 1, ScheduleTimeId = 1, DayOfWeek = "Friday", IsActive = true, CreatedAt = SeedDate },
-            new PrioritySchedule { PriorityScheduleId = 4, StudentId = 3, StopId = 1, ScheduleTimeId = 11, DayOfWeek = "Monday", IsActive = true, CreatedAt = SeedDate },
-            new PrioritySchedule { PriorityScheduleId = 5, StudentId = 3, StopId = 1, ScheduleTimeId = 11, DayOfWeek = "Wednesday", IsActive = true, CreatedAt = SeedDate },
-            new PrioritySchedule { PriorityScheduleId = 6, StudentId = 3, StopId = 1, ScheduleTimeId = 11, DayOfWeek = "Friday", IsActive = true, CreatedAt = SeedDate },
-            // Student 6 (Jessica Adams) - Stop 2 (Humewood)
-            new PrioritySchedule { PriorityScheduleId = 7, StudentId = 6, StopId = 2, ScheduleTimeId = 2, DayOfWeek = "Tuesday", IsActive = true, CreatedAt = SeedDate },
-            new PrioritySchedule { PriorityScheduleId = 8, StudentId = 6, StopId = 2, ScheduleTimeId = 2, DayOfWeek = "Thursday", IsActive = true, CreatedAt = SeedDate },
-            new PrioritySchedule { PriorityScheduleId = 9, StudentId = 6, StopId = 2, ScheduleTimeId = 12, DayOfWeek = "Tuesday", IsActive = true, CreatedAt = SeedDate },
-            new PrioritySchedule { PriorityScheduleId = 10, StudentId = 6, StopId = 2, ScheduleTimeId = 12, DayOfWeek = "Thursday", IsActive = true, CreatedAt = SeedDate },
-            // Student 13 (Nokwanda Dube) - Stop 4 (Walmer Heights)
-            new PrioritySchedule { PriorityScheduleId = 11, StudentId = 13, StopId = 4, ScheduleTimeId = 4, DayOfWeek = "Monday", IsActive = true, CreatedAt = SeedDate },
-            new PrioritySchedule { PriorityScheduleId = 12, StudentId = 13, StopId = 4, ScheduleTimeId = 4, DayOfWeek = "Wednesday", IsActive = true, CreatedAt = SeedDate },
-            new PrioritySchedule { PriorityScheduleId = 13, StudentId = 13, StopId = 4, ScheduleTimeId = 10, DayOfWeek = "Monday", IsActive = true, CreatedAt = SeedDate },
-            new PrioritySchedule { PriorityScheduleId = 14, StudentId = 13, StopId = 4, ScheduleTimeId = 10, DayOfWeek = "Wednesday", IsActive = true, CreatedAt = SeedDate }
+            new PrioritySchedule { PriorityScheduleId = 4, StudentId = 3, StopId = 1, ScheduleTimeId = 7, DayOfWeek = "Monday", IsActive = true, CreatedAt = SeedDate },
+            new PrioritySchedule { PriorityScheduleId = 5, StudentId = 3, StopId = 1, ScheduleTimeId = 7, DayOfWeek = "Wednesday", IsActive = true, CreatedAt = SeedDate },
+            new PrioritySchedule { PriorityScheduleId = 6, StudentId = 3, StopId = 1, ScheduleTimeId = 7, DayOfWeek = "Friday", IsActive = true, CreatedAt = SeedDate },
+            // Student 6 (Jessica Adams) - Stop 2: ToCampus 06:45 (ID=20), FromCampus 16:00 (ID=26)
+            new PrioritySchedule { PriorityScheduleId = 7, StudentId = 6, StopId = 2, ScheduleTimeId = 20, DayOfWeek = "Tuesday", IsActive = true, CreatedAt = SeedDate },
+            new PrioritySchedule { PriorityScheduleId = 8, StudentId = 6, StopId = 2, ScheduleTimeId = 20, DayOfWeek = "Thursday", IsActive = true, CreatedAt = SeedDate },
+            new PrioritySchedule { PriorityScheduleId = 9, StudentId = 6, StopId = 2, ScheduleTimeId = 26, DayOfWeek = "Tuesday", IsActive = true, CreatedAt = SeedDate },
+            new PrioritySchedule { PriorityScheduleId = 10, StudentId = 6, StopId = 2, ScheduleTimeId = 26, DayOfWeek = "Thursday", IsActive = true, CreatedAt = SeedDate },
+            // Student 13 (Nokwanda Dube) - Stop 4: ToCampus 06:45 (ID=58), FromCampus 14:30 (ID=63)
+            new PrioritySchedule { PriorityScheduleId = 11, StudentId = 13, StopId = 4, ScheduleTimeId = 58, DayOfWeek = "Monday", IsActive = true, CreatedAt = SeedDate },
+            new PrioritySchedule { PriorityScheduleId = 12, StudentId = 13, StopId = 4, ScheduleTimeId = 58, DayOfWeek = "Wednesday", IsActive = true, CreatedAt = SeedDate },
+            new PrioritySchedule { PriorityScheduleId = 13, StudentId = 13, StopId = 4, ScheduleTimeId = 63, DayOfWeek = "Monday", IsActive = true, CreatedAt = SeedDate },
+            new PrioritySchedule { PriorityScheduleId = 14, StudentId = 13, StopId = 4, ScheduleTimeId = 63, DayOfWeek = "Wednesday", IsActive = true, CreatedAt = SeedDate }
         );
     }
 }

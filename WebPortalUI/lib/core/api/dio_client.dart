@@ -13,12 +13,14 @@ class DioClient {
   })  : _authService = authService ?? AdminAuthService(),
         _dio = Dio(
           BaseOptions(
-            baseUrl: baseUrl ?? 'http://localhost:5000/api/v1',
+            baseUrl: baseUrl ??
+                'https://juicy-dubiously-pushpin.ngrok-free.dev/api/v1',
             connectTimeout: const Duration(seconds: 30),
             receiveTimeout: const Duration(seconds: 30),
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true',
             },
           ),
         ) {
@@ -44,7 +46,8 @@ class DioClient {
       onRequest: (options, handler) async {
         final token = await _authService.getToken();
         if (kDebugMode) {
-          debugPrint('[DIO] Token present: ${token != null && token.isNotEmpty}');
+          debugPrint(
+              '[DIO] Token present: ${token != null && token.isNotEmpty}');
         }
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';

@@ -19,6 +19,7 @@ class DioClient {
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true',
             },
           ),
         ) {
@@ -73,7 +74,8 @@ class DioClient {
         handler.next(options);
       },
       onResponse: (response, handler) {
-        debugPrint('[DIO] ← ${response.statusCode} ${response.requestOptions.uri}');
+        debugPrint(
+            '[DIO] ← ${response.statusCode} ${response.requestOptions.uri}');
         handler.next(response);
       },
       onError: (error, handler) {

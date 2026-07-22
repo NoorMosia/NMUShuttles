@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -31,15 +30,15 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
   Future<void> _downloadQrCode() async {
     try {
-      final boundary = _qrKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
+      final boundary =
+          _qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return;
 
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
 
-      final Uint8List pngBytes = byteData.buffer.asUint8List();
+      byteData.buffer.asUint8List();
 
       // In a real implementation, save to gallery using image_gallery_saver
       // or share via share_plus. For now, show a success message.
@@ -142,7 +141,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                 children: [
                   const Icon(Icons.error_outline, size: 48, color: Colors.red),
                   const SizedBox(height: 12),
-                  Text('Failed to load booking details'),
+                  const Text('Failed to load booking details'),
                   const SizedBox(height: 8),
                   TextButton(
                     onPressed: () =>
@@ -202,8 +201,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                     data: booking.qrCodeToken!,
                     version: QrVersions.auto,
                     size: 256,
-                    embeddedImage:
-                        const AssetImage('assets/logos/qrImg.png'),
+                    embeddedImage: const AssetImage('assets/logos/qrImg.png'),
                     embeddedImageStyle: const QrEmbeddedImageStyle(
                       size: Size(48, 48),
                     ),
@@ -292,8 +290,9 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed:
-                      _isCancelling ? null : () => _cancelBooking(booking.bookingId),
+                  onPressed: _isCancelling
+                      ? null
+                      : () => _cancelBooking(booking.bookingId),
                   icon: _isCancelling
                       ? const SizedBox(
                           width: 18,
@@ -301,7 +300,8 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.cancel_outlined),
-                  label: Text(_isCancelling ? 'Cancelling...' : 'Cancel Booking'),
+                  label:
+                      Text(_isCancelling ? 'Cancelling...' : 'Cancel Booking'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
                     side: const BorderSide(color: Colors.red),

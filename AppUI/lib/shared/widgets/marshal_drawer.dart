@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/features/marshal/providers/marshal_home_provider.dart';
+import 'package:nmu_shuttle_app/features/marshal/providers/passenger_list_provider.dart';
 
 /// Marshal-specific navigation drawer with only marshal-relevant screens.
-class MarshalDrawer extends StatelessWidget {
+class MarshalDrawer extends ConsumerWidget {
   const MarshalDrawer({super.key, this.onLogout});
 
   final VoidCallback? onLogout;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Drawer(
       child: SafeArea(
         child: Column(
@@ -66,7 +69,17 @@ class MarshalDrawer extends StatelessWidget {
                 style: TextStyle(color: Colors.red),
               ),
               onTap: () async {
+                // Delete token from secure storage
                 await AuthService().deleteToken();
+                
+                // Invalidate all marshal-specific data providers so they don't cache the old user's data
+                ref.invalidate(marshalHomeProvider);
+                ref.invalidate(passengerManifestProvider);
+                ref.invalidate(checkInProvider);
+                ref.invalidate(flagBreakdownProvider);
+                ref.invalidate(tripShuttlesProvider);
+                
+                // Navigate to login
                 onLogout?.call();
               },
             ),

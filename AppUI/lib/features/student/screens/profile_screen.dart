@@ -5,7 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/models/report_model.dart';
+import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
+import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dart';
+import 'package:nmu_shuttle_app/features/student/providers/trip_providers.dart';
 import 'package:nmu_shuttle_app/features/student/screens/report_detail_screen.dart';
 import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
 
@@ -61,7 +64,7 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 // ─── Logout Button ────────────────────────────
                 OutlinedButton.icon(
-                  onPressed: () => _handleLogout(context),
+                  onPressed: () => _handleLogout(context, ref),
                   icon: const Icon(Icons.logout, color: Colors.red),
                   label: const Text(
                     'Logout',
@@ -384,8 +387,17 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleLogout(BuildContext context) async {
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
     await AuthService().deleteToken();
+
+    // Invalidate all user-specific cached providers so the next user starts fresh
+    ref.invalidate(studentProfileProvider);
+    ref.invalidate(bookingsProvider);
+    ref.invalidate(reportsProvider);
+    ref.invalidate(notificationsProvider);
+    ref.invalidate(tripAvailabilityProvider);
+    ref.invalidate(stopsProvider);
+
     if (context.mounted) {
       context.go('/login');
     }

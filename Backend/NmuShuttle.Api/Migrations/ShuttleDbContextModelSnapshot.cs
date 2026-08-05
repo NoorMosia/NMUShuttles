@@ -45,6 +45,11 @@ namespace NmuShuttle.Api.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -54,6 +59,11 @@ namespace NmuShuttle.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("StaffNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("AdminId");
 
@@ -69,8 +79,10 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin@mandela.ac.za",
                             FirstName = "Thabo",
+                            IsActive = true,
                             LastName = "Mokoena",
-                            PasswordHash = "$2a$12$UnzkP2CPSCL04uIvla3UKOpZAVQZFEPRngF12SJyE2.gdVhHlZBk6"
+                            PasswordHash = "$2a$12$UnzkP2CPSCL04uIvla3UKOpZAVQZFEPRngF12SJyE2.gdVhHlZBk6",
+                            StaffNumber = "7001001"
                         },
                         new
                         {
@@ -78,8 +90,10 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "transport@mandela.ac.za",
                             FirstName = "Nomsa",
+                            IsActive = true,
                             LastName = "Dlamini",
-                            PasswordHash = "$2a$12$YqZo4jPNiOcMGYhDRJ4CleeMqptACgPleJfWR/n.UJKTol9pZfE0i"
+                            PasswordHash = "$2a$12$YqZo4jPNiOcMGYhDRJ4CleeMqptACgPleJfWR/n.UJKTol9pZfE0i",
+                            StaffNumber = "7001002"
                         });
                 });
 
@@ -485,7 +499,7 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("Marshals", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Marshals_AssignedXOR", "(AssignedCampusId IS NOT NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NULL AND AssignedStopId IS NOT NULL)");
+                            t.HasCheckConstraint("CK_Marshals_AssignedXOR", "(AssignedCampusId IS NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NOT NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NULL AND AssignedStopId IS NOT NULL)");
                         });
 
                     b.HasData(
@@ -2335,10 +2349,15 @@ namespace NmuShuttle.Api.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("VendorId")
+                        .HasColumnType("int");
+
                     b.HasKey("ShuttleId");
 
                     b.HasIndex("LicensePlate")
                         .IsUnique();
+
+                    b.HasIndex("VendorId");
 
                     b.ToTable("Shuttles", null, t =>
                         {
@@ -2353,7 +2372,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = true,
                             LicensePlate = "EC 142-837",
-                            VendorCompanyName = "Bay Transit Corp"
+                            VendorCompanyName = "Bay Transit Corp",
+                            VendorId = 1
                         },
                         new
                         {
@@ -2362,7 +2382,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             LicensePlate = "EC 256-491",
-                            VendorCompanyName = "Bay Transit Corp"
+                            VendorCompanyName = "Bay Transit Corp",
+                            VendorId = 1
                         },
                         new
                         {
@@ -2371,7 +2392,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             LicensePlate = "EC 389-720",
-                            VendorCompanyName = "Bay Transit Corp"
+                            VendorCompanyName = "Bay Transit Corp",
+                            VendorId = 1
                         },
                         new
                         {
@@ -2380,7 +2402,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = true,
                             LicensePlate = "EC 501-163",
-                            VendorCompanyName = "Coastal Movers"
+                            VendorCompanyName = "Coastal Movers",
+                            VendorId = 2
                         },
                         new
                         {
@@ -2389,7 +2412,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             LicensePlate = "EC 628-945",
-                            VendorCompanyName = "Coastal Movers"
+                            VendorCompanyName = "Coastal Movers",
+                            VendorId = 2
                         },
                         new
                         {
@@ -2398,7 +2422,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             LicensePlate = "EC 714-382",
-                            VendorCompanyName = "Coastal Movers"
+                            VendorCompanyName = "Coastal Movers",
+                            VendorId = 2
                         },
                         new
                         {
@@ -2407,7 +2432,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             LicensePlate = "EC 837-256",
-                            VendorCompanyName = "Metro Link SA"
+                            VendorCompanyName = "Metro Link SA",
+                            VendorId = 3
                         },
                         new
                         {
@@ -2416,7 +2442,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             LicensePlate = "EC 948-617",
-                            VendorCompanyName = "Metro Link SA"
+                            VendorCompanyName = "Metro Link SA",
+                            VendorId = 3
                         },
                         new
                         {
@@ -2425,7 +2452,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = true,
                             LicensePlate = "EC 103-475",
-                            VendorCompanyName = "Metro Link SA"
+                            VendorCompanyName = "Metro Link SA",
+                            VendorId = 3
                         },
                         new
                         {
@@ -2434,7 +2462,8 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             LicensePlate = "EC 217-864",
-                            VendorCompanyName = "Bay Transit Corp"
+                            VendorCompanyName = "Bay Transit Corp",
+                            VendorId = 1
                         });
                 });
 
@@ -2446,10 +2475,10 @@ namespace NmuShuttle.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StopId"));
 
-                    b.Property<string>("FullAddress")
+                    b.Property<string>("City")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("GpsCoordinates")
                         .IsRequired()
@@ -2461,7 +2490,22 @@ namespace NmuShuttle.Api.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
                     b.Property<string>("StopName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Suburb")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -2477,66 +2521,90 @@ namespace NmuShuttle.Api.Migrations
                         new
                         {
                             StopId = 1,
-                            FullAddress = "12 Marine Drive, Summerstrand, Gqeberha, 6001",
+                            City = "Gqeberha",
                             GpsCoordinates = "-33.9680,25.6450",
                             IsActive = true,
-                            StopName = "Summerstrand Village"
+                            PostalCode = "6001",
+                            StopName = "Summerstrand Village",
+                            Street = "12 Marine Drive",
+                            Suburb = "Summerstrand"
                         },
                         new
                         {
                             StopId = 2,
-                            FullAddress = "45 Beach Road, Humewood, Gqeberha, 6001",
+                            City = "Gqeberha",
                             GpsCoordinates = "-33.9630,25.6280",
                             IsActive = true,
-                            StopName = "Humewood"
+                            PostalCode = "6001",
+                            StopName = "Humewood",
+                            Street = "45 Beach Road",
+                            Suburb = "Humewood"
                         },
                         new
                         {
                             StopId = 3,
-                            FullAddress = "78 Cape Road, Newton Park, Gqeberha, 6045",
+                            City = "Gqeberha",
                             GpsCoordinates = "-33.9480,25.5750",
                             IsActive = true,
-                            StopName = "Newton Park"
+                            PostalCode = "6045",
+                            StopName = "Newton Park",
+                            Street = "78 Cape Road",
+                            Suburb = "Newton Park"
                         },
                         new
                         {
                             StopId = 4,
-                            FullAddress = "23 Heugh Road, Walmer Heights, Gqeberha, 6070",
+                            City = "Gqeberha",
                             GpsCoordinates = "-33.9850,25.6100",
                             IsActive = true,
-                            StopName = "Walmer Heights"
+                            PostalCode = "6070",
+                            StopName = "Walmer Heights",
+                            Street = "23 Heugh Road",
+                            Suburb = "Walmer Heights"
                         },
                         new
                         {
                             StopId = 5,
-                            FullAddress = "91 Circular Drive, Lorraine, Gqeberha, 6070",
+                            City = "Gqeberha",
                             GpsCoordinates = "-33.9320,25.5620",
                             IsActive = true,
-                            StopName = "Lorraine"
+                            PostalCode = "6070",
+                            StopName = "Lorraine",
+                            Street = "91 Circular Drive",
+                            Suburb = "Lorraine"
                         },
                         new
                         {
                             StopId = 6,
-                            FullAddress = "5 Seaview Crescent, Bluewater Bay, Gqeberha, 6210",
+                            City = "Gqeberha",
                             GpsCoordinates = "-33.8710,25.5590",
                             IsActive = true,
-                            StopName = "Bluewater Bay"
+                            PostalCode = "6210",
+                            StopName = "Bluewater Bay",
+                            Street = "5 Seaview Crescent",
+                            Suburb = "Bluewater Bay"
                         },
                         new
                         {
                             StopId = 7,
-                            FullAddress = "14 Langenhoven Drive, Framesby, Gqeberha, 6045",
+                            City = "Gqeberha",
                             GpsCoordinates = "-33.9260,25.5810",
                             IsActive = true,
-                            StopName = "Framesby"
+                            PostalCode = "6045",
+                            StopName = "Framesby",
+                            Street = "14 Langenhoven Drive",
+                            Suburb = "Framesby"
                         },
                         new
                         {
                             StopId = 8,
-                            FullAddress = "30 Ring Road, Greenacres, Gqeberha, 6045",
+                            City = "Gqeberha",
                             GpsCoordinates = "-33.9410,25.5870",
                             IsActive = true,
-                            StopName = "Greenacres"
+                            PostalCode = "6045",
+                            StopName = "Greenacres",
+                            Street = "30 Ring Road",
+                            Suburb = "Greenacres"
                         });
                 });
 
@@ -2557,6 +2625,11 @@ namespace NmuShuttle.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<bool>("IsPriorityUser")
                         .ValueGeneratedOnAdd()
@@ -2601,6 +2674,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 1,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Sarah",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Nkosi",
                             StudentNumber = "s312847563",
@@ -2611,6 +2685,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 2,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Liam",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "van der Merwe",
                             StudentNumber = "s319284731",
@@ -2621,6 +2696,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 3,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Ayanda",
+                            IsActive = true,
                             IsPriorityUser = true,
                             LastName = "Mthembu",
                             StudentNumber = "s321056839",
@@ -2631,6 +2707,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 4,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Chloe",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Botha",
                             StudentNumber = "s317493208",
@@ -2641,6 +2718,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 5,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Sipho",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Zulu",
                             StudentNumber = "s329187465",
@@ -2651,6 +2729,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 6,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Jessica",
+                            IsActive = true,
                             IsPriorityUser = true,
                             LastName = "Adams",
                             StudentNumber = "s318274056",
@@ -2661,6 +2740,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 7,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Mandla",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Ndlovu",
                             StudentNumber = "s322941587",
@@ -2671,6 +2751,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 8,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Regan",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Pieterse",
                             StudentNumber = "s316785234",
@@ -2681,6 +2762,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 9,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Zanele",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Khumalo",
                             StudentNumber = "s325098471",
@@ -2691,6 +2773,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 10,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Devon",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Jacobs",
                             StudentNumber = "s311653928",
@@ -2701,6 +2784,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 11,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Thandi",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Sithole",
                             StudentNumber = "s328417509",
@@ -2711,6 +2795,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 12,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Jason",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Williams",
                             StudentNumber = "s314928673",
@@ -2721,6 +2806,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 13,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Nokwanda",
+                            IsActive = true,
                             IsPriorityUser = true,
                             LastName = "Dube",
                             StudentNumber = "s327651084",
@@ -2731,6 +2817,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 14,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Michael",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "van Niekerk",
                             StudentNumber = "s319073845",
@@ -2741,6 +2828,7 @@ namespace NmuShuttle.Api.Migrations
                             StudentId = 15,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Lerato",
+                            IsActive = true,
                             IsPriorityUser = false,
                             LastName = "Molefe",
                             StudentNumber = "s323846190",
@@ -2841,6 +2929,67 @@ namespace NmuShuttle.Api.Migrations
                         .HasDatabaseName("UQ_TripShuttleAllocations_TripInstance_Shuttle");
 
                     b.ToTable("TripShuttleAllocations", (string)null);
+                });
+
+            modelBuilder.Entity("NmuShuttle.Api.Models.Vendor", b =>
+                {
+                    b.Property<int>("VendorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VendorId"));
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ContactPhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("VendorId");
+
+                    b.HasIndex("CompanyName")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_Vendors_CompanyName");
+
+                    b.ToTable("Vendors", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            VendorId = 1,
+                            CompanyName = "Bay Transit Corp",
+                            ContactEmail = "info@baytransit.co.za",
+                            ContactPhone = "041-555-0101",
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            VendorId = 2,
+                            CompanyName = "Coastal Movers",
+                            ContactEmail = "info@coastalmovers.co.za",
+                            ContactPhone = "041-555-0202",
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            VendorId = 3,
+                            CompanyName = "Metro Link SA",
+                            ContactEmail = "info@metrolinksa.co.za",
+                            ContactPhone = "041-555-0303",
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("NmuShuttle.Api.Models.Booking", b =>
@@ -3009,6 +3158,17 @@ namespace NmuShuttle.Api.Migrations
                     b.Navigation("Stop");
                 });
 
+            modelBuilder.Entity("NmuShuttle.Api.Models.Shuttle", b =>
+                {
+                    b.HasOne("NmuShuttle.Api.Models.Vendor", "Vendor")
+                        .WithMany("Shuttles")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Vendor");
+                });
+
             modelBuilder.Entity("NmuShuttle.Api.Models.TripInstance", b =>
                 {
                     b.HasOne("NmuShuttle.Api.Models.ScheduleTime", "ScheduleTime")
@@ -3115,6 +3275,11 @@ namespace NmuShuttle.Api.Migrations
                     b.Navigation("Reports");
 
                     b.Navigation("TripShuttleAllocations");
+                });
+
+            modelBuilder.Entity("NmuShuttle.Api.Models.Vendor", b =>
+                {
+                    b.Navigation("Shuttles");
                 });
 #pragma warning restore 612, 618
         }

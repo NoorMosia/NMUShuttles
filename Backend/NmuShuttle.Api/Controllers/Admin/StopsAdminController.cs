@@ -30,7 +30,11 @@ public class StopsAdminController : ControllerBase
             {
                 StopId = s.StopId,
                 StopName = s.StopName,
-                FullAddress = s.FullAddress,
+                Street = s.Street,
+                Suburb = s.Suburb,
+                City = s.City,
+                PostalCode = s.PostalCode,
+                FullAddress = s.Street + ", " + s.Suburb + ", " + s.City + ", " + s.PostalCode,
                 GpsCoordinates = s.GpsCoordinates,
                 IsActive = s.IsActive
             })
@@ -53,6 +57,10 @@ public class StopsAdminController : ControllerBase
         {
             StopId = stop.StopId,
             StopName = stop.StopName,
+            Street = stop.Street,
+            Suburb = stop.Suburb,
+            City = stop.City,
+            PostalCode = stop.PostalCode,
             FullAddress = stop.FullAddress,
             GpsCoordinates = stop.GpsCoordinates,
             IsActive = stop.IsActive
@@ -60,25 +68,28 @@ public class StopsAdminController : ControllerBase
     }
 
     /// <summary>
-    /// Create a new stop. Validates StopName, FullAddress, GpsCoordinates non-empty;
-    /// validates GPS format; rejects duplicate StopName with 409.
+    /// Create a new stop. Validates required fields and GPS format;
+    /// rejects duplicate StopName with 409.
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateStopDto dto)
     {
-        // Validate required fields non-empty
         if (string.IsNullOrWhiteSpace(dto.StopName))
             return UnprocessableEntity(new { message = "StopName is required" });
-        if (string.IsNullOrWhiteSpace(dto.FullAddress))
-            return UnprocessableEntity(new { message = "FullAddress is required" });
+        if (string.IsNullOrWhiteSpace(dto.Street))
+            return UnprocessableEntity(new { message = "Street is required" });
+        if (string.IsNullOrWhiteSpace(dto.Suburb))
+            return UnprocessableEntity(new { message = "Suburb is required" });
+        if (string.IsNullOrWhiteSpace(dto.City))
+            return UnprocessableEntity(new { message = "City is required" });
+        if (string.IsNullOrWhiteSpace(dto.PostalCode))
+            return UnprocessableEntity(new { message = "PostalCode is required" });
         if (string.IsNullOrWhiteSpace(dto.GpsCoordinates))
             return UnprocessableEntity(new { message = "GpsCoordinates is required" });
 
-        // Validate GPS format
         if (!TryParseGpsCoordinates(dto.GpsCoordinates, out _, out _))
             return UnprocessableEntity(new { message = "Invalid GPS coordinates. Expected format: 'lat,lon' with lat in [-90,90] and lon in [-180,180]" });
 
-        // Reject duplicate StopName
         var duplicate = await _context.Stops
             .AnyAsync(s => s.StopName.ToLower() == dto.StopName.ToLower());
         if (duplicate)
@@ -87,7 +98,10 @@ public class StopsAdminController : ControllerBase
         var stop = new Stop
         {
             StopName = dto.StopName,
-            FullAddress = dto.FullAddress,
+            Street = dto.Street,
+            Suburb = dto.Suburb,
+            City = dto.City,
+            PostalCode = dto.PostalCode,
             GpsCoordinates = dto.GpsCoordinates,
             IsActive = dto.IsActive
         };
@@ -95,16 +109,18 @@ public class StopsAdminController : ControllerBase
         _context.Stops.Add(stop);
         await _context.SaveChangesAsync();
 
-        var response = new StopResponseDto
+        return CreatedAtAction(nameof(GetById), new { id = stop.StopId }, new StopResponseDto
         {
             StopId = stop.StopId,
             StopName = stop.StopName,
+            Street = stop.Street,
+            Suburb = stop.Suburb,
+            City = stop.City,
+            PostalCode = stop.PostalCode,
             FullAddress = stop.FullAddress,
             GpsCoordinates = stop.GpsCoordinates,
             IsActive = stop.IsActive
-        };
-
-        return CreatedAtAction(nameof(GetById), new { id = stop.StopId }, response);
+        });
     }
 
     /// <summary>
@@ -117,26 +133,32 @@ public class StopsAdminController : ControllerBase
         if (stop == null)
             return NotFound(new { message = "Stop not found" });
 
-        // Validate required fields non-empty
         if (string.IsNullOrWhiteSpace(dto.StopName))
             return UnprocessableEntity(new { message = "StopName is required" });
-        if (string.IsNullOrWhiteSpace(dto.FullAddress))
-            return UnprocessableEntity(new { message = "FullAddress is required" });
+        if (string.IsNullOrWhiteSpace(dto.Street))
+            return UnprocessableEntity(new { message = "Street is required" });
+        if (string.IsNullOrWhiteSpace(dto.Suburb))
+            return UnprocessableEntity(new { message = "Suburb is required" });
+        if (string.IsNullOrWhiteSpace(dto.City))
+            return UnprocessableEntity(new { message = "City is required" });
+        if (string.IsNullOrWhiteSpace(dto.PostalCode))
+            return UnprocessableEntity(new { message = "PostalCode is required" });
         if (string.IsNullOrWhiteSpace(dto.GpsCoordinates))
             return UnprocessableEntity(new { message = "GpsCoordinates is required" });
 
-        // Validate GPS format
         if (!TryParseGpsCoordinates(dto.GpsCoordinates, out _, out _))
             return UnprocessableEntity(new { message = "Invalid GPS coordinates. Expected format: 'lat,lon' with lat in [-90,90] and lon in [-180,180]" });
 
-        // Reject duplicate StopName (exclude current stop)
         var duplicate = await _context.Stops
             .AnyAsync(s => s.StopName.ToLower() == dto.StopName.ToLower() && s.StopId != id);
         if (duplicate)
             return Conflict(new { message = "A stop with this name already exists" });
 
         stop.StopName = dto.StopName;
-        stop.FullAddress = dto.FullAddress;
+        stop.Street = dto.Street;
+        stop.Suburb = dto.Suburb;
+        stop.City = dto.City;
+        stop.PostalCode = dto.PostalCode;
         stop.GpsCoordinates = dto.GpsCoordinates;
         stop.IsActive = dto.IsActive;
 
@@ -146,6 +168,10 @@ public class StopsAdminController : ControllerBase
         {
             StopId = stop.StopId,
             StopName = stop.StopName,
+            Street = stop.Street,
+            Suburb = stop.Suburb,
+            City = stop.City,
+            PostalCode = stop.PostalCode,
             FullAddress = stop.FullAddress,
             GpsCoordinates = stop.GpsCoordinates,
             IsActive = stop.IsActive
@@ -162,7 +188,6 @@ public class StopsAdminController : ControllerBase
         if (stop == null)
             return NotFound(new { message = "Stop not found" });
 
-        // Check referential integrity — reject if TripInstances reference this stop
         var hasTrips = await _context.TripInstances.AnyAsync(t => t.StopId == id);
         if (hasTrips)
             return Conflict(new { message = "Cannot delete stop: it is referenced by existing trip instances" });
@@ -173,9 +198,6 @@ public class StopsAdminController : ControllerBase
         return NoContent();
     }
 
-    /// <summary>
-    /// Parses GPS coordinates in "lat,lon" format and validates ranges.
-    /// </summary>
     private static bool TryParseGpsCoordinates(string gps, out double latitude, out double longitude)
     {
         latitude = 0;

@@ -14,8 +14,20 @@ public class Stop
     public string StopName { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(300)]
-    public string FullAddress { get; set; } = string.Empty;
+    [MaxLength(200)]
+    public string Street { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(100)]
+    public string Suburb { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(100)]
+    public string City { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(10)]
+    public string PostalCode { get; set; } = string.Empty;
 
     [Required]
     [MaxLength(50)]
@@ -23,6 +35,12 @@ public class Stop
 
     [Required]
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Computed full address for display/search purposes.
+    /// </summary>
+    [NotMapped]
+    public string FullAddress => $"{Street}, {Suburb}, {City}, {PostalCode}";
 
     // Navigation properties
     public ICollection<ScheduleTime> ScheduleTimes { get; set; } = new List<ScheduleTime>();

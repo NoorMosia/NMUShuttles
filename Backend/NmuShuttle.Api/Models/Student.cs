@@ -28,6 +28,9 @@ public class Student
     [Required]
     public bool IsPriorityUser { get; set; }
 
+    [Required]
+    public bool IsActive { get; set; } = true;
+
     [MaxLength(256)]
     public string? OtpHash { get; set; }
 

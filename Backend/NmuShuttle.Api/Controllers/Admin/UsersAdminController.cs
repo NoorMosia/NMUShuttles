@@ -81,6 +81,7 @@ public class UsersAdminController : ControllerBase
                 Email = st.UniversityEmail,
                 Identifier = st.StudentNumber,
                 IsPriorityUser = st.IsPriorityUser,
+                IsActive = st.IsActive,
                 CreatedAt = st.CreatedAt
             }).ToListAsync();
 
@@ -125,6 +126,7 @@ public class UsersAdminController : ControllerBase
                 adminsQuery = adminsQuery.Where(a =>
                     a.FirstName.ToLower().Contains(s) ||
                     a.LastName.ToLower().Contains(s) ||
+                    a.StaffNumber.ToLower().Contains(s) ||
                     a.Email.ToLower().Contains(s));
             }
 
@@ -135,6 +137,8 @@ public class UsersAdminController : ControllerBase
                 FirstName = a.FirstName,
                 LastName = a.LastName,
                 Email = a.Email,
+                Identifier = a.StaffNumber,
+                IsActive = a.IsActive,
                 CreatedAt = a.CreatedAt
             }).ToListAsync();
 
@@ -167,6 +171,7 @@ public class UsersAdminController : ControllerBase
                     Email = student.UniversityEmail,
                     Identifier = student.StudentNumber,
                     IsPriorityUser = student.IsPriorityUser,
+                    IsActive = student.IsActive,
                     CreatedAt = student.CreatedAt
                 });
 
@@ -196,6 +201,8 @@ public class UsersAdminController : ControllerBase
                     FirstName = admin.FirstName,
                     LastName = admin.LastName,
                     Email = admin.Email,
+                    Identifier = admin.StaffNumber,
+                    IsActive = admin.IsActive,
                     CreatedAt = admin.CreatedAt
                 });
 
@@ -358,6 +365,7 @@ public class UsersAdminController : ControllerBase
         var admin = new Models.Admin
         {
             Email = dto.Email,
+            StaffNumber = dto.StaffNumber ?? "",
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12),
@@ -374,6 +382,7 @@ public class UsersAdminController : ControllerBase
             FirstName = admin.FirstName,
             LastName = admin.LastName,
             Email = admin.Email,
+            Identifier = admin.StaffNumber,
             CreatedAt = admin.CreatedAt
         });
     }
@@ -408,6 +417,8 @@ public class UsersAdminController : ControllerBase
         student.UniversityEmail = dto.Email;
         if (dto.IsPriorityUser.HasValue)
             student.IsPriorityUser = dto.IsPriorityUser.Value;
+        if (dto.IsActive.HasValue)
+            student.IsActive = dto.IsActive.Value;
 
         await _context.SaveChangesAsync();
 
@@ -420,6 +431,7 @@ public class UsersAdminController : ControllerBase
             Email = student.UniversityEmail,
             Identifier = student.StudentNumber,
             IsPriorityUser = student.IsPriorityUser,
+            IsActive = student.IsActive,
             CreatedAt = student.CreatedAt
         });
     }
@@ -487,6 +499,12 @@ public class UsersAdminController : ControllerBase
         admin.LastName = dto.LastName;
         admin.Email = dto.Email;
 
+        if (!string.IsNullOrWhiteSpace(dto.StaffNumber))
+            admin.StaffNumber = dto.StaffNumber;
+
+        if (dto.IsActive.HasValue)
+            admin.IsActive = dto.IsActive.Value;
+
         if (!string.IsNullOrWhiteSpace(dto.Password))
             admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12);
 
@@ -499,6 +517,8 @@ public class UsersAdminController : ControllerBase
             FirstName = admin.FirstName,
             LastName = admin.LastName,
             Email = admin.Email,
+            Identifier = admin.StaffNumber,
+            IsActive = admin.IsActive,
             CreatedAt = admin.CreatedAt
         });
     }

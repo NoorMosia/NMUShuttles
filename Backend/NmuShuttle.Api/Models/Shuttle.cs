@@ -21,12 +21,16 @@ public class Shuttle
     public string VendorCompanyName { get; set; } = string.Empty;
 
     [Required]
+    public int VendorId { get; set; }
+
+    [Required]
     public bool IsAccessibleVehicle { get; set; }
 
     [Required]
     public DateTime CreatedAt { get; set; }
 
     // Navigation properties
+    public Vendor Vendor { get; set; } = null!;
     public ICollection<TripShuttleAllocation> TripShuttleAllocations { get; set; } = new List<TripShuttleAllocation>();
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public ICollection<BreakdownLog> BreakdownLogs { get; set; } = new List<BreakdownLog>();

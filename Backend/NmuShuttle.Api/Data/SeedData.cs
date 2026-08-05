@@ -49,6 +49,7 @@ public static class SeedData
             {
                 AdminId = 1,
                 Email = "admin@mandela.ac.za",
+                StaffNumber = "7001001",
                 PasswordHash = AdminPasswordHash,
                 FirstName = "Thabo",
                 LastName = "Mokoena",
@@ -58,6 +59,7 @@ public static class SeedData
             {
                 AdminId = 2,
                 Email = "transport@mandela.ac.za",
+                StaffNumber = "7001002",
                 PasswordHash = TransportPasswordHash,
                 FirstName = "Nomsa",
                 LastName = "Dlamini",
@@ -78,14 +80,14 @@ public static class SeedData
     private static void SeedStops(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Stop>().HasData(
-            new Stop { StopId = 1, StopName = "Summerstrand Village", FullAddress = "12 Marine Drive, Summerstrand, Gqeberha, 6001", GpsCoordinates = "-33.9680,25.6450", IsActive = true },
-            new Stop { StopId = 2, StopName = "Humewood", FullAddress = "45 Beach Road, Humewood, Gqeberha, 6001", GpsCoordinates = "-33.9630,25.6280", IsActive = true },
-            new Stop { StopId = 3, StopName = "Newton Park", FullAddress = "78 Cape Road, Newton Park, Gqeberha, 6045", GpsCoordinates = "-33.9480,25.5750", IsActive = true },
-            new Stop { StopId = 4, StopName = "Walmer Heights", FullAddress = "23 Heugh Road, Walmer Heights, Gqeberha, 6070", GpsCoordinates = "-33.9850,25.6100", IsActive = true },
-            new Stop { StopId = 5, StopName = "Lorraine", FullAddress = "91 Circular Drive, Lorraine, Gqeberha, 6070", GpsCoordinates = "-33.9320,25.5620", IsActive = true },
-            new Stop { StopId = 6, StopName = "Bluewater Bay", FullAddress = "5 Seaview Crescent, Bluewater Bay, Gqeberha, 6210", GpsCoordinates = "-33.8710,25.5590", IsActive = true },
-            new Stop { StopId = 7, StopName = "Framesby", FullAddress = "14 Langenhoven Drive, Framesby, Gqeberha, 6045", GpsCoordinates = "-33.9260,25.5810", IsActive = true },
-            new Stop { StopId = 8, StopName = "Greenacres", FullAddress = "30 Ring Road, Greenacres, Gqeberha, 6045", GpsCoordinates = "-33.9410,25.5870", IsActive = true }
+            new Stop { StopId = 1, StopName = "Summerstrand Village", Street = "12 Marine Drive", Suburb = "Summerstrand", City = "Gqeberha", PostalCode = "6001", GpsCoordinates = "-33.9680,25.6450", IsActive = true },
+            new Stop { StopId = 2, StopName = "Humewood", Street = "45 Beach Road", Suburb = "Humewood", City = "Gqeberha", PostalCode = "6001", GpsCoordinates = "-33.9630,25.6280", IsActive = true },
+            new Stop { StopId = 3, StopName = "Newton Park", Street = "78 Cape Road", Suburb = "Newton Park", City = "Gqeberha", PostalCode = "6045", GpsCoordinates = "-33.9480,25.5750", IsActive = true },
+            new Stop { StopId = 4, StopName = "Walmer Heights", Street = "23 Heugh Road", Suburb = "Walmer Heights", City = "Gqeberha", PostalCode = "6070", GpsCoordinates = "-33.9850,25.6100", IsActive = true },
+            new Stop { StopId = 5, StopName = "Lorraine", Street = "91 Circular Drive", Suburb = "Lorraine", City = "Gqeberha", PostalCode = "6070", GpsCoordinates = "-33.9320,25.5620", IsActive = true },
+            new Stop { StopId = 6, StopName = "Bluewater Bay", Street = "5 Seaview Crescent", Suburb = "Bluewater Bay", City = "Gqeberha", PostalCode = "6210", GpsCoordinates = "-33.8710,25.5590", IsActive = true },
+            new Stop { StopId = 7, StopName = "Framesby", Street = "14 Langenhoven Drive", Suburb = "Framesby", City = "Gqeberha", PostalCode = "6045", GpsCoordinates = "-33.9260,25.5810", IsActive = true },
+            new Stop { StopId = 8, StopName = "Greenacres", Street = "30 Ring Road", Suburb = "Greenacres", City = "Gqeberha", PostalCode = "6045", GpsCoordinates = "-33.9410,25.5870", IsActive = true }
         );
     }
 
@@ -132,17 +134,24 @@ public static class SeedData
 
     private static void SeedShuttles(ModelBuilder modelBuilder)
     {
+        // Seed vendors first
+        modelBuilder.Entity<Vendor>().HasData(
+            new Vendor { VendorId = 1, CompanyName = "Bay Transit Corp", ContactEmail = "info@baytransit.co.za", ContactPhone = "041-555-0101", CreatedAt = SeedDate },
+            new Vendor { VendorId = 2, CompanyName = "Coastal Movers", ContactEmail = "info@coastalmovers.co.za", ContactPhone = "041-555-0202", CreatedAt = SeedDate },
+            new Vendor { VendorId = 3, CompanyName = "Metro Link SA", ContactEmail = "info@metrolinksa.co.za", ContactPhone = "041-555-0303", CreatedAt = SeedDate }
+        );
+
         modelBuilder.Entity<Shuttle>().HasData(
-            new Shuttle { ShuttleId = 1, LicensePlate = "EC 142-837", Capacity = 22, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 2, LicensePlate = "EC 256-491", Capacity = 35, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 3, LicensePlate = "EC 389-720", Capacity = 22, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 4, LicensePlate = "EC 501-163", Capacity = 28, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 5, LicensePlate = "EC 628-945", Capacity = 35, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 6, LicensePlate = "EC 714-382", Capacity = 22, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 7, LicensePlate = "EC 837-256", Capacity = 28, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 8, LicensePlate = "EC 948-617", Capacity = 35, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 9, LicensePlate = "EC 103-475", Capacity = 22, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 10, LicensePlate = "EC 217-864", Capacity = 28, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, CreatedAt = SeedDate }
+            new Shuttle { ShuttleId = 1, LicensePlate = "EC 142-837", Capacity = 22, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 2, LicensePlate = "EC 256-491", Capacity = 35, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = false, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 3, LicensePlate = "EC 389-720", Capacity = 22, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = false, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 4, LicensePlate = "EC 501-163", Capacity = 28, VendorCompanyName = "Coastal Movers", VendorId = 2, IsAccessibleVehicle = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 5, LicensePlate = "EC 628-945", Capacity = 35, VendorCompanyName = "Coastal Movers", VendorId = 2, IsAccessibleVehicle = false, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 6, LicensePlate = "EC 714-382", Capacity = 22, VendorCompanyName = "Coastal Movers", VendorId = 2, IsAccessibleVehicle = false, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 7, LicensePlate = "EC 837-256", Capacity = 28, VendorCompanyName = "Metro Link SA", VendorId = 3, IsAccessibleVehicle = false, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 8, LicensePlate = "EC 948-617", Capacity = 35, VendorCompanyName = "Metro Link SA", VendorId = 3, IsAccessibleVehicle = false, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 9, LicensePlate = "EC 103-475", Capacity = 22, VendorCompanyName = "Metro Link SA", VendorId = 3, IsAccessibleVehicle = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 10, LicensePlate = "EC 217-864", Capacity = 28, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = false, CreatedAt = SeedDate }
         );
     }
 

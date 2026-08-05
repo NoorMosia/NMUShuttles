@@ -23,6 +23,7 @@ public class ShuttleDbContext : DbContext
     public DbSet<ScheduleTime> ScheduleTimes => Set<ScheduleTime>();
     public DbSet<CalendarException> CalendarExceptions => Set<CalendarException>();
     public DbSet<Shuttle> Shuttles => Set<Shuttle>();
+    public DbSet<Vendor> Vendors => Set<Vendor>();
     public DbSet<TripInstance> TripInstances => Set<TripInstance>();
     public DbSet<TripShuttleAllocation> TripShuttleAllocations => Set<TripShuttleAllocation>();
     public DbSet<Booking> Bookings => Set<Booking>();
@@ -44,6 +45,7 @@ public class ShuttleDbContext : DbContext
         ConfigureScheduleTime(modelBuilder);
         ConfigureCalendarException(modelBuilder);
         ConfigureShuttle(modelBuilder);
+        ConfigureVendor(modelBuilder);
         ConfigureTripInstance(modelBuilder);
         ConfigureTripShuttleAllocation(modelBuilder);
         ConfigureBooking(modelBuilder);
@@ -69,6 +71,7 @@ public class ShuttleDbContext : DbContext
             entity.Property(e => e.LastName).HasColumnType("nvarchar(100)").IsRequired();
             entity.Property(e => e.UniversityEmail).HasColumnType("nvarchar(200)").IsRequired();
             entity.Property(e => e.IsPriorityUser).IsRequired().HasDefaultValue(false);
+            entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
             entity.Property(e => e.OtpHash).HasColumnType("nvarchar(256)");
             entity.Property(e => e.OtpExpiry).HasColumnType("datetime2");
             entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
@@ -98,10 +101,10 @@ public class ShuttleDbContext : DbContext
             entity.HasIndex(e => e.StaffNumber).IsUnique();
             entity.HasIndex(e => e.UniversityEmail).IsUnique();
 
-            // XOR CHECK constraint: exactly one of AssignedCampusId or AssignedStopId must be non-null
+            // XOR CHECK constraint: either both null (unassigned) or exactly one is set
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Marshals_AssignedXOR",
-                "(AssignedCampusId IS NOT NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NULL AND AssignedStopId IS NOT NULL)"));
+                "(AssignedCampusId IS NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NOT NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NULL AND AssignedStopId IS NOT NULL)"));
 
             // Relationships
             entity.HasOne(e => e.AssignedCampus)
@@ -124,11 +127,13 @@ public class ShuttleDbContext : DbContext
             entity.HasKey(e => e.AdminId);
 
             entity.Property(e => e.Email).HasColumnType("nvarchar(200)").IsRequired();
+            entity.Property(e => e.StaffNumber).HasColumnType("nvarchar(20)").IsRequired();
             entity.Property(e => e.PasswordHash).HasColumnType("nvarchar(256)").IsRequired();
             entity.Property(e => e.FirstName).HasColumnType("nvarchar(100)").IsRequired();
             entity.Property(e => e.LastName).HasColumnType("nvarchar(100)").IsRequired();
             entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
                 .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
 
             entity.HasIndex(e => e.Email).IsUnique();
         });
@@ -156,11 +161,16 @@ public class ShuttleDbContext : DbContext
             entity.HasKey(e => e.StopId);
 
             entity.Property(e => e.StopName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.FullAddress).HasColumnType("nvarchar(300)").IsRequired();
+            entity.Property(e => e.Street).HasColumnType("nvarchar(200)").IsRequired();
+            entity.Property(e => e.Suburb).HasColumnType("nvarchar(100)").IsRequired();
+            entity.Property(e => e.City).HasColumnType("nvarchar(100)").IsRequired();
+            entity.Property(e => e.PostalCode).HasColumnType("nvarchar(10)").IsRequired();
             entity.Property(e => e.GpsCoordinates).HasColumnType("nvarchar(50)").IsRequired();
             entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
 
             entity.HasIndex(e => e.StopName).IsUnique();
+
+            entity.Ignore(e => e.FullAddress);
         });
     }
 
@@ -227,6 +237,7 @@ public class ShuttleDbContext : DbContext
             entity.Property(e => e.LicensePlate).HasColumnType("nvarchar(20)").IsRequired();
             entity.Property(e => e.Capacity).IsRequired();
             entity.Property(e => e.VendorCompanyName).HasColumnType("nvarchar(100)").IsRequired();
+            entity.Property(e => e.VendorId).IsRequired();
             entity.Property(e => e.IsAccessibleVehicle).IsRequired().HasDefaultValue(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
                 .HasDefaultValueSql("GETUTCDATE()");
@@ -237,6 +248,12 @@ public class ShuttleDbContext : DbContext
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Shuttles_Capacity",
                 "Capacity > 0"));
+
+            // Relationships
+            entity.HasOne(e => e.Vendor)
+                .WithMany(v => v.Shuttles)
+                .HasForeignKey(e => e.VendorId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
@@ -577,6 +594,24 @@ public class ShuttleDbContext : DbContext
                 .WithMany(a => a.ResolvedBreakdownLogs)
                 .HasForeignKey(e => e.ResolvedByAdminId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureVendor(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Vendor>(entity =>
+        {
+            entity.ToTable("Vendors");
+            entity.HasKey(e => e.VendorId);
+
+            entity.Property(e => e.CompanyName).HasColumnType("nvarchar(100)").IsRequired();
+            entity.Property(e => e.ContactEmail).HasColumnType("nvarchar(200)");
+            entity.Property(e => e.ContactPhone).HasColumnType("nvarchar(20)");
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.HasIndex(e => e.CompanyName).IsUnique()
+                .HasDatabaseName("UQ_Vendors_CompanyName");
         });
     }
 }

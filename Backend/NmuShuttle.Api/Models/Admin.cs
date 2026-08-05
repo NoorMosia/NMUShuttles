@@ -14,6 +14,10 @@ public class Admin
     public string Email { get; set; } = string.Empty;
 
     [Required]
+    [MaxLength(20)]
+    public string StaffNumber { get; set; } = string.Empty;
+
+    [Required]
     [MaxLength(256)]
     public string PasswordHash { get; set; } = string.Empty;
 
@@ -27,6 +31,9 @@ public class Admin
 
     [Required]
     public DateTime CreatedAt { get; set; }
+
+    [Required]
+    public bool IsActive { get; set; } = true;
 
     // Navigation properties
     public ICollection<BreakdownLog> ResolvedBreakdownLogs { get; set; } = new List<BreakdownLog>();

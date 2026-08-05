@@ -26,12 +26,14 @@ public class ShuttlesAdminController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var shuttles = await _context.Shuttles
+            .Include(s => s.Vendor)
             .Select(s => new ShuttleResponseDto
             {
                 ShuttleId = s.ShuttleId,
                 LicensePlate = s.LicensePlate,
                 Capacity = s.Capacity,
-                VendorCompanyName = s.VendorCompanyName,
+                VendorId = s.VendorId,
+                VendorCompanyName = s.Vendor.CompanyName,
                 IsAccessibleVehicle = s.IsAccessibleVehicle,
                 CreatedAt = s.CreatedAt
             })
@@ -46,7 +48,10 @@ public class ShuttlesAdminController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var shuttle = await _context.Shuttles.FindAsync(id);
+        var shuttle = await _context.Shuttles
+            .Include(s => s.Vendor)
+            .FirstOrDefaultAsync(s => s.ShuttleId == id);
+
         if (shuttle == null)
             return NotFound(new { message = "Shuttle not found" });
 
@@ -55,7 +60,8 @@ public class ShuttlesAdminController : ControllerBase
             ShuttleId = shuttle.ShuttleId,
             LicensePlate = shuttle.LicensePlate,
             Capacity = shuttle.Capacity,
-            VendorCompanyName = shuttle.VendorCompanyName,
+            VendorId = shuttle.VendorId,
+            VendorCompanyName = shuttle.Vendor.CompanyName,
             IsAccessibleVehicle = shuttle.IsAccessibleVehicle,
             CreatedAt = shuttle.CreatedAt
         });
@@ -70,6 +76,11 @@ public class ShuttlesAdminController : ControllerBase
         if (dto.Capacity <= 0)
             return UnprocessableEntity(new { message = "Capacity must be greater than 0" });
 
+        // Validate vendor exists
+        var vendor = await _context.Vendors.FindAsync(dto.VendorId);
+        if (vendor == null)
+            return UnprocessableEntity(new { message = "Invalid VendorId" });
+
         // Reject duplicate LicensePlate
         var duplicate = await _context.Shuttles
             .AnyAsync(s => s.LicensePlate.ToLower() == dto.LicensePlate.ToLower());
@@ -80,7 +91,8 @@ public class ShuttlesAdminController : ControllerBase
         {
             LicensePlate = dto.LicensePlate,
             Capacity = dto.Capacity,
-            VendorCompanyName = dto.VendorCompanyName,
+            VendorId = dto.VendorId,
+            VendorCompanyName = vendor.CompanyName,
             IsAccessibleVehicle = dto.IsAccessibleVehicle,
             CreatedAt = DateTime.UtcNow
         };
@@ -88,22 +100,20 @@ public class ShuttlesAdminController : ControllerBase
         _context.Shuttles.Add(shuttle);
         await _context.SaveChangesAsync();
 
-        var response = new ShuttleResponseDto
+        return CreatedAtAction(nameof(GetById), new { id = shuttle.ShuttleId }, new ShuttleResponseDto
         {
             ShuttleId = shuttle.ShuttleId,
             LicensePlate = shuttle.LicensePlate,
             Capacity = shuttle.Capacity,
-            VendorCompanyName = shuttle.VendorCompanyName,
+            VendorId = shuttle.VendorId,
+            VendorCompanyName = vendor.CompanyName,
             IsAccessibleVehicle = shuttle.IsAccessibleVehicle,
             CreatedAt = shuttle.CreatedAt
-        };
-
-        return CreatedAtAction(nameof(GetById), new { id = shuttle.ShuttleId }, response);
+        });
     }
 
     /// <summary>
-    /// Update a shuttle. When capacity changes, affected trips are recalculated at query time
-    /// by the capacity service, so just update the record.
+    /// Update a shuttle.
     /// </summary>
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateShuttleDto dto)
@@ -115,6 +125,11 @@ public class ShuttlesAdminController : ControllerBase
         if (dto.Capacity <= 0)
             return UnprocessableEntity(new { message = "Capacity must be greater than 0" });
 
+        // Validate vendor exists
+        var vendor = await _context.Vendors.FindAsync(dto.VendorId);
+        if (vendor == null)
+            return UnprocessableEntity(new { message = "Invalid VendorId" });
+
         // Reject duplicate LicensePlate (exclude current shuttle)
         var duplicate = await _context.Shuttles
             .AnyAsync(s => s.LicensePlate.ToLower() == dto.LicensePlate.ToLower() && s.ShuttleId != id);
@@ -123,7 +138,8 @@ public class ShuttlesAdminController : ControllerBase
 
         shuttle.LicensePlate = dto.LicensePlate;
         shuttle.Capacity = dto.Capacity;
-        shuttle.VendorCompanyName = dto.VendorCompanyName;
+        shuttle.VendorId = dto.VendorId;
+        shuttle.VendorCompanyName = vendor.CompanyName;
         shuttle.IsAccessibleVehicle = dto.IsAccessibleVehicle;
 
         await _context.SaveChangesAsync();
@@ -133,7 +149,8 @@ public class ShuttlesAdminController : ControllerBase
             ShuttleId = shuttle.ShuttleId,
             LicensePlate = shuttle.LicensePlate,
             Capacity = shuttle.Capacity,
-            VendorCompanyName = shuttle.VendorCompanyName,
+            VendorId = shuttle.VendorId,
+            VendorCompanyName = vendor.CompanyName,
             IsAccessibleVehicle = shuttle.IsAccessibleVehicle,
             CreatedAt = shuttle.CreatedAt
         });

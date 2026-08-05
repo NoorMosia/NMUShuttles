@@ -37,6 +37,9 @@ public class UpdateUserDto
 
     // Admin-specific
     public string? Password { get; set; }
+
+    // Shared — toggle active/inactive
+    public bool? IsActive { get; set; }
 }
 
 public class UserResponseDto
@@ -50,5 +53,6 @@ public class UserResponseDto
     public bool? IsPriorityUser { get; set; }
     public int? AssignedCampusId { get; set; }
     public int? AssignedStopId { get; set; }
+    public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; }
 }

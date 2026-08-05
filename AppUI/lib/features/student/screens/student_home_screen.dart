@@ -80,6 +80,8 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/student/booking/new'),
+        elevation: 0,
+        highlightElevation: 0,
         icon: const Icon(Icons.add),
         label: const Text('New Booking'),
       ),

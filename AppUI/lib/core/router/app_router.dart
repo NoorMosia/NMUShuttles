@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
 import 'package:nmu_shuttle_app/features/auth/screens/login_screen.dart';
+import 'package:nmu_shuttle_app/features/splash/screens/splash_screen.dart';
 import 'package:nmu_shuttle_app/features/student/screens/student_home_screen.dart';
 import 'package:nmu_shuttle_app/features/student/screens/new_booking_screen.dart';
 import 'package:nmu_shuttle_app/features/student/screens/booking_detail_screen.dart';
@@ -22,9 +23,14 @@ class AppRouter {
   final AuthService _authService;
 
   late final GoRouter router = GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/splash',
     redirect: _globalRedirect,
     routes: [
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/login',
         name: 'login',
@@ -102,6 +108,9 @@ class AppRouter {
     BuildContext context,
     GoRouterState state,
   ) async {
+    final isOnSplash = state.matchedLocation == '/splash';
+    if (isOnSplash) return null;
+
     final isAuthenticated = await _authService.isAuthenticated();
     final isOnLogin = state.matchedLocation == '/login';
 

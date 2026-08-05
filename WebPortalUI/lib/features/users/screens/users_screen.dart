@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -307,101 +308,88 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
   }
 
   Widget _buildUsersTable(List<UserModel> users) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Container(
-          width: constraints.maxWidth,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Column(
-              children: [
-                // Sticky header
-                Container(
-                  width: constraints.maxWidth,
-                  color: Colors.grey.shade50,
-                  child: DataTable(
-                    headingRowColor: WidgetStateProperty.all(Colors.grey.shade50),
-                    headingTextStyle: GoogleFonts.hankenGrotesk(
-                      fontWeight: FontWeight.w700,
-                      color: _navy,
-                      fontSize: 13,
-                    ),
-                    dataTextStyle: GoogleFonts.hankenGrotesk(fontSize: 13),
-                    columnSpacing: 32,
-                    horizontalMargin: 20,
-                    headingRowHeight: 48,
-                    columns: const [
-                      DataColumn(label: Text('Identifier')),
-                      DataColumn(label: Text('Name')),
-                      DataColumn(label: Text('Role')),
-                      DataColumn(label: Text('Email')),
-                      DataColumn(label: Text('Actions')),
-                    ],
-                    rows: const [],
-                  ),
-                ),
-                // Scrollable body
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: SizedBox(
-                      width: constraints.maxWidth,
-                      child: DataTable(
-                        headingRowHeight: 0,
-                        headingTextStyle: GoogleFonts.hankenGrotesk(
-                          fontWeight: FontWeight.w700,
-                          color: _navy,
-                          fontSize: 13,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE8ECF0)),
+      ),
+      child: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          child: DataTable(
+            headingTextStyle: GoogleFonts.hankenGrotesk(
+              fontWeight: FontWeight.w700,
+              color: _navy,
+              fontSize: 13,
+            ),
+            dataTextStyle: GoogleFonts.hankenGrotesk(fontSize: 13),
+            columnSpacing: 32,
+            horizontalMargin: 20,
+            headingRowHeight: 48,
+            columns: const [
+              DataColumn(label: Text('Identifier')),
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Role')),
+              DataColumn(label: Text('Email')),
+              DataColumn(label: Text('Status')),
+              DataColumn(label: Text('Actions')),
+            ],
+            rows: users.map((user) {
+              return DataRow(
+                cells: [
+                  DataCell(Text(user.identifier)),
+                  DataCell(Text(user.fullName)),
+                  DataCell(Text(user.role)),
+                  DataCell(Text(user.email)),
+                  DataCell(
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: user.isActive
+                            ? Colors.green.shade50
+                            : Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        user.isActive ? 'Active' : 'Inactive',
+                        style: GoogleFonts.hankenGrotesk(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: user.isActive
+                              ? Colors.green.shade700
+                              : Colors.red.shade700,
                         ),
-                        dataTextStyle: GoogleFonts.hankenGrotesk(fontSize: 13),
-                        dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                          (states) {
-                            if (states.contains(WidgetState.hovered)) {
-                              return Colors.grey.shade200;
-                            }
-                            return null;
-                          },
-                        ),
-                        columnSpacing: 32,
-                        horizontalMargin: 20,
-                        columns: const [
-                          DataColumn(label: SizedBox.shrink()),
-                          DataColumn(label: SizedBox.shrink()),
-                          DataColumn(label: SizedBox.shrink()),
-                          DataColumn(label: SizedBox.shrink()),
-                          DataColumn(label: SizedBox.shrink()),
-                        ],
-                        rows: users.map((user) {
-                          return DataRow(
-                            cells: [
-                              DataCell(Text(user.identifier)),
-                              DataCell(Text(user.fullName)),
-                              DataCell(Text(user.role)),
-                              DataCell(Text(user.email)),
-                              DataCell(
-                                IconButton(
-                                  icon: const Icon(Icons.edit_outlined, size: 18),
-                                  color: _navy,
-                                  tooltip: 'Edit user',
-                                  onPressed: () => _showEditUserDialog(user),
-                                ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                  DataCell(Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        color: _navy,
+                        tooltip: 'Edit user',
+                        onPressed: () => _showEditUserDialog(user),
+                      ),
+                      if (user.role != 'Admin')
+                        IconButton(
+                          icon: Icon(
+                            user.isActive ? Icons.block_outlined : Icons.check_circle_outline,
+                            size: 18,
+                          ),
+                          color: user.isActive ? Colors.orange.shade700 : Colors.green.shade700,
+                          tooltip: user.isActive ? 'Deactivate' : 'Activate',
+                          onPressed: () => _toggleUserActive(user),
+                        ),
+                    ],
+                  )),
+                ],
+              );
+            }).toList(),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -453,6 +441,55 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     );
   }
 
+  // ─── Toggle Active/Inactive ──────────────────────────────────────────────
+
+  void _toggleUserActive(UserModel user) {
+    final newStatus = !user.isActive;
+    final action = newStatus ? 'activate' : 'deactivate';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          '${newStatus ? 'Activate' : 'Deactivate'} User',
+          style: GoogleFonts.hankenGrotesk(
+            fontWeight: FontWeight.w600,
+            color: _navy,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to $action ${user.fullName}?',
+          style: GoogleFonts.hankenGrotesk(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await ref.read(usersProvider.notifier).updateUser(
+                    id: user.id,
+                    role: user.role,
+                    identifier: user.identifier,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    isActive: newStatus,
+                  );
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor:
+                  newStatus ? Colors.green.shade700 : Colors.orange.shade700,
+            ),
+            child: Text(newStatus ? 'Activate' : 'Deactivate'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ─── CSV Upload ──────────────────────────────────────────────────────────
 
   Future<void> _handleCsvUpload() async {
@@ -467,6 +504,74 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     final file = result.files.first;
     if (file.bytes == null) return;
 
+    // Parse CSV locally for preview
+    final csvContent = utf8.decode(file.bytes!);
+    final lines = const LineSplitter().convert(csvContent);
+
+    if (lines.length < 2) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'CSV file is empty or has no data rows.',
+            style: GoogleFonts.hankenGrotesk(),
+          ),
+          backgroundColor: Colors.orange.shade700,
+        ),
+      );
+      return;
+    }
+
+    // Parse rows (skip header)
+    final List<_CsvPreviewRow> previewRows = [];
+    final List<String> parseErrors = [];
+
+    for (int i = 1; i < lines.length; i++) {
+      final line = lines[i].trim();
+      if (line.isEmpty) continue;
+
+      final parts = line.split(',');
+      if (parts.length < 5) {
+        parseErrors.add('Row ${i + 1}: Not enough columns (expected 5)');
+        continue;
+      }
+
+      previewRows.add(_CsvPreviewRow(
+        role: parts[0].trim(),
+        identifier: parts[1].trim(),
+        firstName: parts[2].trim(),
+        lastName: parts[3].trim(),
+        email: parts[4].trim(),
+      ));
+    }
+
+    if (previewRows.isEmpty && parseErrors.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'No valid rows found in CSV.',
+            style: GoogleFonts.hankenGrotesk(),
+          ),
+          backgroundColor: Colors.orange.shade700,
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    // Show preview/confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => _CsvPreviewDialog(
+        fileName: file.name,
+        rows: previewRows,
+        parseErrors: parseErrors,
+      ),
+    );
+
+    if (confirmed != true) return;
     if (!mounted) return;
 
     // Show loading dialog
@@ -493,7 +598,8 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
         .uploadCsv(file.bytes!, file.name);
 
     if (!mounted) return;
-    Navigator.of(context).pop(); // Close loading dialog
+    // Pop the loading dialog using rootNavigator to avoid popping the route
+    Navigator.of(context, rootNavigator: true).pop();
 
     if (uploadResult != null) {
       _showUploadResultDialog(uploadResult);
@@ -712,7 +818,7 @@ class _UserFormDialogState extends State<_UserFormDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Role dropdown
+                // Role dropdown (read-only when editing)
                 DropdownButtonFormField<String>(
                   value: _role,
                   decoration: _inputDecoration('Role'),
@@ -726,12 +832,14 @@ class _UserFormDialogState extends State<_UserFormDialog> {
                             child: Text(r),
                           ))
                       .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _role = value);
-                      _formKey.currentState?.validate();
-                    }
-                  },
+                  onChanged: widget.initialRole != null
+                      ? null
+                      : (value) {
+                          if (value != null) {
+                            setState(() => _role = value);
+                            _formKey.currentState?.validate();
+                          }
+                        },
                 ),
                 const SizedBox(height: 16),
 
@@ -740,7 +848,7 @@ class _UserFormDialogState extends State<_UserFormDialog> {
                   controller: _identifierCtrl,
                   style: GoogleFonts.hankenGrotesk(fontSize: 14),
                   decoration: _inputDecoration(
-                    'Identifier',
+                    _role == 'Student' ? 'Student Number' : 'Staff Number',
                     hint: _role == 'Student'
                         ? 'e.g. s312345678'
                         : 'e.g. 1234567',
@@ -859,6 +967,198 @@ class _UserFormDialogState extends State<_UserFormDialog> {
         horizontal: 16,
         vertical: 14,
       ),
+    );
+  }
+}
+
+// ─── CSV Preview Model ───────────────────────────────────────────────────────
+
+class _CsvPreviewRow {
+  const _CsvPreviewRow({
+    required this.role,
+    required this.identifier,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+  });
+
+  final String role;
+  final String identifier;
+  final String firstName;
+  final String lastName;
+  final String email;
+}
+
+// ─── CSV Preview/Confirmation Dialog ─────────────────────────────────────────
+
+class _CsvPreviewDialog extends StatelessWidget {
+  const _CsvPreviewDialog({
+    required this.fileName,
+    required this.rows,
+    required this.parseErrors,
+  });
+
+  final String fileName;
+  final List<_CsvPreviewRow> rows;
+  final List<String> parseErrors;
+
+  static const Color _navy = Color(0xFF132E51);
+
+  @override
+  Widget build(BuildContext context) {
+    final students = rows.where((r) => r.role.toLowerCase() == 'student').toList();
+    final marshals = rows.where((r) => r.role.toLowerCase() == 'marshal').toList();
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      title: Row(
+        children: [
+          const Icon(Icons.preview_outlined, size: 22),
+          const SizedBox(width: 8),
+          Text(
+            'Review Upload',
+            style: GoogleFonts.hankenGrotesk(
+              fontWeight: FontWeight.bold,
+              color: _navy,
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 600,
+        height: 420,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Summary
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F9FB),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.insert_drive_file_outlined, size: 18, color: Colors.grey.shade600),
+                  const SizedBox(width: 8),
+                  Text(
+                    fileName,
+                    style: GoogleFonts.hankenGrotesk(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${rows.length} user(s): ${students.length} students, ${marshals.length} marshals',
+                    style: GoogleFonts.hankenGrotesk(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Parse errors
+            if (parseErrors.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.shade200),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.warning_amber_outlined, size: 16, color: Colors.orange.shade700),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${parseErrors.length} row(s) have format issues and will be skipped.',
+                        style: GoogleFonts.hankenGrotesk(
+                          fontSize: 12,
+                          color: Colors.orange.shade800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // Table header
+            Text(
+              'Users to be imported:',
+              style: GoogleFonts.hankenGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: _navy,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Scrollable preview table
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE8ECF0)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: DataTable(
+                      headingRowHeight: 36,
+                      dataRowMinHeight: 32,
+                      dataRowMaxHeight: 40,
+                      columnSpacing: 16,
+                      horizontalMargin: 12,
+                      headingTextStyle: GoogleFonts.hankenGrotesk(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade600,
+                      ),
+                      dataTextStyle: GoogleFonts.hankenGrotesk(fontSize: 12),
+                      columns: const [
+                        DataColumn(label: Text('ROLE')),
+                        DataColumn(label: Text('IDENTIFIER')),
+                        DataColumn(label: Text('NAME')),
+                        DataColumn(label: Text('EMAIL')),
+                      ],
+                      rows: rows.map((row) {
+                        return DataRow(cells: [
+                          DataCell(Text(row.role)),
+                          DataCell(Text(row.identifier)),
+                          DataCell(Text('${row.firstName} ${row.lastName}')),
+                          DataCell(Text(row.email)),
+                        ]);
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text('Cancel', style: GoogleFonts.hankenGrotesk(color: Colors.grey.shade600)),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.of(context).pop(true),
+          icon: const Icon(Icons.upload, size: 18),
+          label: Text(
+            'Confirm & Upload',
+            style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
     );
   }
 }

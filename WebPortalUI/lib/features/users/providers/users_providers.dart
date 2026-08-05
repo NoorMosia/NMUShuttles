@@ -15,6 +15,7 @@ class UserModel {
     required this.lastName,
     required this.email,
     required this.role,
+    required this.isActive,
   });
 
   final int id;
@@ -23,6 +24,7 @@ class UserModel {
   final String lastName;
   final String email;
   final String role;
+  final bool isActive;
 
   String get fullName => '$firstName $lastName';
 
@@ -34,6 +36,7 @@ class UserModel {
       lastName: json['lastName'] as String? ?? '',
       email: json['email'] as String? ?? '',
       role: json['type'] as String? ?? json['role'] as String? ?? '',
+      isActive: json['isActive'] as bool? ?? true,
     );
   }
 }
@@ -49,12 +52,20 @@ class BulkUploadResult {
   final List<String> skippedRows;
 
   factory BulkUploadResult.fromJson(Map<String, dynamic> json) {
+    // Backend returns { "created": int, "skipped": [{ "row": int, "reason": string }] }
+    final skipped = (json['skipped'] as List<dynamic>?)
+            ?.map((e) {
+              if (e is Map<String, dynamic>) {
+                return 'Row ${e['row']}: ${e['reason']}';
+              }
+              return e.toString();
+            })
+            .toList() ??
+        [];
+
     return BulkUploadResult(
-      successCount: json['successCount'] as int? ?? 0,
-      skippedRows: (json['skippedRows'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
+      successCount: json['created'] as int? ?? json['successCount'] as int? ?? 0,
+      skippedRows: skipped,
     );
   }
 }
@@ -128,8 +139,9 @@ class UsersNotifier extends StateNotifier<UsersState> {
   }) async {
     try {
       await _dioClient.dio.post('/admin/users', data: {
-        'role': role,
-        'identifier': identifier,
+        'type': role,
+        if (role == 'Student') 'studentNumber': identifier,
+        if (role == 'Marshal' || role == 'Admin') 'staffNumber': identifier,
         'firstName': firstName,
         'lastName': lastName,
         'email': email,
@@ -150,14 +162,16 @@ class UsersNotifier extends StateNotifier<UsersState> {
     required String firstName,
     required String lastName,
     required String email,
+    bool? isActive,
   }) async {
     try {
       await _dioClient.dio.put('/admin/users/$id?type=$role', data: {
-        'identifier': identifier,
+        if (role == 'Student') 'studentNumber': identifier,
+        if (role == 'Marshal' || role == 'Admin') 'staffNumber': identifier,
         'firstName': firstName,
         'lastName': lastName,
         'email': email,
-        'role': role,
+        if (isActive != null) 'isActive': isActive,
       });
       await fetchUsers();
       return true;

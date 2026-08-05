@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Option B Refined - Sticky Sidebar Toggle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN PRINCIPLES APPLIED:
+   - Nielsen H1: Visibility of system status (active nav, breadcrumbs)
+   - Nielsen H2: Match between system and real world (familiar icons)
+   - Nielsen H4: Consistency and standards (uniform spacing, colors)
+   - Nielsen H6: Recognition over recall (labels always visible)
+   - Nielsen H8: Aesthetic and minimalist design (whitespace, hierarchy)
+   - Gestalt: Proximity (grouped cards), Similarity (consistent card style)
+   - Visual hierarchy: size, weight, color contrast for scannability
+   ═══════════════════════════════════════════════════════════════ */
+</style>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --navy: #132E51;
+  --navy-light: #1a3a63;
+  --gold: #FFCC00;
+  --gold-soft: #FEF9C3;
+  --surface: #FFFFFF;
+  --bg: #F8F9FB;
+  --text-primary: #132E51;
+  --text-secondary: #5A6B7B;
+  --text-tertiary: #9CA3AF;
+  --border: #E8ECF0;
+  --shadow-sm: 0 1px 3px rgba(19,46,81,0.06);
+  --shadow-md: 0 4px 12px rgba(19,46,81,0.08);
+  --radius: 12px;
+  --sidebar-width-expanded: 240px;
+  --sidebar-width-collapsed: 68px;
+  --topbar-height: 56px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+</style>
+<style>
+/* ─── APP LAYOUT ─── */
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* ─── TOP BAR ─── */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--topbar-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 100;
+  gap: 16px;
+}
+
+.topbar-toggle {
+  width: 36px; height: 36px;
+  border: none; background: transparent;
+  border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  transition: background var(--transition), color var(--transition);
+}
+.topbar-toggle:hover { background: var(--bg); color: var(--navy); }
+.topbar-toggle:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 2px;
+}
+
+.topbar-brand {
+  font-size: 16px; font-weight: 700; color: var(--navy);
+  display: flex; align-items: center; gap: 8px;
+}
+.topbar-brand-dot {
+  width: 8px; height: 8px; background: var(--gold);
+  border-radius: 50%;
+}
+
+.topbar-spacer { flex: 1; }
+
+.topbar-breadcrumb {
+  font-size: 13px; color: var(--text-tertiary);
+  display: flex; align-items: center; gap: 6px;
+}
+.topbar-breadcrumb span { color: var(--text-primary); font-weight: 500; }
+
+.topbar-user {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 24px; border: 1px solid var(--border);
+  cursor: pointer; transition: border-color var(--transition);
+}
+.topbar-user:hover { border-color: var(--gold); }
+.topbar-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--gold); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--navy);
+}
+.topbar-user-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+</style>
+<style>
+/* ─── SIDEBAR ─── */
+.sidebar {
+  position: fixed;
+  top: var(--topbar-height);
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width-collapsed);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 8px;
+  transition: width var(--transition);
+  overflow: hidden;
+  z-index: 90;
+}
+
+/* Expanded state */
+.sidebar.expanded { width: var(--sidebar-width-expanded); }
+
+.nav-list { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+
+.nav-item {
+  display: flex; align-items: center;
+  padding: 10px 12px; border-radius: 10px;
+  text-decoration: none; color: var(--text-secondary);
+  font-size: 14px; font-weight: 500;
+  transition: all var(--transition);
+  white-space: nowrap; overflow: hidden;
+  position: relative;
+  min-height: 40px;
+}
+.nav-item .material-symbols-outlined {
+  font-size: 20px; min-width: 20px;
+  transition: color var(--transition);
+}
+.nav-item-label {
+  margin-left: 14px;
+  opacity: 0; transition: opacity var(--transition);
+}
+.sidebar.expanded .nav-item-label { opacity: 1; }
+
+/* Hover — subtle background */
+.nav-item:hover { background: var(--bg); color: var(--navy); }
+.nav-item:hover .material-symbols-outlined { color: var(--navy); }
+
+/* Active — gold indicator + bold label  (Nielsen H1: system status) */
+.nav-item.active {
+  background: var(--gold-soft);
+  color: var(--navy); font-weight: 600;
+}
+.nav-item.active .material-symbols-outlined { color: var(--navy); }
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 8px; bottom: 8px;
+  width: 3px; background: var(--gold); border-radius: 0 2px 2px 0;
+}
+
+/* Tooltip for collapsed state (Nielsen H6: recognition over recall) */
+.nav-item[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute; left: 56px; top: 50%; transform: translateY(-50%);
+  background: var(--navy); color: #fff;
+  font-size: 12px; font-weight: 500; padding: 4px 10px;
+  border-radius: 6px; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.15s;
+}
+.sidebar:not(.expanded) .nav-item:hover[data-tooltip]::after { opacity: 1; }
+
+/* Logout in footer */
+.nav-footer { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px; }
+.nav-item.logout { color: #DC2626; }
+.nav-item.logout:hover { background: #FEE2E2; }
+</style>
+<style>
+/* ─── MAIN CONTENT ─── */
+.main {
+  margin-top: var(--topbar-height);
+  margin-left: var(--sidebar-width-collapsed);
+  flex: 1;
+  overflow-y: auto;
+  transition: margin-left var(--transition);
+  padding: 32px 40px;
+}
+.sidebar.expanded ~ .main { margin-left: var(--sidebar-width-expanded); }
+
+.content-constrained { max-width: 1200px; margin: 0 auto; }
+
+/* ─── TYPOGRAPHY SCALE (Visual hierarchy) ─── */
+.page-title { font-size: 22px; font-weight: 700; color: var(--navy); }
+.page-subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 2px; }
+.section-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--text-tertiary);
+  margin-bottom: 12px; margin-top: 28px;
+}
+
+/* ─── STAT CARDS (Gestalt: proximity + similarity) ─── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-top: 12px;
+}
+.stat-card {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.stat-card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 12px;
+}
+.stat-card-label { font-size: 12px; font-weight: 500; color: var(--text-tertiary); }
+.stat-card-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.stat-card-icon .material-symbols-outlined { font-size: 18px; }
+.stat-card-icon.gold { background: #FEF3C7; color: #B45309; }
+.stat-card-icon.teal { background: #CCFBF1; color: #0F766E; }
+.stat-card-icon.blue { background: #DBEAFE; color: #1D4ED8; }
+.stat-card-icon.purple { background: #EDE9FE; color: #6D28D9; }
+.stat-card-value { font-size: 28px; font-weight: 700; color: var(--navy); }
+</style>
+<style>
+/* ─── CONTENT CARDS ─── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px; margin-top: 12px;
+}
+.card {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 24px; box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+.card-title {
+  font-size: 15px; font-weight: 600; color: var(--navy);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 16px;
+}
+.card-title .material-symbols-outlined { font-size: 18px; color: var(--gold); }
+
+.demand-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.demand-item:last-child { border-bottom: none; }
+.demand-name { font-size: 14px; color: var(--text-primary); }
+.demand-value { font-size: 15px; font-weight: 700; color: var(--navy); }
+.demand-bar { height: 4px; background: #F3F4F6; border-radius: 2px; margin-top: 6px; }
+.demand-bar-fill { height: 100%; border-radius: 2px; background: var(--gold); }
+
+/* ─── TABLE CARD ─── */
+.card-full { grid-column: 1 / -1; }
+.table-wrapper { overflow-x: auto; margin-top: 12px; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-tertiary); padding: 10px 16px;
+  border-bottom: 2px solid var(--border);
+}
+tbody td {
+  padding: 12px 16px; font-size: 14px; color: var(--text-primary);
+  border-bottom: 1px solid #F9FAFB;
+}
+tbody tr:hover { background: #FAFBFC; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 10px;
+  font-size: 12px; font-weight: 600;
+}
+.badge.success { background: #D1FAE5; color: #065F46; }
+.badge.warning { background: #FEF3C7; color: #92400E; }
+
+/* ─── BUTTON ─── */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; background: var(--navy); color: #fff;
+  border: none; border-radius: 10px; font-family: inherit;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background var(--transition);
+}
+.btn-primary:hover { background: var(--navy-light); }
+.btn-primary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn-primary .material-symbols-outlined { font-size: 18px; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-grid { grid-template-columns: 1fr; }
+  .main { padding: 24px 20px; }
+}
+</style>
+
+<!-- ═══════════ TOP BAR ═══════════ -->
+<div class="topbar">
+  <button class="topbar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" title="Pin/unpin sidebar">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+  <div class="topbar-brand">
+    <span class="topbar-brand-dot"></span>
+    NMU Shuttles
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-breadcrumb">
+    Admin <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
+    <span>Operations Overview</span>
+  </div>
+  <div class="topbar-user">
+    <div class="topbar-avatar">AH</div>
+    <span class="topbar-user-name">Admin</span>
+  </div>
+</div>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav class="sidebar" id="sidebar" aria-label="Main navigation">
+  <div class="nav-list">
+    <a href="#" class="nav-item active" data-tooltip="Overview">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="nav-item-label">Overview</span>
+    </a>
+    <a href="#" class="nav-item" data-tooltip="Shuttle Stops">
+      <span class="material-symbols-outlined">location_on</span>
+      <span class="nav-item-label">Shuttle Stops</span>
+    </a>
+    <a href="#" class="nav-item" data-tooltip="Shuttles">
+      <span class="material-symbols-outlined">directions_bus</span>
+      <span class="nav-item-label">Shuttles</span>
+    </a>
+    <a href="#" class="nav-item" data-tooltip="Users">
+      <span class="material-symbols-outlined">people</span>
+      <span class="nav-item-label">Users</span>
+    </a>
+    <a href="#" class="nav-item" data-tooltip="Schedule">
+      <span class="material-symbols-outlined">schedule</span>
+      <span class="nav-item-label">Schedule</span>
+    </a>
+    <a href="#" class="nav-item" data-tooltip="Calendar">
+      <span class="material-symbols-outlined">calendar_month</span>
+      <span class="nav-item-label">Calendar</span>
+    </a>
+    <a href="#" class="nav-item" data-tooltip="Priority">
+      <span class="material-symbols-outlined">accessibility_new</span>
+      <span class="nav-item-label">Priority</span>
+    </a>
+    <a href="#" class="nav-item" data-tooltip="Trips">
+      <span class="material-symbols-outlined">trip_origin</span>
+      <span class="nav-item-label">Trips</span>
+    </a>
+    <a href="#" class="nav-item" data-tooltip="Reports">
+      <span class="material-symbols-outlined">bar_chart</span>
+      <span class="nav-item-label">Reports</span>
+    </a>
+  </div>
+  <div class="nav-footer">
+    <a href="#" class="nav-item logout" data-tooltip="Sign out">
+      <span class="material-symbols-outlined">logout</span>
+      <span class="nav-item-label">Sign Out</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ═══════════ MAIN CONTENT ═══════════ -->
+<main class="main" id="mainContent">
+  <div class="content-constrained">
+    <!-- Page header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+      <div>
+        <h1 class="page-title">Operations Overview</h1>
+        <p class="page-subtitle">Dashboard summary and key metrics</p>
+      </div>
+      <button class="btn-primary">
+        <span class="material-symbols-outlined">analytics</span>
+        Detailed Analytics
+      </button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="section-label">Today's Snapshot</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <span class="stat-card-label">Active Bookings</span>
+          <div class="stat-card-icon gold">
+            <span class="material-symbols-outlined">confirmation_number</span>
+          </div>
+        </div>
+        <div class="stat-card-value">1,247</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <span class="stat-card-label">Registered Users</span>
+          <div class="stat-card-icon teal">
+            <span class="material-symbols-outlined">people</span>
+          </div>
+        </div>
+        <div class="stat-card-value">3,582</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <span class="stat-card-label">Operational Shuttles</span>
+          <div class="stat-card-icon blue">
+            <span class="material-symbols-outlined">directions_bus</span>
+          </div>
+        </div>
+        <div class="stat-card-value">24</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <span class="stat-card-label">Trips Today</span>
+          <div class="stat-card-icon purple">
+            <span class="material-symbols-outlined">trip_origin</span>
+          </div>
+        </div>
+        <div class="stat-card-value">86</div>
+      </div>
+    </div>
+
+    <!-- Demand analysis cards -->
+    <div class="section-label">Stop Demand Analysis</div>
+    <div class="card-grid">
+      <div class="card">
+        <h2 class="card-title">
+          <span class="material-symbols-outlined">trending_up</span>
+          Most In-Demand Stops
+        </h2>
+        <div class="demand-item">
+          <div>
+            <div class="demand-name">South Campus Residences</div>
+            <div class="demand-bar" style="width:180px;">
+              <div class="demand-bar-fill" style="width:100%;"></div>
+            </div>
+          </div>
+          <span class="demand-value">1,834</span>
+        </div>
+        <div class="demand-item">
+          <div>
+            <div class="demand-name">North Campus Main Gate</div>
+            <div class="demand-bar" style="width:180px;">
+              <div class="demand-bar-fill" style="width:89%;"></div>
+            </div>
+          </div>
+          <span class="demand-value">1,627</span>
+        </div>
+        <div class="demand-item">
+          <div>
+            <div class="demand-name">Missionvale Residences</div>
+            <div class="demand-bar" style="width:180px;">
+              <div class="demand-bar-fill" style="width:66%;"></div>
+            </div>
+          </div>
+          <span class="demand-value">1,203</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">
+          <span class="material-symbols-outlined" style="color:var(--text-tertiary);">trending_down</span>
+          Least In-Demand Stops
+        </h2>
+        <div class="demand-item">
+          <div>
+            <div class="demand-name">Summerstrand Village</div>
+            <div class="demand-bar" style="width:180px;">
+              <div class="demand-bar-fill" style="width:5%;background:#E5E7EB;"></div>
+            </div>
+          </div>
+          <span class="demand-value">87</span>
+        </div>
+        <div class="demand-item">
+          <div>
+            <div class="demand-name">Newton Park Hub</div>
+            <div class="demand-bar" style="width:180px;">
+              <div class="demand-bar-fill" style="width:7%;background:#E5E7EB;"></div>
+            </div>
+          </div>
+          <span class="demand-value">124</span>
+        </div>
+        <div class="demand-item">
+          <div>
+            <div class="demand-name">Humewood Road Stop</div>
+            <div class="demand-bar" style="width:180px;">
+              <div class="demand-bar-fill" style="width:9%;background:#E5E7EB;"></div>
+            </div>
+          </div>
+          <span class="demand-value">156</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendor reliability table -->
+    <div class="section-label">Vendor Reliability</div>
+    <div class="card-grid">
+      <div class="card card-full">
+        <h2 class="card-title">
+          <span class="material-symbols-outlined">warning</span>
+          Breakdown &amp; Cancellation Events
+        </h2>
+        <p style="font-size:13px; color:var(--text-tertiary); margin-top:-8px; margin-bottom:4px;">
+          January 1, 2026 &ndash; December 31, 2026
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Vendor</th>
+                <th>Breakdowns</th>
+                <th>Cancellations</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Algoa Bus Company</strong></td>
+                <td>2</td>
+                <td>1</td>
+                <td><strong>3</strong></td>
+                <td><span class="badge success">Resolved</span></td>
+              </tr>
+              <tr>
+                <td><strong>Bay Area Transit</strong></td>
+                <td>4</td>
+                <td>2</td>
+                <td><strong>6</strong></td>
+                <td><span class="badge warning">Under Review</span></td>
+              </tr>
+              <tr>
+                <td><strong>Nelson Bay Coaches</strong></td>
+                <td>1</td>
+                <td>0</td>
+                <td><strong>1</strong></td>
+                <td><span class="badge success">Resolved</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- .content-constrained -->
+</main>
+
+<!-- ═══════════ JAVASCRIPT: Sidebar toggle (sticky/collapsed) ═══════════ -->
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('sidebarToggle');
+  const main = document.getElementById('mainContent');
+
+  // Load saved preference (Nielsen H4: consistency across sessions)
+  const saved = localStorage.getItem('sidebar-expanded');
+  if (saved === 'true') sidebar.classList.add('expanded');
+
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('expanded');
+    const isExpanded = sidebar.classList.contains('expanded');
+    localStorage.setItem('sidebar-expanded', isExpanded);
+    // Update toggle icon for feedback (Nielsen H1: visibility of system status)
+    toggle.querySelector('.material-symbols-outlined').textContent =
+      isExpanded ? 'menu_open' : 'menu';
+  });
+
+  // Set initial icon state
+  if (sidebar.classList.contains('expanded')) {
+    toggle.querySelector('.material-symbols-outlined').textContent = 'menu_open';
+  }
+</script>
+</body>
+</html>

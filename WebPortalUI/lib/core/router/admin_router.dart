@@ -8,10 +8,13 @@ import 'package:nmu_shuttle_admin/features/auth/screens/admin_login_screen.dart'
 import 'package:nmu_shuttle_admin/features/overview/screens/overview_screen.dart';
 import 'package:nmu_shuttle_admin/features/reports/screens/reports_screen.dart';
 import 'package:nmu_shuttle_admin/features/schedule/screens/schedule_screen.dart';
+import 'package:nmu_shuttle_admin/features/schedule/screens/calendar_exceptions_screen.dart';
+import 'package:nmu_shuttle_admin/features/schedule/screens/priority_schedules_screen.dart';
 import 'package:nmu_shuttle_admin/features/shuttles/screens/shuttles_screen.dart';
 import 'package:nmu_shuttle_admin/features/stops/screens/stops_screen.dart';
 import 'package:nmu_shuttle_admin/features/trips/screens/trips_screen.dart';
 import 'package:nmu_shuttle_admin/features/users/screens/users_screen.dart';
+import 'package:nmu_shuttle_admin/features/vendors/screens/vendors_screen.dart';
 import 'package:nmu_shuttle_admin/shared/widgets/admin_scaffold.dart';
 
 final adminRouterProvider = Provider<GoRouter>((ref) {
@@ -60,6 +63,10 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const ShuttlesScreen(),
           ),
           GoRoute(
+            path: '/vendors',
+            builder: (context, state) => const VendorsScreen(),
+          ),
+          GoRoute(
             path: '/users',
             builder: (context, state) => const UsersScreen(),
           ),
@@ -69,11 +76,11 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/calendar-exceptions',
-            builder: (context, state) => const ScheduleScreen(),
+            builder: (context, state) => const CalendarExceptionsScreen(),
           ),
           GoRoute(
             path: '/priority-schedules',
-            builder: (context, state) => const ScheduleScreen(),
+            builder: (context, state) => const PrioritySchedulesScreen(),
           ),
           GoRoute(
             path: '/trips',
@@ -124,7 +131,7 @@ class _DetailedAnalyticsPlaceholder extends StatelessWidget {
               Text(
                 'Detailed Analytics',
                 style: GoogleFonts.hankenGrotesk(
-                  fontSize: 28,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF132E51),
                 ),
@@ -136,7 +143,7 @@ class _DetailedAnalyticsPlaceholder extends StatelessWidget {
             'Detailed analytics view coming soon',
             style: GoogleFonts.hankenGrotesk(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: const Color(0xFF5A6B7B),
             ),
           ),
           const SizedBox(height: 32),

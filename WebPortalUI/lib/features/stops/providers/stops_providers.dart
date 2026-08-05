@@ -7,12 +7,20 @@ class Stop {
   const Stop({
     required this.id,
     required this.stopName,
+    required this.street,
+    required this.suburb,
+    required this.city,
+    required this.postalCode,
     required this.fullAddress,
     required this.gpsCoordinates,
   });
 
   final int id;
   final String stopName;
+  final String street;
+  final String suburb;
+  final String city;
+  final String postalCode;
   final String fullAddress;
   final String gpsCoordinates;
 
@@ -20,17 +28,13 @@ class Stop {
     return Stop(
       id: json['stopId'] as int? ?? json['id'] as int? ?? 0,
       stopName: json['stopName'] as String? ?? '',
+      street: json['street'] as String? ?? '',
+      suburb: json['suburb'] as String? ?? '',
+      city: json['city'] as String? ?? '',
+      postalCode: json['postalCode'] as String? ?? '',
       fullAddress: json['fullAddress'] as String? ?? '',
       gpsCoordinates: json['gpsCoordinates'] as String? ?? '',
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'stopName': stopName,
-      'fullAddress': fullAddress,
-      'gpsCoordinates': gpsCoordinates,
-    };
   }
 }
 
@@ -86,13 +90,19 @@ class StopsNotifier extends StateNotifier<StopsState> {
   /// Create a new stop. Returns null on success or an error message.
   Future<String?> createStop({
     required String stopName,
-    required String fullAddress,
+    required String street,
+    required String suburb,
+    required String city,
+    required String postalCode,
     required String gpsCoordinates,
   }) async {
     try {
       await _dio.post('/admin/stops', data: {
         'stopName': stopName,
-        'fullAddress': fullAddress,
+        'street': street,
+        'suburb': suburb,
+        'city': city,
+        'postalCode': postalCode,
         'gpsCoordinates': gpsCoordinates,
       });
       await fetchStops();
@@ -109,13 +119,19 @@ class StopsNotifier extends StateNotifier<StopsState> {
   Future<String?> updateStop({
     required int id,
     required String stopName,
-    required String fullAddress,
+    required String street,
+    required String suburb,
+    required String city,
+    required String postalCode,
     required String gpsCoordinates,
   }) async {
     try {
       await _dio.put('/admin/stops/$id', data: {
         'stopName': stopName,
-        'fullAddress': fullAddress,
+        'street': street,
+        'suburb': suburb,
+        'city': city,
+        'postalCode': postalCode,
         'gpsCoordinates': gpsCoordinates,
       });
       await fetchStops();

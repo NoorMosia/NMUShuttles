@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_admin/features/stops/providers/stops_providers.dart';
@@ -228,8 +229,18 @@ class _StopsScreenState extends ConsumerState<StopsScreen> {
   void _showStopDialog(BuildContext context, {Stop? stop}) {
     final isEditing = stop != null;
     final nameController = TextEditingController(text: stop?.stopName ?? '');
-    final addressController = TextEditingController(text: stop?.fullAddress ?? '');
-    final gpsController = TextEditingController(text: stop?.gpsCoordinates ?? '');
+    final streetController = TextEditingController(text: stop?.street ?? '');
+    final suburbController = TextEditingController(text: stop?.suburb ?? '');
+    final cityController = TextEditingController(text: stop?.city ?? '');
+    final postalCodeController = TextEditingController(text: stop?.postalCode ?? '');
+    // Split existing GPS coordinates into lat/lng
+    final gpsParts = (stop?.gpsCoordinates ?? '').split(',');
+    final latController = TextEditingController(
+      text: gpsParts.isNotEmpty ? gpsParts[0].trim() : '',
+    );
+    final lngController = TextEditingController(
+      text: gpsParts.length > 1 ? gpsParts[1].trim() : '',
+    );
     final formKey = GlobalKey<FormState>();
     String? dialogError;
 
@@ -248,73 +259,166 @@ class _StopsScreenState extends ConsumerState<StopsScreen> {
                 ),
               ),
               content: SizedBox(
-                width: 420,
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (dialogError != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.red.shade200),
-                            ),
-                            child: Text(
-                              dialogError!,
-                              style: GoogleFonts.hankenGrotesk(
-                                color: Colors.red.shade700,
-                                fontSize: 13,
+                width: 480,
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (dialogError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.red.shade200),
+                              ),
+                              child: Text(
+                                dialogError!,
+                                style: GoogleFonts.hankenGrotesk(
+                                  color: Colors.red.shade700,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      TextFormField(
-                        controller: nameController,
-                        decoration: InputDecoration(
-                          labelText: 'Stop Name',
-                          labelStyle: GoogleFonts.hankenGrotesk(),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                        TextFormField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Stop Name',
+                            labelStyle: GoogleFonts.hankenGrotesk(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
+                          style: GoogleFonts.hankenGrotesk(),
+                          validator: (v) => v == null || v.trim().isEmpty ? 'Stop name is required' : null,
                         ),
-                        style: GoogleFonts.hankenGrotesk(),
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Stop name is required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: addressController,
-                        decoration: InputDecoration(
-                          labelText: 'Full Address',
-                          labelStyle: GoogleFonts.hankenGrotesk(),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                        const SizedBox(height: 16),
+                        // Street
+                        TextFormField(
+                          controller: streetController,
+                          decoration: InputDecoration(
+                            labelText: 'Street',
+                            hintText: 'e.g. 12 Marine Drive',
+                            labelStyle: GoogleFonts.hankenGrotesk(),
+                            hintStyle: GoogleFonts.hankenGrotesk(color: Colors.grey.shade400),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
+                          style: GoogleFonts.hankenGrotesk(),
+                          validator: (v) => v == null || v.trim().isEmpty ? 'Street is required' : null,
                         ),
-                        style: GoogleFonts.hankenGrotesk(),
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Address is required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: gpsController,
-                        decoration: InputDecoration(
-                          labelText: 'GPS Coordinates',
-                          hintText: 'e.g. -33.9580, 25.5940',
-                          labelStyle: GoogleFonts.hankenGrotesk(),
-                          hintStyle: GoogleFonts.hankenGrotesk(color: Colors.grey.shade400),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                        const SizedBox(height: 16),
+                        // Suburb
+                        TextFormField(
+                          controller: suburbController,
+                          decoration: InputDecoration(
+                            labelText: 'Suburb',
+                            hintText: 'e.g. Summerstrand',
+                            labelStyle: GoogleFonts.hankenGrotesk(),
+                            hintStyle: GoogleFonts.hankenGrotesk(color: Colors.grey.shade400),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
+                          style: GoogleFonts.hankenGrotesk(),
+                          validator: (v) => v == null || v.trim().isEmpty ? 'Suburb is required' : null,
                         ),
-                        style: GoogleFonts.hankenGrotesk(),
-                        validator: (v) => v == null || v.trim().isEmpty ? 'GPS coordinates are required' : null,
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        // City
+                        TextFormField(
+                          controller: cityController,
+                          decoration: InputDecoration(
+                            labelText: 'City',
+                            hintText: 'e.g. Gqeberha',
+                            labelStyle: GoogleFonts.hankenGrotesk(),
+                            hintStyle: GoogleFonts.hankenGrotesk(color: Colors.grey.shade400),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          style: GoogleFonts.hankenGrotesk(),
+                          validator: (v) => v == null || v.trim().isEmpty ? 'City is required' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        // Postal Code
+                        TextFormField(
+                          controller: postalCodeController,
+                          decoration: InputDecoration(
+                            labelText: 'Postal Code',
+                            hintText: 'e.g. 6001',
+                            helperText: 'Numbers only',
+                            labelStyle: GoogleFonts.hankenGrotesk(),
+                            hintStyle: GoogleFonts.hankenGrotesk(color: Colors.grey.shade400),
+                            helperStyle: GoogleFonts.hankenGrotesk(fontSize: 11, color: Colors.grey.shade500),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          style: GoogleFonts.hankenGrotesk(),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          validator: (v) => v == null || v.trim().isEmpty ? 'Postal code is required' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        // Latitude + Longitude
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: latController,
+                                decoration: InputDecoration(
+                                  labelText: 'Latitude',
+                                  hintText: 'e.g. -33.9580',
+                                  labelStyle: GoogleFonts.hankenGrotesk(),
+                                  hintStyle: GoogleFonts.hankenGrotesk(color: Colors.grey.shade400),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                style: GoogleFonts.hankenGrotesk(),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) return 'Required';
+                                  final n = double.tryParse(v.trim());
+                                  if (n == null || n < -90 || n > 90) return 'Invalid (-90 to 90)';
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextFormField(
+                                controller: lngController,
+                                decoration: InputDecoration(
+                                  labelText: 'Longitude',
+                                  hintText: 'e.g. 25.5940',
+                                  labelStyle: GoogleFonts.hankenGrotesk(),
+                                  hintStyle: GoogleFonts.hankenGrotesk(color: Colors.grey.shade400),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                style: GoogleFonts.hankenGrotesk(),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) return 'Required';
+                                  final n = double.tryParse(v.trim());
+                                  if (n == null || n < -180 || n > 180) return 'Invalid (-180 to 180)';
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -331,18 +435,25 @@ class _StopsScreenState extends ConsumerState<StopsScreen> {
                     if (!formKey.currentState!.validate()) return;
 
                     String? error;
+                    final gpsCoordinates = '${latController.text.trim()},${lngController.text.trim()}';
                     if (isEditing) {
                       error = await ref.read(stopsProvider.notifier).updateStop(
                             id: stop.id,
                             stopName: nameController.text.trim(),
-                            fullAddress: addressController.text.trim(),
-                            gpsCoordinates: gpsController.text.trim(),
+                            street: streetController.text.trim(),
+                            suburb: suburbController.text.trim(),
+                            city: cityController.text.trim(),
+                            postalCode: postalCodeController.text.trim(),
+                            gpsCoordinates: gpsCoordinates,
                           );
                     } else {
                       error = await ref.read(stopsProvider.notifier).createStop(
                             stopName: nameController.text.trim(),
-                            fullAddress: addressController.text.trim(),
-                            gpsCoordinates: gpsController.text.trim(),
+                            street: streetController.text.trim(),
+                            suburb: suburbController.text.trim(),
+                            city: cityController.text.trim(),
+                            postalCode: postalCodeController.text.trim(),
+                            gpsCoordinates: gpsCoordinates,
                           );
                     }
 
@@ -352,11 +463,6 @@ class _StopsScreenState extends ConsumerState<StopsScreen> {
                       if (dialogContext.mounted) Navigator.of(dialogContext).pop();
                     }
                   },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _navy,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
                   child: Text(
                     isEditing ? 'Update' : 'Create',
                     style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w600),

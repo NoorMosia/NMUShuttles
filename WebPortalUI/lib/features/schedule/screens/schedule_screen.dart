@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:nmu_shuttle_admin/features/schedule/providers/schedule_providers.dart';
 
-/// Schedule management screen with 3 tabs:
-/// Schedule Times, Calendar Exceptions, Priority Schedules.
+/// Schedule Times management screen (standalone, no tabs).
 class ScheduleScreen extends ConsumerStatefulWidget {
   const ScheduleScreen({super.key});
 
@@ -13,154 +11,62 @@ class ScheduleScreen extends ConsumerStatefulWidget {
   ConsumerState<ScheduleScreen> createState() => _ScheduleScreenState();
 }
 
-class _ScheduleScreenState extends ConsumerState<ScheduleScreen>
-    with SingleTickerProviderStateMixin {
+class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   static const Color _navy = Color(0xFF132E51);
-  static const Color _gold = Color(0xFFFFCC00);
-
-  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    // Fetch data on load
     Future.microtask(() {
       ref.read(scheduleTimesProvider.notifier).fetchScheduleTimes();
-      ref.read(calendarExceptionsProvider.notifier).fetchCalendarExceptions();
-      ref.read(prioritySchedulesProvider.notifier).fetchPrioritySchedules();
     });
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final state = ref.watch(scheduleTimesProvider);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFFF8F9FB),
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Schedule',
+              'Schedule Times',
               style: GoogleFonts.hankenGrotesk(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
                 color: _navy,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              'Manage shuttle schedules, calendar exceptions, and priority placements',
+              'Manage departure times, directions, and schedule types for shuttle routes',
               style: GoogleFonts.hankenGrotesk(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: const Color(0xFF5A6B7B),
               ),
             ),
             const SizedBox(height: 24),
-            // Tab bar
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TabBar(
-                controller: _tabController,
-                labelColor: _navy,
-                unselectedLabelColor: Colors.grey.shade500,
-                indicatorColor: _gold,
-                indicatorWeight: 3,
-                labelStyle: GoogleFonts.hankenGrotesk(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+            // Action bar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FilledButton.icon(
+                  onPressed: () => _showCreateScheduleTimeDialog(context, ref),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Schedule Time'),
                 ),
-                unselectedLabelStyle: GoogleFonts.hankenGrotesk(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-                tabs: const [
-                  Tab(text: 'Schedule Times'),
-                  Tab(text: 'Calendar Exceptions'),
-                  Tab(text: 'Priority Schedules'),
-                ],
-              ),
+              ],
             ),
             const SizedBox(height: 16),
-            // Tab views
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: const [
-                  _ScheduleTimesTab(),
-                  _CalendarExceptionsTab(),
-                  _PrioritySchedulesTab(),
-                ],
-              ),
-            ),
+            // Content
+            Expanded(child: _buildContent(context, ref, state)),
           ],
         ),
       ),
-    );
-  }
-}
-
-
-// ─── Schedule Times Tab ──────────────────────────────────────────────────────
-
-class _ScheduleTimesTab extends ConsumerWidget {
-  const _ScheduleTimesTab();
-
-  static const Color _navy = Color(0xFF132E51);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(scheduleTimesProvider);
-
-    return Column(
-      children: [
-        // Action bar
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FilledButton.icon(
-              onPressed: () => _showCreateScheduleTimeDialog(context, ref),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add Schedule Time'),
-              style: FilledButton.styleFrom(
-                backgroundColor: _navy,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                textStyle: GoogleFonts.hankenGrotesk(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Content
-        Expanded(
-          child: _buildContent(context, ref, state),
-        ),
-      ],
     );
   }
 
@@ -182,7 +88,7 @@ class _ScheduleTimesTab extends ConsumerWidget {
             child: Text(
               'No schedule times found',
               style: GoogleFonts.hankenGrotesk(
-                  fontSize: 14, color: Colors.grey.shade600),
+                  fontSize: 14, color: const Color(0xFF5A6B7B)),
             ),
           );
         }
@@ -196,45 +102,20 @@ class _ScheduleTimesTab extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: const Color(0xFFE8ECF0)),
       ),
       child: SingleChildScrollView(
         child: SizedBox(
           width: double.infinity,
           child: DataTable(
-            headingRowColor:
-                WidgetStateProperty.all(_navy.withValues(alpha: 0.05)),
-            dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-              (states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return Colors.grey.shade200;
-                }
-                return null;
-              },
-            ),
-            headingTextStyle: GoogleFonts.hankenGrotesk(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: _navy,
-            ),
-            dataTextStyle: GoogleFonts.hankenGrotesk(
-              fontSize: 13,
-              color: _navy,
-            ),
             columnSpacing: 24,
             columns: const [
-              DataColumn(label: Text('Departure Time')),
-              DataColumn(label: Text('Direction')),
-              DataColumn(label: Text('Schedule Type')),
-              DataColumn(label: Text('Campus ID')),
-              DataColumn(label: Text('Stop ID')),
-              DataColumn(label: Text('Actions')),
+              DataColumn(label: Text('DEPARTURE TIME')),
+              DataColumn(label: Text('DIRECTION')),
+              DataColumn(label: Text('SCHEDULE TYPE')),
+              DataColumn(label: Text('CAMPUS ID')),
+              DataColumn(label: Text('STOP ID')),
+              DataColumn(label: Text('ACTIONS')),
             ],
             rows: items.map((item) {
               return DataRow(cells: [
@@ -257,8 +138,7 @@ class _ScheduleTimesTab extends ConsumerWidget {
                       icon: Icon(Icons.delete_outlined,
                           size: 18, color: Colors.red.shade700),
                       tooltip: 'Delete',
-                      onPressed: () =>
-                          _confirmDelete(context, ref, item),
+                      onPressed: () => _confirmDelete(context, ref, item),
                     ),
                   ],
                 )),
@@ -352,415 +232,7 @@ class _ScheduleTimesTab extends ConsumerWidget {
   }
 }
 
-
-// ─── Calendar Exceptions Tab ─────────────────────────────────────────────────
-
-class _CalendarExceptionsTab extends ConsumerWidget {
-  const _CalendarExceptionsTab();
-
-  static const Color _navy = Color(0xFF132E51);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(calendarExceptionsProvider);
-
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FilledButton.icon(
-              onPressed: () => _showCreateExceptionDialog(context, ref),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add Exception'),
-              style: FilledButton.styleFrom(
-                backgroundColor: _navy,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                textStyle: GoogleFonts.hankenGrotesk(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: _buildContent(context, ref, state),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildContent(
-      BuildContext context, WidgetRef ref, CalendarExceptionsState state) {
-    switch (state.status) {
-      case ScheduleStatus.idle:
-      case ScheduleStatus.loading:
-        return const Center(child: CircularProgressIndicator(strokeWidth: 3));
-      case ScheduleStatus.error:
-        return _ErrorPanel(
-          message: state.errorMessage ?? 'An error occurred',
-          onRetry: () => ref
-              .read(calendarExceptionsProvider.notifier)
-              .fetchCalendarExceptions(),
-        );
-      case ScheduleStatus.success:
-        if (state.items.isEmpty) {
-          return Center(
-            child: Text(
-              'No calendar exceptions found',
-              style: GoogleFonts.hankenGrotesk(
-                  fontSize: 14, color: Colors.grey.shade600),
-            ),
-          );
-        }
-        return _buildTable(context, ref, state.items);
-    }
-  }
-
-  Widget _buildTable(BuildContext context, WidgetRef ref,
-      List<CalendarExceptionModel> items) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        child: SizedBox(
-          width: double.infinity,
-          child: DataTable(
-            headingRowColor:
-                WidgetStateProperty.all(_navy.withValues(alpha: 0.05)),
-            dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-              (states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return Colors.grey.shade200;
-                }
-                return null;
-              },
-            ),
-            headingTextStyle: GoogleFonts.hankenGrotesk(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: _navy,
-            ),
-            dataTextStyle: GoogleFonts.hankenGrotesk(
-              fontSize: 13,
-              color: _navy,
-            ),
-            columnSpacing: 24,
-            columns: const [
-              DataColumn(label: Text('Target Date')),
-              DataColumn(label: Text('Exception Type')),
-              DataColumn(label: Text('Description')),
-              DataColumn(label: Text('Actions')),
-            ],
-            rows: items.map((item) {
-              return DataRow(cells: [
-                DataCell(Text(_formatDate(item.targetDate))),
-                DataCell(_ExceptionTypeChip(type: item.exceptionType)),
-                DataCell(
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 300),
-                    child: Text(
-                      item.description,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                DataCell(
-                  IconButton(
-                    icon: Icon(Icons.delete_outlined,
-                        size: 18, color: Colors.red.shade700),
-                    tooltip: 'Delete',
-                    onPressed: () => _confirmDelete(context, ref, item),
-                  ),
-                ),
-              ]);
-            }).toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(String dateStr) {
-    try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('dd MMM yyyy').format(date);
-    } catch (_) {
-      return dateStr;
-    }
-  }
-
-  void _showCreateExceptionDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (ctx) => _CalendarExceptionFormDialog(
-        onSubmit: (targetDate, exceptionType, description) {
-          ref.read(calendarExceptionsProvider.notifier).addCalendarException(
-                targetDate: targetDate,
-                exceptionType: exceptionType,
-                description: description,
-              );
-        },
-      ),
-    );
-  }
-
-  void _confirmDelete(
-      BuildContext context, WidgetRef ref, CalendarExceptionModel item) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          'Delete Calendar Exception',
-          style: GoogleFonts.hankenGrotesk(
-            fontWeight: FontWeight.w600,
-            color: _navy,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to delete the exception for ${_formatDate(item.targetDate)}?',
-          style: GoogleFonts.hankenGrotesk(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              ref
-                  .read(calendarExceptionsProvider.notifier)
-                  .deleteCalendarException(item.id);
-              Navigator.of(ctx).pop();
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red.shade700,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-// ─── Priority Schedules Tab ──────────────────────────────────────────────────
-
-class _PrioritySchedulesTab extends ConsumerWidget {
-  const _PrioritySchedulesTab();
-
-  static const Color _navy = Color(0xFF132E51);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(prioritySchedulesProvider);
-
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FilledButton.icon(
-              onPressed: () => _showCreatePriorityDialog(context, ref),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add Priority Schedule'),
-              style: FilledButton.styleFrom(
-                backgroundColor: _navy,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                textStyle: GoogleFonts.hankenGrotesk(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: _buildContent(context, ref, state),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildContent(
-      BuildContext context, WidgetRef ref, PrioritySchedulesState state) {
-    switch (state.status) {
-      case ScheduleStatus.idle:
-      case ScheduleStatus.loading:
-        return const Center(child: CircularProgressIndicator(strokeWidth: 3));
-      case ScheduleStatus.error:
-        return _ErrorPanel(
-          message: state.errorMessage ?? 'An error occurred',
-          onRetry: () => ref
-              .read(prioritySchedulesProvider.notifier)
-              .fetchPrioritySchedules(),
-        );
-      case ScheduleStatus.success:
-        if (state.items.isEmpty) {
-          return Center(
-            child: Text(
-              'No priority schedules found',
-              style: GoogleFonts.hankenGrotesk(
-                  fontSize: 14, color: Colors.grey.shade600),
-            ),
-          );
-        }
-        return _buildTable(context, ref, state.items);
-    }
-  }
-
-  Widget _buildTable(BuildContext context, WidgetRef ref,
-      List<PriorityScheduleModel> items) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        child: SizedBox(
-          width: double.infinity,
-          child: DataTable(
-            headingRowColor:
-                WidgetStateProperty.all(_navy.withValues(alpha: 0.05)),
-            dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-              (states) {
-                if (states.contains(WidgetState.hovered)) {
-                  return Colors.grey.shade200;
-                }
-                return null;
-              },
-            ),
-            headingTextStyle: GoogleFonts.hankenGrotesk(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: _navy,
-            ),
-            dataTextStyle: GoogleFonts.hankenGrotesk(
-              fontSize: 13,
-              color: _navy,
-            ),
-            columnSpacing: 24,
-            columns: const [
-              DataColumn(label: Text('Student Number')),
-              DataColumn(label: Text('Student Name')),
-              DataColumn(label: Text('Stop')),
-              DataColumn(label: Text('Day of Week')),
-              DataColumn(label: Text('Status')),
-              DataColumn(label: Text('Actions')),
-            ],
-            rows: items.map((item) {
-              return DataRow(cells: [
-                DataCell(Text(item.studentNumber ?? '${item.studentId}')),
-                DataCell(Text(item.studentName ?? '-')),
-                DataCell(Text(item.stopName ?? '${item.stopId}')),
-                DataCell(Text(item.dayOfWeek)),
-                DataCell(_ActiveStatusChip(isActive: item.isActive)),
-                DataCell(
-                  item.isActive
-                      ? IconButton(
-                          icon: Icon(Icons.block_outlined,
-                              size: 18, color: Colors.orange.shade700),
-                          tooltip: 'Deactivate',
-                          onPressed: () =>
-                              _confirmDeactivate(context, ref, item),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              ]);
-            }).toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showCreatePriorityDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (ctx) => _PriorityScheduleFormDialog(
-        onSubmit: (studentId, stopId, scheduleTimeId, dayOfWeek) {
-          ref.read(prioritySchedulesProvider.notifier).addPrioritySchedule(
-                studentId: studentId,
-                stopId: stopId,
-                scheduleTimeId: scheduleTimeId,
-                dayOfWeek: dayOfWeek,
-              );
-        },
-      ),
-    );
-  }
-
-  void _confirmDeactivate(
-      BuildContext context, WidgetRef ref, PriorityScheduleModel item) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          'Deactivate Priority Schedule',
-          style: GoogleFonts.hankenGrotesk(
-            fontWeight: FontWeight.w600,
-            color: _navy,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to deactivate this priority schedule for student ${item.studentId}?',
-          style: GoogleFonts.hankenGrotesk(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              ref
-                  .read(prioritySchedulesProvider.notifier)
-                  .deactivatePrioritySchedule(item.id);
-              Navigator.of(ctx).pop();
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.orange.shade700,
-            ),
-            child: const Text('Deactivate'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-// ─── Schedule Time Form Dialog ───────────────────────────────────────────────
+// ─── Form Dialog ─────────────────────────────────────────────────────────────
 
 class _ScheduleTimeFormDialog extends StatefulWidget {
   const _ScheduleTimeFormDialog({
@@ -835,7 +307,6 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Departure Time
               TextFormField(
                 controller: _departureTimeController,
                 decoration: InputDecoration(
@@ -862,7 +333,6 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
                 readOnly: true,
               ),
               const SizedBox(height: 16),
-              // Direction
               DropdownButtonFormField<String>(
                 initialValue: _direction,
                 decoration: InputDecoration(
@@ -879,10 +349,10 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
                   DropdownMenuItem(
                       value: 'FromCampus', child: Text('From Campus')),
                 ],
-                onChanged: (v) => setState(() => _direction = v ?? 'ToCampus'),
+                onChanged: (v) =>
+                    setState(() => _direction = v ?? 'ToCampus'),
               ),
               const SizedBox(height: 16),
-              // Schedule Type
               DropdownButtonFormField<String>(
                 initialValue: _scheduleType,
                 decoration: InputDecoration(
@@ -895,13 +365,13 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
                 style: GoogleFonts.hankenGrotesk(color: _navy),
                 items: const [
                   DropdownMenuItem(value: 'Weekday', child: Text('Weekday')),
-                  DropdownMenuItem(value: 'Saturday', child: Text('Saturday')),
+                  DropdownMenuItem(
+                      value: 'Saturday', child: Text('Saturday')),
                 ],
                 onChanged: (v) =>
                     setState(() => _scheduleType = v ?? 'Weekday'),
               ),
               const SizedBox(height: 16),
-              // Campus ID
               TextFormField(
                 controller: _campusIdController,
                 decoration: InputDecoration(
@@ -918,7 +388,6 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
                     (v == null || v.isEmpty) ? 'Required' : null,
               ),
               const SizedBox(height: 16),
-              // Stop ID
               TextFormField(
                 controller: _stopIdController,
                 decoration: InputDecoration(
@@ -945,12 +414,6 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
         ),
         FilledButton(
           onPressed: _submit,
-          style: FilledButton.styleFrom(
-            backgroundColor: _navy,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
           child: Text('Save', style: GoogleFonts.hankenGrotesk()),
         ),
       ],
@@ -972,325 +435,7 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
   }
 }
 
-
-// ─── Calendar Exception Form Dialog ─────────────────────────────────────────
-
-class _CalendarExceptionFormDialog extends StatefulWidget {
-  const _CalendarExceptionFormDialog({required this.onSubmit});
-
-  final void Function(
-      String targetDate, String exceptionType, String description) onSubmit;
-
-  @override
-  State<_CalendarExceptionFormDialog> createState() =>
-      _CalendarExceptionFormDialogState();
-}
-
-class _CalendarExceptionFormDialogState
-    extends State<_CalendarExceptionFormDialog> {
-  static const Color _navy = Color(0xFF132E51);
-
-  final _formKey = GlobalKey<FormState>();
-  final _descriptionController = TextEditingController();
-  DateTime? _selectedDate;
-  String _exceptionType = 'PublicHoliday';
-
-  @override
-  void dispose() {
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        'Add Calendar Exception',
-        style: GoogleFonts.hankenGrotesk(
-          fontWeight: FontWeight.w600,
-          color: _navy,
-        ),
-      ),
-      content: SizedBox(
-        width: 420,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Target Date
-              InkWell(
-                onTap: _pickDate,
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Target Date',
-                    labelStyle: GoogleFonts.hankenGrotesk(),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    prefixIcon: const Icon(Icons.calendar_today),
-                  ),
-                  child: Text(
-                    _selectedDate != null
-                        ? DateFormat('dd MMM yyyy').format(_selectedDate!)
-                        : 'Select a date',
-                    style: GoogleFonts.hankenGrotesk(
-                      color: _selectedDate != null ? _navy : Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Exception Type
-              DropdownButtonFormField<String>(
-                initialValue: _exceptionType,
-                decoration: InputDecoration(
-                  labelText: 'Exception Type',
-                  labelStyle: GoogleFonts.hankenGrotesk(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                style: GoogleFonts.hankenGrotesk(color: _navy),
-                items: const [
-                  DropdownMenuItem(
-                      value: 'PublicHoliday', child: Text('Public Holiday')),
-                  DropdownMenuItem(
-                      value: 'UniversityRecess',
-                      child: Text('University Recess')),
-                  DropdownMenuItem(
-                      value: 'SpecialEvent', child: Text('Special Event')),
-                ],
-                onChanged: (v) =>
-                    setState(() => _exceptionType = v ?? 'PublicHoliday'),
-              ),
-              const SizedBox(height: 16),
-              // Description
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  labelStyle: GoogleFonts.hankenGrotesk(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  prefixIcon: const Icon(Icons.description_outlined),
-                ),
-                style: GoogleFonts.hankenGrotesk(),
-                maxLines: 2,
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Required' : null,
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel', style: GoogleFonts.hankenGrotesk()),
-        ),
-        FilledButton(
-          onPressed: _submit,
-          style: FilledButton.styleFrom(
-            backgroundColor: _navy,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: Text('Save', style: GoogleFonts.hankenGrotesk()),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-    );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
-  }
-
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-    if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a target date')),
-      );
-      return;
-    }
-    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
-    widget.onSubmit(dateStr, _exceptionType, _descriptionController.text);
-    Navigator.of(context).pop();
-  }
-}
-
-
-// ─── Priority Schedule Form Dialog ───────────────────────────────────────────
-
-class _PriorityScheduleFormDialog extends StatefulWidget {
-  const _PriorityScheduleFormDialog({required this.onSubmit});
-
-  final void Function(
-      int studentId, int stopId, int scheduleTimeId, String dayOfWeek) onSubmit;
-
-  @override
-  State<_PriorityScheduleFormDialog> createState() =>
-      _PriorityScheduleFormDialogState();
-}
-
-class _PriorityScheduleFormDialogState
-    extends State<_PriorityScheduleFormDialog> {
-  static const Color _navy = Color(0xFF132E51);
-
-  final _formKey = GlobalKey<FormState>();
-  final _studentIdController = TextEditingController();
-  final _stopIdController = TextEditingController();
-  final _scheduleTimeIdController = TextEditingController();
-  String _dayOfWeek = 'Monday';
-
-  static const List<String> _daysOfWeek = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ];
-
-  @override
-  void dispose() {
-    _studentIdController.dispose();
-    _stopIdController.dispose();
-    _scheduleTimeIdController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        'Add Priority Schedule',
-        style: GoogleFonts.hankenGrotesk(
-          fontWeight: FontWeight.w600,
-          color: _navy,
-        ),
-      ),
-      content: SizedBox(
-        width: 420,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Student ID
-              TextFormField(
-                controller: _studentIdController,
-                decoration: InputDecoration(
-                  labelText: 'Student ID',
-                  labelStyle: GoogleFonts.hankenGrotesk(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  prefixIcon: const Icon(Icons.person_outlined),
-                ),
-                style: GoogleFonts.hankenGrotesk(),
-                keyboardType: TextInputType.number,
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: 16),
-              // Stop ID
-              TextFormField(
-                controller: _stopIdController,
-                decoration: InputDecoration(
-                  labelText: 'Stop ID',
-                  labelStyle: GoogleFonts.hankenGrotesk(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  prefixIcon: const Icon(Icons.location_on_outlined),
-                ),
-                style: GoogleFonts.hankenGrotesk(),
-                keyboardType: TextInputType.number,
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: 16),
-              // Schedule Time ID
-              TextFormField(
-                controller: _scheduleTimeIdController,
-                decoration: InputDecoration(
-                  labelText: 'Schedule Time ID',
-                  labelStyle: GoogleFonts.hankenGrotesk(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  prefixIcon: const Icon(Icons.schedule_outlined),
-                ),
-                style: GoogleFonts.hankenGrotesk(),
-                keyboardType: TextInputType.number,
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: 16),
-              // Day of Week
-              DropdownButtonFormField<String>(
-                initialValue: _dayOfWeek,
-                decoration: InputDecoration(
-                  labelText: 'Day of Week',
-                  labelStyle: GoogleFonts.hankenGrotesk(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                style: GoogleFonts.hankenGrotesk(color: _navy),
-                items: _daysOfWeek
-                    .map((d) => DropdownMenuItem(value: d, child: Text(d)))
-                    .toList(),
-                onChanged: (v) =>
-                    setState(() => _dayOfWeek = v ?? 'Monday'),
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel', style: GoogleFonts.hankenGrotesk()),
-        ),
-        FilledButton(
-          onPressed: _submit,
-          style: FilledButton.styleFrom(
-            backgroundColor: _navy,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: Text('Save', style: GoogleFonts.hankenGrotesk()),
-        ),
-      ],
-    );
-  }
-
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-    final studentId = int.tryParse(_studentIdController.text) ?? 0;
-    final stopId = int.tryParse(_stopIdController.text) ?? 0;
-    final scheduleTimeId = int.tryParse(_scheduleTimeIdController.text) ?? 0;
-    widget.onSubmit(studentId, stopId, scheduleTimeId, _dayOfWeek);
-    Navigator.of(context).pop();
-  }
-}
-
-
-// ─── Shared Chip / Badge Widgets ─────────────────────────────────────────────
+// ─── Chip Widgets ────────────────────────────────────────────────────────────
 
 class _DirectionChip extends StatelessWidget {
   const _DirectionChip({required this.direction});
@@ -1345,75 +490,6 @@ class _ScheduleTypeChip extends StatelessWidget {
   }
 }
 
-class _ExceptionTypeChip extends StatelessWidget {
-  const _ExceptionTypeChip({required this.type});
-  final String type;
-
-  @override
-  Widget build(BuildContext context) {
-    Color color;
-    String label;
-    switch (type) {
-      case 'PublicHoliday':
-        color = Colors.red.shade700;
-        label = 'Public Holiday';
-        break;
-      case 'UniversityRecess':
-        color = Colors.indigo.shade700;
-        label = 'University Recess';
-        break;
-      case 'SpecialEvent':
-        color = Colors.green.shade700;
-        label = 'Special Event';
-        break;
-      default:
-        color = Colors.grey.shade700;
-        label = type;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.hankenGrotesk(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
-    );
-  }
-}
-
-class _ActiveStatusChip extends StatelessWidget {
-  const _ActiveStatusChip({required this.isActive});
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isActive ? Colors.green.shade700 : Colors.grey.shade600;
-    final label = isActive ? 'Active' : 'Inactive';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.hankenGrotesk(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
-    );
-  }
-}
-
 // ─── Error Panel ─────────────────────────────────────────────────────────────
 
 class _ErrorPanel extends StatelessWidget {
@@ -1435,7 +511,7 @@ class _ErrorPanel extends StatelessWidget {
               message,
               style: GoogleFonts.hankenGrotesk(
                 fontSize: 14,
-                color: Colors.grey.shade700,
+                color: const Color(0xFF5A6B7B),
               ),
             ),
             const SizedBox(height: 12),

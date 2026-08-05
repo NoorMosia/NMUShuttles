@@ -8,6 +8,7 @@ class Shuttle {
     required this.id,
     required this.licensePlate,
     required this.capacity,
+    required this.vendorId,
     required this.vendorCompanyName,
     required this.isAccessibleVehicle,
   });
@@ -15,6 +16,7 @@ class Shuttle {
   final int id;
   final String licensePlate;
   final int capacity;
+  final int vendorId;
   final String vendorCompanyName;
   final bool isAccessibleVehicle;
 
@@ -23,18 +25,10 @@ class Shuttle {
       id: json['shuttleId'] as int? ?? json['id'] as int? ?? 0,
       licensePlate: json['licensePlate'] as String? ?? '',
       capacity: json['capacity'] as int? ?? 0,
+      vendorId: json['vendorId'] as int? ?? 0,
       vendorCompanyName: json['vendorCompanyName'] as String? ?? '',
       isAccessibleVehicle: json['isAccessibleVehicle'] as bool? ?? false,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'licensePlate': licensePlate,
-      'capacity': capacity,
-      'vendorCompanyName': vendorCompanyName,
-      'isAccessibleVehicle': isAccessibleVehicle,
-    };
   }
 }
 
@@ -91,14 +85,14 @@ class ShuttlesNotifier extends StateNotifier<ShuttlesState> {
   Future<String?> createShuttle({
     required String licensePlate,
     required int capacity,
-    required String vendorCompanyName,
+    required int vendorId,
     required bool isAccessibleVehicle,
   }) async {
     try {
       await _dio.post('/admin/shuttles', data: {
         'licensePlate': licensePlate,
         'capacity': capacity,
-        'vendorCompanyName': vendorCompanyName,
+        'vendorId': vendorId,
         'isAccessibleVehicle': isAccessibleVehicle,
       });
       await fetchShuttles();
@@ -116,14 +110,14 @@ class ShuttlesNotifier extends StateNotifier<ShuttlesState> {
     required int id,
     required String licensePlate,
     required int capacity,
-    required String vendorCompanyName,
+    required int vendorId,
     required bool isAccessibleVehicle,
   }) async {
     try {
       await _dio.put('/admin/shuttles/$id', data: {
         'licensePlate': licensePlate,
         'capacity': capacity,
-        'vendorCompanyName': vendorCompanyName,
+        'vendorId': vendorId,
         'isAccessibleVehicle': isAccessibleVehicle,
       });
       await fetchShuttles();

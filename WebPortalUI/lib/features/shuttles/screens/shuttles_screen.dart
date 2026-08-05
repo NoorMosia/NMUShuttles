@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_admin/features/shuttles/providers/shuttles_providers.dart';
+import 'package:nmu_shuttle_admin/features/vendors/providers/vendors_providers.dart';
 
 /// Full CRUD screen for managing shuttle vehicles.
 class ShuttlesScreen extends ConsumerStatefulWidget {
@@ -18,7 +19,10 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(shuttlesProvider.notifier).fetchShuttles());
+    Future.microtask(() {
+      ref.read(shuttlesProvider.notifier).fetchShuttles();
+      ref.read(vendorsProvider.notifier).fetchVendors();
+    });
   }
 
   @override
@@ -127,12 +131,7 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                                   _navy.withValues(alpha: 0.05),
                                 ),
                                 dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                                  (states) {
-                                    if (states.contains(WidgetState.hovered)) {
-                                      return Colors.grey.shade200;
-                                    }
-                                    return null;
-                                  },
+                                  (states) => Colors.transparent,
                                 ),
                                 headingRowHeight: 52,
                                 dataRowMinHeight: 48,
@@ -251,7 +250,7 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
     final capacityController = TextEditingController(
       text: shuttle != null ? shuttle.capacity.toString() : '',
     );
-    final vendorController = TextEditingController(text: shuttle?.vendorCompanyName ?? '');
+    int? selectedVendorId = shuttle?.vendorId;
     bool isAccessible = shuttle?.isAccessibleVehicle ?? false;
     final formKey = GlobalKey<FormState>();
     String? dialogError;
@@ -261,6 +260,8 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final vendorsState = ref.watch(vendorsProvider);
+
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               title: Text(
@@ -312,58 +313,131 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                             v == null || v.trim().isEmpty ? 'License plate is required' : null,
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: capacityController,
+                      // Capacity: slider + editable text field
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Capacity',
+                            style: GoogleFonts.hankenGrotesk(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: _navy,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Slider(
+                                  value: (int.tryParse(capacityController.text) ?? 0)
+                                      .clamp(0, 80)
+                                      .toDouble(),
+                                  min: 0,
+                                  max: 80,
+                                  divisions: 80,
+                                  activeColor: _navy,
+                                  label: capacityController.text.isEmpty
+                                      ? '0'
+                                      : capacityController.text,
+                                  onChanged: (val) {
+                                    setDialogState(() {
+                                      capacityController.text =
+                                          val.round().toString();
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              SizedBox(
+                                width: 72,
+                                child: TextFormField(
+                                  controller: capacityController,
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 10),
+                                  ),
+                                  style: GoogleFonts.hankenGrotesk(fontSize: 14),
+                                  textAlign: TextAlign.center,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  onChanged: (v) {
+                                    setDialogState(() {});
+                                  },
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'Required';
+                                    }
+                                    final n = int.tryParse(v.trim());
+                                    if (n == null || n <= 0) return '> 0';
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Vendor dropdown
+                      DropdownButtonFormField<int>(
+                        value: selectedVendorId,
                         decoration: InputDecoration(
-                          labelText: 'Capacity',
+                          labelText: 'Vendor',
                           labelStyle: GoogleFonts.hankenGrotesk(),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
+                          prefixIcon: const Icon(Icons.business_outlined),
                         ),
-                        style: GoogleFonts.hankenGrotesk(),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Capacity is required';
-                          final n = int.tryParse(v.trim());
-                          if (n == null || n <= 0) return 'Capacity must be greater than 0';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: vendorController,
-                        decoration: InputDecoration(
-                          labelText: 'Vendor Company Name',
-                          labelStyle: GoogleFonts.hankenGrotesk(),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        style: GoogleFonts.hankenGrotesk(),
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty ? 'Vendor name is required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          'Accessible Vehicle',
-                          style: GoogleFonts.hankenGrotesk(fontSize: 14),
-                        ),
-                        subtitle: Text(
-                          'Wheelchair-accessible shuttle',
-                          style: GoogleFonts.hankenGrotesk(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                        value: isAccessible,
-                        activeTrackColor: _navy,
+                        style: GoogleFonts.hankenGrotesk(color: _navy, fontSize: 14),
+                        items: vendorsState.vendors.map((v) {
+                          return DropdownMenuItem<int>(
+                            value: v.id,
+                            child: Text(v.companyName),
+                          );
+                        }).toList(),
                         onChanged: (val) {
-                          setDialogState(() => isAccessible = val);
+                          setDialogState(() => selectedVendorId = val);
                         },
+                        validator: (v) => v == null ? 'Please select a vendor' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      // Accessible vehicle toggle
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Accessible Vehicle',
+                                  style: GoogleFonts.hankenGrotesk(fontSize: 14),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Wheelchair-accessible shuttle',
+                                  style: GoogleFonts.hankenGrotesk(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: isAccessible,
+                            activeTrackColor: _navy,
+                            onChanged: (val) {
+                              setDialogState(() => isAccessible = val);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -387,14 +461,14 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                             id: shuttle.id,
                             licensePlate: plateController.text.trim(),
                             capacity: int.parse(capacityController.text.trim()),
-                            vendorCompanyName: vendorController.text.trim(),
+                            vendorId: selectedVendorId!,
                             isAccessibleVehicle: isAccessible,
                           );
                     } else {
                       error = await ref.read(shuttlesProvider.notifier).createShuttle(
                             licensePlate: plateController.text.trim(),
                             capacity: int.parse(capacityController.text.trim()),
-                            vendorCompanyName: vendorController.text.trim(),
+                            vendorId: selectedVendorId!,
                             isAccessibleVehicle: isAccessible,
                           );
                     }
@@ -405,11 +479,6 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                       if (dialogContext.mounted) Navigator.of(dialogContext).pop();
                     }
                   },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _navy,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
                   child: Text(
                     isEditing ? 'Update' : 'Create',
                     style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w600),

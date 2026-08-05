@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nmu_shuttle_app/core/router/app_router.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(
     const ProviderScope(
       child: NmuShuttleApp(),
@@ -26,6 +28,7 @@ class _NmuShuttleAppState extends State<NmuShuttleApp> {
   void initState() {
     super.initState();
     _appRouter = AppRouter();
+    FlutterNativeSplash.remove();
   }
 
   // @override

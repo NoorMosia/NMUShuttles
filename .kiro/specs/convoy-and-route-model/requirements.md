@@ -7,7 +7,7 @@ operational workflow of the NMU Shuttle Management Network. It builds on the fou
 established in the `nmu-shuttle-management` spec and corrects several design issues discovered
 during analysis of how the physical university shuttle system actually operates.
 
-The changes fall into four concern areas:
+The changes fall into five concern areas:
 
 1. **Stop-centric default convoys** — each Stop maintains a standing roster of shuttles that are
    automatically applied when trips are created, replacing the current manual per-trip assignment
@@ -19,6 +19,8 @@ The changes fall into four concern areas:
    counts so they can physically direct shuttle drivers and passengers at the boarding point.
 4. **Trip notes** — admin incident resolution is simplified from a structured form into freeform
    trip notes, with only minimal structured fields retained for analytics.
+5. **Shuttle lifecycle** — shuttles gain an `IsActive` flag enabling soft-deactivation with
+   automatic cleanup of convoy defaults and filtering from operational queries.
 
 ---
 
@@ -36,10 +38,9 @@ Terms not defined here are inherited from the `nmu-shuttle-management` requireme
   enforced for trips generated from that template. When false, boarding is open (no scan required).
 - **Default Convoy**: The set of shuttles associated with a Stop via StopShuttleDefault records,
   automatically applied as TripShuttleAllocations when new TripInstances are created for that Stop.
-- **T+4 Window**: The earliest date on which changes to a Stop's default convoy take effect.
-  Defined as the current SAST date plus 4 days. All trips within T+0 to T+3 are already created
-  or will be created tonight by the Rolling Injection Job and are therefore protected from default
-  convoy edits.
+- **Default Convoy Advisory**: A UX notice informing the admin that default convoy edits only
+  affect trips created by future injection runs (earliest: tonight's run for T+3). Trips for
+  T+0 through T+2 already have their own allocations and are unaffected by default changes.
 
 ---
 
@@ -55,9 +56,9 @@ for every individual trip.
 
 1. THE System SHALL maintain a `StopShuttleDefault` table that maps Shuttles to Stops with an
    OrderPosition (1-based integer), representing the standing convoy roster for that Stop.
-2. THE Admin Portal SHALL display a "Default Convoy" panel on each Stop's management page, showing
-   the current roster of shuttles in OrderPosition order with license plate, accessibility flag,
-   and capacity.
+2. THE Admin Portal SHALL display a "Default Convoy" panel on the Stop Detail Screen (see
+   Requirement 9), showing the current roster of shuttles in OrderPosition order with license
+   plate, accessibility flag, and capacity.
 3. THE Admin Portal SHALL allow an Admin to add a Shuttle to a Stop's default convoy, which inserts
    a `StopShuttleDefault` record with the next available OrderPosition.
 4. WHEN an accessible Shuttle (`IsAccessibleVehicle = TRUE`) is added to a Stop's default convoy,
@@ -68,13 +69,15 @@ for every individual trip.
 6. THE Admin Portal SHALL allow an Admin to remove a Shuttle from a Stop's default convoy.
 7. THE Admin Portal SHALL allow an Admin to reorder shuttles within a Stop's default convoy by
    reassigning OrderPosition values, subject to the accessible-first constraint.
-8. ALL edits to a Stop's default convoy (add, remove, reorder) SHALL be rejected by THE System
-   with HTTP 400 if the effective date of the change would be earlier than T+4 (current SAST date
-   plus 4 days). This constraint ensures no edit retroactively affects TripInstances that are
-   already created or will be created tonight.
-9. FOR ALL `StopShuttleDefault` records on a given Stop, OrderPosition values SHALL be unique and
-   contiguous starting from 1 (ordering uniqueness invariant).
-10. FOR ALL `StopShuttleDefault` records on a given Stop, every record where
+8. THE Admin Portal SHALL display an advisory banner on the Default Convoy panel stating: "Changes
+   apply to trips created from tonight onwards (earliest: {T+3 date}). Trips for the next 3 days
+   already have their convoy assigned — edit those individually from the trip detail screen."
+9. WHEN a Shuttle is deactivated (`IsActive` set to `FALSE`), THE System SHALL automatically remove
+   all `StopShuttleDefault` records referencing that Shuttle and re-normalise OrderPositions on
+   each affected Stop to maintain contiguous ordering (see Requirement 8).
+10. FOR ALL `StopShuttleDefault` records on a given Stop, OrderPosition values SHALL be unique and
+    contiguous starting from 1 (ordering uniqueness invariant).
+11. FOR ALL `StopShuttleDefault` records on a given Stop, every record where
     `Shuttle.IsAccessibleVehicle = TRUE` SHALL have an OrderPosition less than or equal to every
     record where `Shuttle.IsAccessibleVehicle = FALSE` (accessible-first invariant).
 
@@ -143,14 +146,16 @@ technology.
 
 1. THE `ScheduleTime` entity SHALL include a `RequiresScanning` boolean field (default `TRUE`).
 2. THE Admin Portal SHALL allow an Admin to toggle `RequiresScanning` on any ScheduleTime record.
-3. WHEN a Marshal attempts a check-in scan for a TripInstance whose ScheduleTime has
-   `RequiresScanning = FALSE`, THE System SHALL reject the scan attempt with HTTP 422 and a message
-   indicating that scanning is not required for this trip.
+3. WHEN `RequiresScanning = FALSE` for a TripInstance's ScheduleTime, THE App SHALL disable the
+   QR scan button on the Marshal's trip detail screen and display an informational message:
+   "This trip is open boarding — no QR scan required."
 4. WHEN `RequiresScanning = FALSE` for a TripInstance's ScheduleTime, THE System SHALL still track
    the TripInstance normally (generate it, lock it, complete it) — only the QR scan gate is bypassed.
-5. FOR ALL TripInstances where `ScheduleTime.RequiresScanning = TRUE`, the existing 35-minute scan
+5. THE API `GET /trips/{tripId}/convoy` and trip detail endpoint SHALL include the
+   `requiresScanning` flag so the marshal app can determine whether to show or hide the scan button.
+6. FOR ALL TripInstances where `ScheduleTime.RequiresScanning = TRUE`, the existing 35-minute scan
    window enforcement SHALL continue to apply (scan rejected if before T-35 min).
-6. FOR ALL TripInstances where `ScheduleTime.RequiresScanning = FALSE`, capacity tracking, booking
+7. FOR ALL TripInstances where `ScheduleTime.RequiresScanning = FALSE`, capacity tracking, booking
    creation, and waitlist promotion SHALL continue to function normally.
 
 ---
@@ -168,12 +173,15 @@ to park in the correct order and manage passenger flow at the boarding point.
 2. FOR EACH shuttle in the Convoy Panel, THE App SHALL display: OrderPosition, LicensePlate,
    `IsAccessibleVehicle` indicator, Capacity, and current boarded count
    (count of Bookings where `ShuttleId = this shuttle AND BoardedStatus = 'Boarded'`).
-3. THE App SHALL update the boarded counts in the Convoy Panel after each successful QR scan
-   without requiring a full screen refresh.
-4. THE App SHALL clearly distinguish accessible shuttles from non-accessible ones in the Convoy
+3. WHEN a Marshal performs a successful QR scan, THE App SHALL immediately invalidate the convoy
+   data provider and refresh boarded counts without waiting for the next poll cycle. This ensures
+   the scanning marshal sees instant feedback for their own scans.
+4. THE App SHALL poll the convoy endpoint on a 30-second interval to pick up boarded count changes
+   caused by other marshals scanning at different campus stops on the same route.
+5. THE App SHALL clearly distinguish accessible shuttles from non-accessible ones in the Convoy
    Panel (e.g., a visual accessibility indicator).
-5. THE API SHALL provide the boarded count per shuttle as part of the passenger manifest or a
-   dedicated convoy status endpoint so the marshal app can display accurate live counts.
+6. THE API SHALL provide the boarded count per shuttle as part of the convoy status endpoint so
+   the marshal app can display accurate live counts.
 
 ---
 
@@ -195,17 +203,24 @@ situation.
 4. THE Admin Portal SHALL display all TripNotes for a TripInstance in the trip detail view, ordered
    by `CreatedAt` ASC.
 5. WHEN an Admin creates a TripNote with NoteType = `'Replacement'` or `'Incident'` on an
-   `IncidentActive` TripInstance, THE System SHALL treat this as the admin resolution action:
-   set `BreakdownLog.ResolvedAt = DateTime.UtcNow`, `BreakdownLog.ResolvedByAdminId` = the admin,
-   and dispatch FCM push notifications to all Confirmed Booking holders on that TripInstance.
-6. THE push notification dispatched on admin resolution SHALL include the NoteType and a summary
+   `IncidentActive` TripInstance, THE Admin Portal SHALL display a confirmation dialog:
+   "This note will resolve the active incident and send push notifications to all confirmed
+   passengers. Proceed?" Only after admin confirmation SHALL the request be submitted.
+6. WHEN the confirmed TripNote creation request is processed, THE System SHALL treat this as the
+   admin resolution action: set `BreakdownLog.ResolvedAt = DateTime.UtcNow`,
+   `BreakdownLog.ResolvedByAdminId` = the admin, and dispatch FCM push notifications to all
+   Confirmed Booking holders on that TripInstance.
+7. THE request body SHALL include an explicit `"resolveIncident": true` flag when the admin
+   confirms resolution. If the flag is absent or false, the TripNote is created as a normal note
+   without triggering resolution logic, even if the NoteType is 'Incident' or 'Replacement'.
+8. THE push notification dispatched on admin resolution SHALL include the NoteType and a summary
    derived from the first 100 characters of the TripNote body.
-7. FOR ALL TripNotes, the `Body` field SHALL be non-empty (minimum 1 character). THE System SHALL
+9. FOR ALL TripNotes, the `Body` field SHALL be non-empty (minimum 1 character). THE System SHALL
    reject empty body submissions with HTTP 422.
-8. The existing `BreakdownLog.ResolutionType` and `BreakdownLog.ReplacementShuttleId` structured
-   fields SHALL be retained for analytics purposes, but completing them SHALL be optional. If an
-   Admin provides a `replacementShuttleId` alongside the TripNote, THE System SHALL update the
-   allocation and tally accordingly. If not provided, the TripNote body alone records the event.
+10. The existing `BreakdownLog.ResolutionType` and `BreakdownLog.ReplacementShuttleId` structured
+    fields SHALL be retained for analytics purposes, but completing them SHALL be optional. If an
+    Admin provides a `replacementShuttleId` alongside the TripNote, THE System SHALL update the
+    allocation and tally accordingly. If not provided, the TripNote body alone records the event.
 
 ---
 
@@ -227,4 +242,57 @@ list of all trip instances.
    TripInstance to assign or remove shuttles from that specific trip's convoy.
 5. THE stop-centric view SHALL visually flag trips that have an empty convoy (zero allocations) so
    the admin can identify and address them quickly.
+
+---
+
+### Requirement 8: Shuttle Lifecycle — Soft Deactivation
+
+**User Story:** As an Admin, I want to deactivate a shuttle that is no longer in service, so that
+it is excluded from new convoy assignments and trip allocations while preserving its historical
+data for analytics.
+
+#### Acceptance Criteria
+
+1. THE `Shuttle` entity SHALL include an `IsActive` boolean field (default `TRUE`).
+2. THE Admin Portal SHALL allow an Admin to toggle a Shuttle's `IsActive` status from the shuttle
+   management screen.
+3. WHEN a Shuttle is deactivated (`IsActive` set to `FALSE`), THE System SHALL automatically remove
+   all `StopShuttleDefault` records referencing that Shuttle and re-normalise OrderPositions on
+   each affected Stop.
+4. WHEN a Shuttle is deactivated, THE System SHALL NOT remove existing `TripShuttleAllocation`
+   records for already-created trips. Those trips retain the shuttle (marked `IsOperational` as
+   appropriate by admin action).
+5. THE Admin Portal shuttle picker (used when adding shuttles to default convoys or per-trip
+   assignments) SHALL only show active shuttles (`IsActive = TRUE`).
+6. WHEN the Rolling Injection Job populates convoy allocations from `StopShuttleDefault`, it SHALL
+   only include shuttles where `Shuttle.IsActive = TRUE` (defensive guard against race conditions
+   if deactivation cleanup is still processing).
+7. WHEN a deactivated Shuttle is reactivated (`IsActive` set back to `TRUE`), it SHALL NOT be
+   automatically re-added to any Stop's default convoy. An admin must manually re-add it.
+8. All historical `TripShuttleAllocation`, `BreakdownLog`, and `Booking` records referencing a
+   deactivated shuttle SHALL be preserved for analytics queries.
+
+---
+
+### Requirement 9: Admin Detail Screens
+
+**User Story:** As an Admin, I want dedicated detail screens for Stops and Trips in the web portal,
+so that I have sufficient screen real estate to view and manage convoy configurations, trip notes,
+and operational details without cramming everything into list row expansions.
+
+#### Acceptance Criteria
+
+1. THE Admin Portal SHALL provide a Stop Detail Screen, navigable from the stops list by tapping
+   a stop row or a "View Details" action. The screen SHALL contain: stop metadata (name, address,
+   GPS, active status), the Default Convoy panel (Requirement 1), and a "View Trips" button
+   leading to the stop-centric trip view (Requirement 7).
+2. THE Admin Portal SHALL provide a Trip Detail Screen, navigable from the trips list or the
+   stop-centric trip view by tapping a trip row. The screen SHALL contain: trip metadata (date,
+   departure time, direction, stop, status), convoy allocation panel (current shuttles assigned to
+   this specific trip with ability to add/remove/reorder), and the Trip Notes section
+   (Requirement 6).
+3. THE Admin Portal Trip Detail Screen SHALL also display the ScheduleTime campus route information
+   (ordered list of campuses from `ScheduleTimeCampus`) as a read-only informational section.
+4. THE Admin Portal Stop Detail Screen and Trip Detail Screen SHALL use standard back-navigation
+   (breadcrumb or back arrow) to return to the originating list view.
 

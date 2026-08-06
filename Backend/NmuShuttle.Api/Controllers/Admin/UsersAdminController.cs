@@ -111,6 +111,7 @@ public class UsersAdminController : ControllerBase
                 Identifier = m.StaffNumber,
                 AssignedCampusId = m.AssignedCampusId,
                 AssignedStopId = m.AssignedStopId,
+                IsActive = m.IsActive,
                 CreatedAt = m.CreatedAt
             }).ToListAsync();
 
@@ -188,6 +189,7 @@ public class UsersAdminController : ControllerBase
                     Identifier = marshal.StaffNumber,
                     AssignedCampusId = marshal.AssignedCampusId,
                     AssignedStopId = marshal.AssignedStopId,
+                    IsActive = marshal.IsActive,
                     CreatedAt = marshal.CreatedAt
                 });
 
@@ -466,6 +468,8 @@ public class UsersAdminController : ControllerBase
         marshal.UniversityEmail = dto.Email;
         marshal.AssignedCampusId = dto.AssignedCampusId;
         marshal.AssignedStopId = dto.AssignedStopId;
+        if (dto.IsActive.HasValue)
+            marshal.IsActive = dto.IsActive.Value;
 
         await _context.SaveChangesAsync();
 
@@ -479,6 +483,7 @@ public class UsersAdminController : ControllerBase
             Identifier = marshal.StaffNumber,
             AssignedCampusId = marshal.AssignedCampusId,
             AssignedStopId = marshal.AssignedStopId,
+            IsActive = marshal.IsActive,
             CreatedAt = marshal.CreatedAt
         });
     }

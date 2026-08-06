@@ -470,6 +470,9 @@ namespace NmuShuttle.Api.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -516,6 +519,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedCampusId = 1,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Bongani",
+                            IsActive = true,
                             LastName = "Cele",
                             StaffNumber = "4827391",
                             UniversityEmail = "b.cele@mandela.ac.za"
@@ -526,6 +530,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedCampusId = 2,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Karen",
+                            IsActive = true,
                             LastName = "Swart",
                             StaffNumber = "5914826",
                             UniversityEmail = "k.swart@mandela.ac.za"
@@ -536,6 +541,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedCampusId = 3,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Vuyo",
+                            IsActive = true,
                             LastName = "Mabena",
                             StaffNumber = "3208574",
                             UniversityEmail = "v.mabena@mandela.ac.za"
@@ -546,6 +552,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedStopId = 1,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Thulani",
+                            IsActive = true,
                             LastName = "Ngcobo",
                             StaffNumber = "6153042",
                             UniversityEmail = "t.ngcobo@mandela.ac.za"
@@ -556,6 +563,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedStopId = 2,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Lindiwe",
+                            IsActive = true,
                             LastName = "Shabalala",
                             StaffNumber = "7294185",
                             UniversityEmail = "l.shabalala@mandela.ac.za"
@@ -566,6 +574,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedStopId = 3,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Pieter",
+                            IsActive = true,
                             LastName = "Venter",
                             StaffNumber = "8401267",
                             UniversityEmail = "p.venter@mandela.ac.za"
@@ -576,6 +585,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedStopId = 4,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Nombuso",
+                            IsActive = true,
                             LastName = "Mkhize",
                             StaffNumber = "9537148",
                             UniversityEmail = "n.mkhize@mandela.ac.za"
@@ -586,6 +596,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedStopId = 5,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Craig",
+                            IsActive = true,
                             LastName = "Daniels",
                             StaffNumber = "2648309",
                             UniversityEmail = "c.daniels@mandela.ac.za"
@@ -596,6 +607,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedStopId = 6,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Noluthando",
+                            IsActive = true,
                             LastName = "Mthethwa",
                             StaffNumber = "1785423",
                             UniversityEmail = "n.mthethwa@mandela.ac.za"
@@ -606,6 +618,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedStopId = 7,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Willem",
+                            IsActive = true,
                             LastName = "Pretorius",
                             StaffNumber = "4062891",
                             UniversityEmail = "w.pretorius@mandela.ac.za"
@@ -616,6 +629,7 @@ namespace NmuShuttle.Api.Migrations
                             AssignedStopId = 8,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             FirstName = "Zandile",
+                            IsActive = true,
                             LastName = "Mdluli",
                             StaffNumber = "5379216",
                             UniversityEmail = "z.mdluli@mandela.ac.za"

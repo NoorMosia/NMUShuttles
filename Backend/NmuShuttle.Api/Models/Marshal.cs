@@ -43,6 +43,9 @@ public class Marshal
     public DateTime? OtpExpiry { get; set; }
 
     [Required]
+    public bool IsActive { get; set; } = true;
+
+    [Required]
     public DateTime CreatedAt { get; set; }
 
     // Navigation properties

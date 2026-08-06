@@ -132,7 +132,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
         SizedBox(
           width: 840,
           child: Align(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             child: FilledButton.icon(
               onPressed: () => context.go('/analytics/detailed'),
               icon: const Icon(Icons.analytics_outlined),

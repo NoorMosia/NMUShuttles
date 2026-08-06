@@ -250,7 +250,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text('Request OTP'),
+                              : const Text('Login'),
                         )
                       : FilledButton(
                           onPressed:

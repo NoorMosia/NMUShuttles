@@ -271,6 +271,8 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<NmuShuttle.Api.Infrastructure.ActiveUserMiddleware>();
+
 app.MapControllers();
 
 // Generate trips on startup (today through today+3) so there's data immediately

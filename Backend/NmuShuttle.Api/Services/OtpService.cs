@@ -136,4 +136,52 @@ public class OtpService : IOtpService
 
         return _jwtTokenService.GenerateMarshalToken(marshal.MarshalId, marshal.StaffNumber);
     }
+
+    /// <inheritdoc />
+    public async Task<bool> RequestAdminOtpAsync(string email)
+    {
+        var admin = await _db.Admins
+            .FirstOrDefaultAsync(a => a.Email.ToLower() == email.ToLower());
+
+        if (admin is null)
+            return false;
+
+        var otp = GenerateOtp();
+        admin.OtpHash = HashOtp(otp);
+        admin.OtpExpiry = DateTime.UtcNow.AddMinutes(5);
+
+        await _db.SaveChangesAsync();
+
+        if (_environment.IsDevelopment())
+        {
+            _logger.LogInformation("OTP for admin {Identifier}: {Otp}", email, otp);
+        }
+
+        return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<string?> VerifyAdminOtpAsync(string email, string otp)
+    {
+        var admin = await _db.Admins
+            .FirstOrDefaultAsync(a => a.Email.ToLower() == email.ToLower());
+
+        if (admin is null)
+            return null;
+
+        var isValid = admin.OtpHash is not null
+            && admin.OtpExpiry.HasValue
+            && admin.OtpExpiry.Value > DateTime.UtcNow
+            && admin.OtpHash == HashOtp(otp);
+
+        // Always clear OTP fields (single-use)
+        admin.OtpHash = null;
+        admin.OtpExpiry = null;
+        await _db.SaveChangesAsync();
+
+        if (!isValid)
+            return null;
+
+        return _jwtTokenService.GenerateAdminToken(admin.AdminId, admin.Email);
+    }
 }

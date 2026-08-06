@@ -14,30 +14,34 @@ final dioClientProvider = Provider<DioClient>((ref) {
   return DioClient(authService: authService);
 });
 
-/// State for the login flow.
-enum LoginStatus { idle, loading, success, error }
+/// State for the login flow (two-step OTP).
+enum LoginStatus { idle, loading, otpSent, verifying, success, error }
 
 class LoginState {
   const LoginState({
     this.status = LoginStatus.idle,
     this.errorMessage,
+    this.email,
   });
 
   final LoginStatus status;
   final String? errorMessage;
+  final String? email;
 
   LoginState copyWith({
     LoginStatus? status,
     String? errorMessage,
+    String? email,
   }) {
     return LoginState(
       status: status ?? this.status,
       errorMessage: errorMessage,
+      email: email ?? this.email,
     );
   }
 }
 
-/// StateNotifier that manages the login flow.
+/// StateNotifier that manages the two-step OTP login flow.
 class LoginNotifier extends StateNotifier<LoginState> {
   LoginNotifier(this._dioClient, this._authService)
       : super(const LoginState());
@@ -45,40 +49,34 @@ class LoginNotifier extends StateNotifier<LoginState> {
   final DioClient _dioClient;
   final AdminAuthService _authService;
 
-  /// Attempt login with email and password.
-  /// On 200: saves JWT token, returns true.
-  /// On 401: sets generic error message, returns false.
+  /// Step 1: Request OTP for the given email.
+  /// On 200: transitions to otpSent state, returns true.
+  /// On 404: admin not found error, returns false.
   /// On network error: sets connection error message, returns false.
-  Future<bool> login(String email, String password) async {
-    state = const LoginState(status: LoginStatus.loading);
+  Future<bool> requestOtp(String email) async {
+    state = LoginState(status: LoginStatus.loading, email: email);
 
     try {
       final response = await _dioClient.dio.post(
-        '/auth/admin/login',
-        data: {
-          'email': email,
-          'password': password,
-        },
+        '/auth/admin/otp/request',
+        data: {'email': email},
       );
 
       if (response.statusCode == 200) {
-        final token = response.data['token'] as String;
-        await _authService.saveToken(token);
-        state = const LoginState(status: LoginStatus.success);
+        state = LoginState(status: LoginStatus.otpSent, email: email);
         return true;
       }
 
-      // Unexpected status code
       state = const LoginState(
         status: LoginStatus.error,
-        errorMessage: 'Invalid credentials',
+        errorMessage: 'Admin not found',
       );
       return false;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
+      if (e.response?.statusCode == 404) {
         state = const LoginState(
           status: LoginStatus.error,
-          errorMessage: 'Invalid credentials',
+          errorMessage: 'Admin not found',
         );
       } else {
         state = const LoginState(
@@ -96,9 +94,77 @@ class LoginNotifier extends StateNotifier<LoginState> {
     }
   }
 
-  /// Reset to idle state (e.g., when navigating away).
+  /// Step 2: Verify OTP and obtain JWT.
+  /// On 200: saves JWT token, returns true.
+  /// On 401: invalid/expired OTP, returns false.
+  /// On network error: sets connection error message, returns false.
+  Future<bool> verifyOtp(String otp) async {
+    final email = state.email;
+    if (email == null) {
+      state = const LoginState(
+        status: LoginStatus.error,
+        errorMessage: 'Email not set. Please start over.',
+      );
+      return false;
+    }
+
+    state = LoginState(status: LoginStatus.verifying, email: email);
+
+    try {
+      final response = await _dioClient.dio.post(
+        '/auth/admin/otp/verify',
+        data: {
+          'email': email,
+          'otp': otp,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final token = response.data['token'] as String;
+        await _authService.saveToken(token);
+        state = LoginState(status: LoginStatus.success, email: email);
+        return true;
+      }
+
+      state = LoginState(
+        status: LoginStatus.otpSent,
+        email: email,
+        errorMessage: 'Invalid or expired OTP',
+      );
+      return false;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        state = LoginState(
+          status: LoginStatus.otpSent,
+          email: email,
+          errorMessage: 'Invalid or expired OTP',
+        );
+      } else {
+        state = LoginState(
+          status: LoginStatus.otpSent,
+          email: email,
+          errorMessage: 'Unable to connect to server',
+        );
+      }
+      return false;
+    } on Exception catch (_) {
+      state = LoginState(
+        status: LoginStatus.otpSent,
+        email: email,
+        errorMessage: 'Unable to connect to server',
+      );
+      return false;
+    }
+  }
+
+  /// Reset to idle state (e.g., when navigating away or going back).
   void reset() {
     state = const LoginState();
+  }
+
+  /// Go back to the email step from OTP step.
+  void backToEmail() {
+    state = LoginState(status: LoginStatus.idle, email: state.email);
   }
 }
 

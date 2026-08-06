@@ -38,4 +38,16 @@ public interface IOtpService
     /// OTP fields are always cleared after verification (single-use).
     /// </summary>
     Task<string?> VerifyMarshalOtpAsync(string staffNumber, string otp);
+
+    /// <summary>
+    /// Generates an OTP for the admin, stores the hash + expiry, and logs the code.
+    /// Returns false if admin not found.
+    /// </summary>
+    Task<bool> RequestAdminOtpAsync(string email);
+
+    /// <summary>
+    /// Verifies the OTP for an admin. Returns a JWT if valid, null otherwise.
+    /// OTP fields are always cleared after verification (single-use).
+    /// </summary>
+    Task<string?> VerifyAdminOtpAsync(string email, string otp);
 }

@@ -1,6 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NmuShuttle.Api.Data;
+using Microsoft.AspNetCore.RateLimiting;
 using NmuShuttle.Api.DTOs;
 using NmuShuttle.Api.Services;
 
@@ -10,61 +10,62 @@ namespace NmuShuttle.Api.Controllers;
 [Route("api/v1/auth/admin")]
 public class AdminAuthController : ControllerBase
 {
-    private readonly ShuttleDbContext _context;
-    private readonly IJwtTokenService _jwtTokenService;
+    private readonly IOtpService _otpService;
     private readonly IConfiguration _configuration;
 
     public AdminAuthController(
-        ShuttleDbContext context,
-        IJwtTokenService jwtTokenService,
+        IOtpService otpService,
         IConfiguration configuration)
     {
-        _context = context;
-        _jwtTokenService = jwtTokenService;
+        _otpService = otpService;
         _configuration = configuration;
     }
 
     /// <summary>
-    /// Authenticates an admin using email and password.
-    /// Returns a JWT token on success, or HTTP 401 with a generic message on failure.
+    /// Request an OTP for an admin. The OTP is logged in development mode.
     /// </summary>
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] AdminLoginDto dto)
+    [HttpPost("otp/request")]
+    [EnableRateLimiting("OtpRateLimit")]
+    public async Task<IActionResult> RequestOtp([FromBody] AdminOtpRequestDto dto)
     {
-        // Look up admin by email (case-insensitive)
-        var admin = await _context.Admins
-            .FirstOrDefaultAsync(a => a.Email.ToLower() == dto.Email.ToLower());
+        var success = await _otpService.RequestAdminOtpAsync(dto.Email);
 
-        // If not found, return generic 401 — do NOT disclose which field was wrong
-        if (admin == null)
+        if (!success)
         {
-            return Unauthorized(new { message = "Invalid credentials" });
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Not Found",
+                Detail = "Admin not found.",
+                Instance = HttpContext.Request.Path
+            });
         }
 
-        // DEV BYPASS: skip password check in Development environment
-        // TODO: Remove this before production deployment
-        var env = HttpContext.RequestServices.GetRequiredService<IHostEnvironment>();
-        bool passwordValid;
-        if (env.IsDevelopment())
+        return Ok(new { Message = "OTP sent successfully." });
+    }
+
+    /// <summary>
+    /// Verify an admin's OTP and return a JWT on success.
+    /// </summary>
+    [HttpPost("otp/verify")]
+    public async Task<IActionResult> VerifyOtp([FromBody] AdminOtpVerifyDto dto)
+    {
+        var token = await _otpService.VerifyAdminOtpAsync(dto.Email, dto.Otp);
+
+        if (token is null)
         {
-            passwordValid = true; // Skip BCrypt verification in dev
-        }
-        else
-        {
-            passwordValid = BCrypt.Net.BCrypt.Verify(dto.Password, admin.PasswordHash);
+            return Unauthorized(new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = "Unauthorized",
+                Detail = "OTP is invalid or expired.",
+                Instance = HttpContext.Request.Path
+            });
         }
 
-        if (!passwordValid)
-        {
-            return Unauthorized(new { message = "Invalid credentials" });
-        }
-
-        // Generate admin JWT (8-hour expiry configured in JwtTokenService)
-        var token = _jwtTokenService.GenerateAdminToken(admin.AdminId, admin.Email);
-
-        // Calculate expiry for response
-        var expiryHours = _configuration.GetValue<int>("Jwt:AdminTokenExpiryHours", 8);
-        var expiresAt = DateTime.UtcNow.AddHours(expiryHours);
+        var handler = new JwtSecurityTokenHandler();
+        var jwt = handler.ReadJwtToken(token);
+        var expiresAt = jwt.ValidTo;
 
         return Ok(new AdminLoginResponseDto
         {

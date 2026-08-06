@@ -35,6 +35,11 @@ public class Admin
     [Required]
     public bool IsActive { get; set; } = true;
 
+    [MaxLength(128)]
+    public string? OtpHash { get; set; }
+
+    public DateTime? OtpExpiry { get; set; }
+
     // Navigation properties
     public ICollection<BreakdownLog> ResolvedBreakdownLogs { get; set; } = new List<BreakdownLog>();
     public ICollection<TripNote> TripNotes { get; set; } = new List<TripNote>();

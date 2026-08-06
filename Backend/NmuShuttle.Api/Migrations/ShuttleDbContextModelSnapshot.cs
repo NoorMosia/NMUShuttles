@@ -55,6 +55,13 @@ namespace NmuShuttle.Api.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<DateTime?>("OtpExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OtpHash")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(256)

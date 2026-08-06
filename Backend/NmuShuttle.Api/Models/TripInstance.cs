@@ -40,4 +40,5 @@ public class TripInstance
     public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     public ICollection<Report> Reports { get; set; } = new List<Report>();
     public ICollection<BreakdownLog> BreakdownLogs { get; set; } = new List<BreakdownLog>();
+    public ICollection<TripNote> TripNotes { get; set; } = new List<TripNote>();
 }

@@ -15,15 +15,18 @@ public class TripsAdminController : ControllerBase
 {
     private readonly ITripStateMachineService _tripStateMachine;
     private readonly IConvoyOrderingService _convoyOrdering;
+    private readonly ITripNoteService _tripNoteService;
     private readonly ShuttleDbContext _db;
 
     public TripsAdminController(
         ITripStateMachineService tripStateMachine,
         IConvoyOrderingService convoyOrdering,
+        ITripNoteService tripNoteService,
         ShuttleDbContext db)
     {
         _tripStateMachine = tripStateMachine;
         _convoyOrdering = convoyOrdering;
+        _tripNoteService = tripNoteService;
         _db = db;
     }
 
@@ -37,7 +40,8 @@ public class TripsAdminController : ControllerBase
     {
         var query = _db.TripInstances
             .Include(t => t.ScheduleTime)
-                .ThenInclude(st => st.Campus)
+                .ThenInclude(st => st.ScheduleTimeCampuses)
+                    .ThenInclude(stc => stc.Campus)
             .Include(t => t.Stop)
             .AsQueryable();
 
@@ -50,19 +54,23 @@ public class TripsAdminController : ControllerBase
         var trips = await query
             .OrderBy(t => t.TripDate)
             .ThenBy(t => t.ScheduleTime.DepartureTime)
-            .Select(t => new
-            {
-                t.TripInstanceId,
-                t.TripDate,
-                DepartureTime = t.ScheduleTime.DepartureTime,
-                Direction = t.ScheduleTime.Direction,
-                StopName = t.Stop.StopName,
-                CampusName = t.ScheduleTime.Campus.CampusName,
-                t.Status
-            })
             .ToListAsync();
 
-        return Ok(trips);
+        var response = trips.Select(t => new
+        {
+            t.TripInstanceId,
+            t.TripDate,
+            DepartureTime = t.ScheduleTime.DepartureTime,
+            Direction = t.ScheduleTime.Direction,
+            StopName = t.Stop.StopName,
+            Campuses = t.ScheduleTime.ScheduleTimeCampuses
+                .OrderBy(stc => stc.StopOrder)
+                .Select(stc => new { stc.CampusId, stc.Campus.CampusName, stc.StopOrder })
+                .ToList(),
+            t.Status
+        });
+
+        return Ok(response);
     }
 
     /// <summary>
@@ -149,5 +157,79 @@ public class TripsAdminController : ControllerBase
                 Instance = HttpContext.Request.Path
             });
         }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Trip Notes Endpoints
+    // ──────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Create a trip note. May trigger incident resolution if resolveIncident = true.
+    /// </summary>
+    [HttpPost("{tripId}/notes")]
+    public async Task<IActionResult> CreateTripNote(int tripId, [FromBody] CreateTripNoteDto dto)
+    {
+        // Extract admin ID from JWT claims
+        var adminIdClaim = User.FindFirst("AdminId")?.Value
+            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (adminIdClaim == null || !int.TryParse(adminIdClaim, out var adminId))
+            return Unauthorized(new { message = "Admin identity not found in token" });
+
+        try
+        {
+            var (note, notificationsSent) = await _tripNoteService.CreateTripNoteAsync(
+                tripId, dto.NoteType, dto.Body, dto.ResolveIncident,
+                dto.ReplacementShuttleId, adminId);
+
+            var admin = await _db.Admins.FindAsync(adminId);
+
+            var response = new TripNoteResponseDto
+            {
+                TripNoteId = note.TripNoteId,
+                TripInstanceId = note.TripInstanceId,
+                NoteType = note.NoteType,
+                Body = note.Body,
+                IsResolutionAction = note.IsResolutionAction,
+                CreatedByAdminId = note.CreatedByAdminId,
+                CreatedByAdminName = admin != null ? $"{admin.FirstName} {admin.LastName}" : "Unknown",
+                CreatedAt = note.CreatedAt,
+                NotificationsSent = note.IsResolutionAction ? notificationsSent : null
+            };
+
+            return CreatedAtAction(nameof(GetTripNotes), new { tripId }, response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return UnprocessableEntity(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get all notes for a trip, ordered by CreatedAt ASC.
+    /// </summary>
+    [HttpGet("{tripId}/notes")]
+    public async Task<IActionResult> GetTripNotes(int tripId)
+    {
+        var notes = await _tripNoteService.GetTripNotesAsync(tripId);
+
+        var response = notes.Select(n => new TripNoteResponseDto
+        {
+            TripNoteId = n.TripNoteId,
+            TripInstanceId = n.TripInstanceId,
+            NoteType = n.NoteType,
+            Body = n.Body,
+            IsResolutionAction = n.IsResolutionAction,
+            CreatedByAdminId = n.CreatedByAdminId,
+            CreatedByAdminName = n.CreatedByAdmin != null
+                ? $"{n.CreatedByAdmin.FirstName} {n.CreatedByAdmin.LastName}"
+                : "Unknown",
+            CreatedAt = n.CreatedAt
+        });
+
+        return Ok(response);
     }
 }

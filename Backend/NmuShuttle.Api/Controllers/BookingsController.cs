@@ -53,7 +53,8 @@ public class BookingsController : ControllerBase
                 DepartureTime = fullBooking.TripInstance.ScheduleTime.DepartureTime,
                 Direction = fullBooking.TripInstance.ScheduleTime.Direction,
                 StopName = fullBooking.TripInstance.Stop.StopName,
-                CampusName = fullBooking.TripInstance.ScheduleTime.Campus.CampusName,
+                CampusName = fullBooking.TripInstance.ScheduleTime.ScheduleTimeCampuses
+                    .OrderBy(stc => stc.StopOrder).FirstOrDefault()?.Campus?.CampusName ?? "",
                 BoardedStatus = fullBooking.BoardedStatus,
                 CreatedAt = fullBooking.CreatedAt
             };
@@ -112,7 +113,8 @@ public class BookingsController : ControllerBase
             DepartureTime = b.TripInstance.ScheduleTime.DepartureTime,
             Direction = b.TripInstance.ScheduleTime.Direction,
             StopName = b.TripInstance.Stop.StopName,
-            CampusName = b.TripInstance.ScheduleTime.Campus.CampusName,
+            CampusName = b.TripInstance.ScheduleTime.ScheduleTimeCampuses
+                .OrderBy(stc => stc.StopOrder).FirstOrDefault()?.Campus?.CampusName ?? "",
             BoardedStatus = b.BoardedStatus,
             CreatedAt = b.CreatedAt
         }).ToList();
@@ -152,7 +154,8 @@ public class BookingsController : ControllerBase
             DepartureTime = booking.TripInstance.ScheduleTime.DepartureTime,
             Direction = booking.TripInstance.ScheduleTime.Direction,
             StopName = booking.TripInstance.Stop.StopName,
-            CampusName = booking.TripInstance.ScheduleTime.Campus.CampusName,
+            CampusName = booking.TripInstance.ScheduleTime.ScheduleTimeCampuses
+                .OrderBy(stc => stc.StopOrder).FirstOrDefault()?.Campus?.CampusName ?? "",
             BoardedStatus = booking.BoardedStatus,
             CreatedAt = booking.CreatedAt
         };

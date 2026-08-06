@@ -47,4 +47,5 @@ public class Stop
     public ICollection<TripInstance> TripInstances { get; set; } = new List<TripInstance>();
     public ICollection<PrioritySchedule> PrioritySchedules { get; set; } = new List<PrioritySchedule>();
     public ICollection<Marshal> Marshals { get; set; } = new List<Marshal>();
+    public ICollection<StopShuttleDefault> StopShuttleDefaults { get; set; } = new List<StopShuttleDefault>();
 }

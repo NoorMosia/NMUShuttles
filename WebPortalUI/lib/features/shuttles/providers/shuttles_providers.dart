@@ -11,6 +11,7 @@ class Shuttle {
     required this.vendorId,
     required this.vendorCompanyName,
     required this.isAccessibleVehicle,
+    this.isActive = true,
   });
 
   final int id;
@@ -19,6 +20,7 @@ class Shuttle {
   final int vendorId;
   final String vendorCompanyName;
   final bool isAccessibleVehicle;
+  final bool isActive;
 
   factory Shuttle.fromJson(Map<String, dynamic> json) {
     return Shuttle(
@@ -28,6 +30,7 @@ class Shuttle {
       vendorId: json['vendorId'] as int? ?? 0,
       vendorCompanyName: json['vendorCompanyName'] as String? ?? '',
       isAccessibleVehicle: json['isAccessibleVehicle'] as bool? ?? false,
+      isActive: json['isActive'] as bool? ?? true,
     );
   }
 }
@@ -146,6 +149,28 @@ class ShuttlesNotifier extends StateNotifier<ShuttlesState> {
       }
     }
     return 'Validation error';
+  }
+
+  /// Deactivate a shuttle. Returns null on success or an error message.
+  Future<String?> deactivateShuttle(int id) async {
+    try {
+      await _dio.patch('/admin/shuttles/$id/deactivate');
+      await fetchShuttles();
+      return null;
+    } on DioException catch (e) {
+      return e.response?.data?['message']?.toString() ?? 'Failed to deactivate shuttle';
+    }
+  }
+
+  /// Reactivate a shuttle. Returns null on success or an error message.
+  Future<String?> reactivateShuttle(int id) async {
+    try {
+      await _dio.patch('/admin/shuttles/$id/reactivate');
+      await fetchShuttles();
+      return null;
+    } on DioException catch (e) {
+      return e.response?.data?['message']?.toString() ?? 'Failed to reactivate shuttle';
+    }
   }
 }
 

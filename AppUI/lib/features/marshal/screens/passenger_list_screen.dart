@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/marshal/models/passenger_model.dart';
 import 'package:nmu_shuttle_app/features/marshal/providers/passenger_list_provider.dart';
+import 'package:nmu_shuttle_app/features/marshal/providers/convoy_provider.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/qr_scanner_screen.dart';
 
 /// Displays the passenger manifest for a given trip, with real-time counts
@@ -31,6 +32,8 @@ class _PassengerListScreenState extends ConsumerState<PassengerListScreen> {
     if (result != null && mounted) {
       // Invalidate manifest to get instant update
       ref.invalidate(passengerManifestProvider(_tripIdInt));
+      // Also refresh convoy counts immediately
+      ref.invalidate(convoyStatusProvider(_tripIdInt));
     }
   }
 
@@ -110,7 +113,11 @@ class _PassengerListScreenState extends ConsumerState<PassengerListScreen> {
   @override
   Widget build(BuildContext context) {
     final manifestAsync = ref.watch(passengerManifestProvider(_tripIdInt));
+    final convoyAsync = ref.watch(convoyStatusProvider(_tripIdInt));
     final theme = Theme.of(context);
+
+    // Determine if scanning is required (default to true if convoy not loaded yet)
+    final requiresScanning = convoyAsync.valueOrNull?.requiresScanning ?? true;
 
     return Scaffold(
       appBar: AppBar(
@@ -125,44 +132,110 @@ class _PassengerListScreenState extends ConsumerState<PassengerListScreen> {
           ),
         ],
       ),
-      body: manifestAsync.when(
-        data: (manifest) => _buildManifestContent(manifest, theme),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
-                const SizedBox(height: 16),
-                Text(
-                  'Failed to load passengers',
-                  style: theme.textTheme.titleMedium,
+      body: Column(
+        children: [
+          // Scan gating banner
+          if (!requiresScanning)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              color: Colors.amber.shade100,
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 18, color: Colors.amber.shade900),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'This trip is open boarding — no QR scan required.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.amber.shade900,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          // Convoy panel
+          _buildConvoyPanel(convoyAsync, theme),
+          const Divider(height: 1),
+          // Main manifest content
+          Expanded(
+            child: manifestAsync.when(
+              data: (manifest) => _buildManifestContent(manifest, theme),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+                      const SizedBox(height: 16),
+                      Text('Failed to load passengers', style: theme.textTheme.titleMedium),
+                      const SizedBox(height: 8),
+                      Text(_extractError(error), textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: () => ref.invalidate(passengerManifestProvider(_tripIdInt)),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  _extractError(error),
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: () =>
-                      ref.invalidate(passengerManifestProvider(_tripIdInt)),
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openQrScanner,
-        icon: const Icon(Icons.qr_code_scanner),
-        label: const Text('Scan QR'),
-      ),
+      floatingActionButton: requiresScanning
+          ? FloatingActionButton.extended(
+              onPressed: _openQrScanner,
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Scan QR'),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildConvoyPanel(AsyncValue<ConvoyStatus> convoyAsync, ThemeData theme) {
+    return convoyAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (convoy) {
+        if (convoy.shuttles.isEmpty) return const SizedBox.shrink();
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: AppTheme.navy.withValues(alpha: 0.03),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Convoy',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: AppTheme.navy,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                height: 56,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: convoy.shuttles.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final shuttle = convoy.shuttles[index];
+                    return _ConvoyShuttleChip(shuttle: shuttle);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -329,6 +402,73 @@ class _PassengerTile extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─── Convoy Shuttle Chip ───────────────────────────────────────
+
+class _ConvoyShuttleChip extends StatelessWidget {
+  const _ConvoyShuttleChip({required this.shuttle});
+
+  final ConvoyShuttle shuttle;
+
+  @override
+  Widget build(BuildContext context) {
+    final isOperational = shuttle.isOperational;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isOperational ? Colors.white : Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isOperational
+              ? AppTheme.navy.withValues(alpha: 0.2)
+              : Colors.grey.shade400,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '#${shuttle.orderPosition}',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: isOperational ? AppTheme.navy : Colors.grey,
+                  decoration: isOperational ? null : TextDecoration.lineThrough,
+                ),
+              ),
+              const SizedBox(width: 4),
+              if (shuttle.isAccessibleVehicle)
+                Icon(Icons.accessible, size: 12, color: Colors.blue.shade700),
+              Text(
+                shuttle.licensePlate,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isOperational ? AppTheme.navy : Colors.grey,
+                  decoration: isOperational ? null : TextDecoration.lineThrough,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '${shuttle.boardedCount}/${shuttle.capacity}',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: isOperational ? Colors.green.shade700 : Colors.grey,
+            ),
+          ),
+        ],
       ),
     );
   }

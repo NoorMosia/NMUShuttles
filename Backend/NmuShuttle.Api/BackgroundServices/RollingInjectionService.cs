@@ -148,6 +148,47 @@ public class RollingInjectionService : BackgroundService
 
         _logger.LogInformation("Created {Count} new TripInstances for {TargetDate}.", createdTripIds.Count, targetDate);
 
+        // ── Step 5b: Auto-populate convoy allocations from StopShuttleDefaults ──
+        var allocationsCreated = 0;
+
+        foreach (var tripId in createdTripIds)
+        {
+            var trip = await db.TripInstances.FindAsync(new object[] { tripId }, cancellationToken);
+            if (trip == null) continue;
+
+            var defaults = await db.StopShuttleDefaults
+                .Include(d => d.Shuttle)
+                .Where(d => d.StopId == trip.StopId && d.Shuttle.IsActive)
+                .OrderBy(d => d.OrderPosition)
+                .ToListAsync(cancellationToken);
+
+            foreach (var def in defaults)
+            {
+                // Check if allocation already exists (idempotency)
+                var exists = await db.TripShuttleAllocations
+                    .AnyAsync(a => a.TripInstanceId == tripId && a.ShuttleId == def.ShuttleId, cancellationToken);
+
+                if (!exists)
+                {
+                    db.TripShuttleAllocations.Add(new TripShuttleAllocation
+                    {
+                        TripInstanceId = tripId,
+                        ShuttleId = def.ShuttleId,
+                        OrderPosition = def.OrderPosition,
+                        IsOperational = true,
+                        AssignedAt = DateTime.UtcNow
+                    });
+                    allocationsCreated++;
+                }
+            }
+
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        _logger.LogInformation(
+            "Auto-populated {Count} allocations from default convoys for {TargetDate}.",
+            allocationsCreated, targetDate);
+
         // ── Step 6: Inject priority bookings ──
         var dayOfWeekStr = targetDate.DayOfWeek.ToString(); // e.g., "Monday"
 

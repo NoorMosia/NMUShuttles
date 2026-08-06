@@ -130,8 +130,8 @@ class ShuttleOption {
 
   factory ShuttleOption.fromJson(Map<String, dynamic> json) {
     return ShuttleOption(
-      id: json['id'] as int,
-      licensePlate: json['licensePlate'] as String,
+      id: json['shuttleId'] as int? ?? json['id'] as int? ?? 0,
+      licensePlate: json['licensePlate'] as String? ?? '',
       capacity: json['capacity'] as int? ?? 0,
       isAccessibleVehicle: json['isAccessibleVehicle'] as bool? ?? false,
     );
@@ -188,7 +188,7 @@ final tripsProvider =
 final availableShuttlesProvider =
     FutureProvider<List<ShuttleOption>>((ref) async {
   final dioClient = ref.watch(dioClientProvider);
-  final response = await dioClient.dio.get('/admin/shuttles');
+  final response = await dioClient.dio.get('/admin/shuttles/active');
   final list = response.data as List;
   return list
       .map((e) => ShuttleOption.fromJson(e as Map<String, dynamic>))

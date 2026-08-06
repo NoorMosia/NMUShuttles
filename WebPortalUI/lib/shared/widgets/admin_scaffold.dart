@@ -86,8 +86,10 @@ class _AdminScaffoldState extends State<AdminScaffold>
   }
 
   int get _selectedIndex {
-    final index =
-        _navItems.indexWhere((item) => item.path == widget.currentPath);
+    final path = widget.currentPath;
+    // Use startsWith matching so /stops/1 highlights the /stops nav item
+    final index = _navItems.indexWhere((item) =>
+        path == item.path || (item.path != '/overview' && path.startsWith(item.path)));
     return index >= 0 ? index : 0;
   }
 

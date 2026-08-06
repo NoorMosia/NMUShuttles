@@ -12,7 +12,10 @@ import 'package:nmu_shuttle_admin/features/schedule/screens/calendar_exceptions_
 import 'package:nmu_shuttle_admin/features/schedule/screens/priority_schedules_screen.dart';
 import 'package:nmu_shuttle_admin/features/shuttles/screens/shuttles_screen.dart';
 import 'package:nmu_shuttle_admin/features/stops/screens/stops_screen.dart';
+import 'package:nmu_shuttle_admin/features/stops/screens/stop_detail_screen.dart';
+import 'package:nmu_shuttle_admin/features/stops/screens/stop_trips_screen.dart';
 import 'package:nmu_shuttle_admin/features/trips/screens/trips_screen.dart';
+import 'package:nmu_shuttle_admin/features/trips/screens/trip_detail_screen.dart';
 import 'package:nmu_shuttle_admin/features/users/screens/users_screen.dart';
 import 'package:nmu_shuttle_admin/features/vendors/screens/vendors_screen.dart';
 import 'package:nmu_shuttle_admin/shared/widgets/admin_scaffold.dart';
@@ -59,6 +62,20 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const StopsScreen(),
           ),
           GoRoute(
+            path: '/stops/:id',
+            builder: (context, state) {
+              final id = int.parse(state.pathParameters['id']!);
+              return StopDetailScreen(stopId: id);
+            },
+          ),
+          GoRoute(
+            path: '/stops/:id/trips',
+            builder: (context, state) {
+              final id = int.parse(state.pathParameters['id']!);
+              return StopTripsScreen(stopId: id);
+            },
+          ),
+          GoRoute(
             path: '/shuttles',
             builder: (context, state) => const ShuttlesScreen(),
           ),
@@ -85,6 +102,13 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/trips',
             builder: (context, state) => const TripsScreen(),
+          ),
+          GoRoute(
+            path: '/trips/:id',
+            builder: (context, state) {
+              final id = int.parse(state.pathParameters['id']!);
+              return TripDetailScreen(tripId: id);
+            },
           ),
           GoRoute(
             path: '/reports',

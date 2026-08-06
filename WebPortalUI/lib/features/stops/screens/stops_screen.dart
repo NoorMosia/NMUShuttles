@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_admin/features/stops/providers/stops_providers.dart';
 
@@ -200,6 +201,11 @@ class _StopsScreenState extends ConsumerState<StopsScreen> {
                                       DataCell(Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
+                                          IconButton(
+                                            icon: Icon(Icons.visibility_outlined, color: _navy, size: 20),
+                                            tooltip: 'View Details',
+                                            onPressed: () => context.go('/stops/${stop.id}'),
+                                          ),
                                           IconButton(
                                             icon: Icon(Icons.edit_outlined, color: _navy, size: 20),
                                             tooltip: 'Edit',

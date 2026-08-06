@@ -169,6 +169,7 @@ class ScheduleTimesNotifier extends StateNotifier<ScheduleTimesState> {
     required String scheduleType,
     required int campusId,
     required int stopId,
+    bool requiresScanning = true,
   }) async {
     try {
       await _dioClient.dio.post('/admin/schedule-times', data: {
@@ -177,6 +178,7 @@ class ScheduleTimesNotifier extends StateNotifier<ScheduleTimesState> {
         'scheduleType': scheduleType,
         'campusId': campusId,
         'stopId': stopId,
+        'requiresScanning': requiresScanning,
       });
       await fetchScheduleTimes();
       return true;
@@ -193,6 +195,7 @@ class ScheduleTimesNotifier extends StateNotifier<ScheduleTimesState> {
     required String scheduleType,
     required int campusId,
     required int stopId,
+    bool requiresScanning = true,
   }) async {
     try {
       await _dioClient.dio.put('/admin/schedule-times/$id', data: {
@@ -201,6 +204,7 @@ class ScheduleTimesNotifier extends StateNotifier<ScheduleTimesState> {
         'scheduleType': scheduleType,
         'campusId': campusId,
         'stopId': stopId,
+        'requiresScanning': requiresScanning,
       });
       await fetchScheduleTimes();
       return true;

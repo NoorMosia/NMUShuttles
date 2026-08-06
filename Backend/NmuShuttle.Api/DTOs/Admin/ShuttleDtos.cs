@@ -24,5 +24,6 @@ public class ShuttleResponseDto
     public int VendorId { get; set; }
     public string VendorCompanyName { get; set; } = string.Empty;
     public bool IsAccessibleVehicle { get; set; }
+    public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
 }

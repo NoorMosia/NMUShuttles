@@ -18,6 +18,6 @@ public class Campus
     public string GpsCoordinates { get; set; } = string.Empty;
 
     // Navigation properties
-    public ICollection<ScheduleTime> ScheduleTimes { get; set; } = new List<ScheduleTime>();
     public ICollection<Marshal> Marshals { get; set; } = new List<Marshal>();
+    public ICollection<ScheduleTimeCampus> ScheduleTimeCampuses { get; set; } = new List<ScheduleTimeCampus>();
 }

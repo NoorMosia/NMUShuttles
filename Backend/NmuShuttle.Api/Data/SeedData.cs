@@ -142,16 +142,16 @@ public static class SeedData
         );
 
         modelBuilder.Entity<Shuttle>().HasData(
-            new Shuttle { ShuttleId = 1, LicensePlate = "EC 142-837", Capacity = 22, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 2, LicensePlate = "EC 256-491", Capacity = 35, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 3, LicensePlate = "EC 389-720", Capacity = 22, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 4, LicensePlate = "EC 501-163", Capacity = 28, VendorCompanyName = "Coastal Movers", VendorId = 2, IsAccessibleVehicle = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 5, LicensePlate = "EC 628-945", Capacity = 35, VendorCompanyName = "Coastal Movers", VendorId = 2, IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 6, LicensePlate = "EC 714-382", Capacity = 22, VendorCompanyName = "Coastal Movers", VendorId = 2, IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 7, LicensePlate = "EC 837-256", Capacity = 28, VendorCompanyName = "Metro Link SA", VendorId = 3, IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 8, LicensePlate = "EC 948-617", Capacity = 35, VendorCompanyName = "Metro Link SA", VendorId = 3, IsAccessibleVehicle = false, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 9, LicensePlate = "EC 103-475", Capacity = 22, VendorCompanyName = "Metro Link SA", VendorId = 3, IsAccessibleVehicle = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 10, LicensePlate = "EC 217-864", Capacity = 28, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = false, CreatedAt = SeedDate }
+            new Shuttle { ShuttleId = 1, LicensePlate = "EC 142-837", Capacity = 22, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 2, LicensePlate = "EC 256-491", Capacity = 35, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 3, LicensePlate = "EC 389-720", Capacity = 22, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 4, LicensePlate = "EC 501-163", Capacity = 28, VendorCompanyName = "Coastal Movers", VendorId = 2, IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 5, LicensePlate = "EC 628-945", Capacity = 35, VendorCompanyName = "Coastal Movers", VendorId = 2, IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 6, LicensePlate = "EC 714-382", Capacity = 22, VendorCompanyName = "Coastal Movers", VendorId = 2, IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 7, LicensePlate = "EC 837-256", Capacity = 28, VendorCompanyName = "Metro Link SA", VendorId = 3, IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 8, LicensePlate = "EC 948-617", Capacity = 35, VendorCompanyName = "Metro Link SA", VendorId = 3, IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 9, LicensePlate = "EC 103-475", Capacity = 22, VendorCompanyName = "Metro Link SA", VendorId = 3, IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 10, LicensePlate = "EC 217-864", Capacity = 28, VendorCompanyName = "Bay Transit Corp", VendorId = 1, IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate }
         );
     }
 
@@ -166,25 +166,25 @@ public static class SeedData
             // Weekday ToCampus: 06:45, 07:45, 08:45, 09:45
             foreach (var time in new[] { new TimeOnly(6, 45), new TimeOnly(7, 45), new TimeOnly(8, 45), new TimeOnly(9, 45) })
             {
-                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "ToCampus", ScheduleType = "Weekday", CampusId = 1, StopId = stopId });
+                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "ToCampus", ScheduleType = "Weekday", StopId = stopId, RequiresScanning = true });
             }
 
             // Weekday FromCampus: 12:30, 14:30, 16:00, 17:30, 18:30, 20:30, 22:00
             foreach (var time in new[] { new TimeOnly(12, 30), new TimeOnly(14, 30), new TimeOnly(16, 0), new TimeOnly(17, 30), new TimeOnly(18, 30), new TimeOnly(20, 30), new TimeOnly(22, 0) })
             {
-                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "FromCampus", ScheduleType = "Weekday", CampusId = 1, StopId = stopId });
+                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "FromCampus", ScheduleType = "Weekday", StopId = stopId, RequiresScanning = true });
             }
 
             // Saturday ToCampus: 06:45, 07:45, 08:45, 09:45
             foreach (var time in new[] { new TimeOnly(6, 45), new TimeOnly(7, 45), new TimeOnly(8, 45), new TimeOnly(9, 45) })
             {
-                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "ToCampus", ScheduleType = "Saturday", CampusId = 1, StopId = stopId });
+                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "ToCampus", ScheduleType = "Saturday", StopId = stopId, RequiresScanning = true });
             }
 
             // Saturday FromCampus: 12:30, 14:30, 16:00, 17:30
             foreach (var time in new[] { new TimeOnly(12, 30), new TimeOnly(14, 30), new TimeOnly(16, 0), new TimeOnly(17, 30) })
             {
-                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "FromCampus", ScheduleType = "Saturday", CampusId = 1, StopId = stopId });
+                schedules.Add(new ScheduleTime { ScheduleTimeId = id++, DepartureTime = time, Direction = "FromCampus", ScheduleType = "Saturday", StopId = stopId, RequiresScanning = true });
             }
         }
 

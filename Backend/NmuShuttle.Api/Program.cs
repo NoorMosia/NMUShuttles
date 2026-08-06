@@ -81,6 +81,9 @@ builder.Services.AddScoped<ITripStateMachineService, TripStateMachineService>();
 // ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<ICapacityService, CapacityService>();
 builder.Services.AddScoped<IConvoyOrderingService, ConvoyOrderingService>();
+builder.Services.AddScoped<IStopDefaultConvoyService, StopDefaultConvoyService>();
+builder.Services.AddScoped<IScheduleTimeCampusService, ScheduleTimeCampusService>();
+builder.Services.AddScoped<ITripNoteService, TripNoteService>();
 
 // ──────────────────────────────────────────────────────────────────
 // Notification Services

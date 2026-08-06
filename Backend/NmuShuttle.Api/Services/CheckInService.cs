@@ -26,6 +26,7 @@ public class CheckInService : ICheckInService
         var booking = await _db.Bookings
             .Include(b => b.TripInstance)
                 .ThenInclude(t => t.ScheduleTime)
+                    .ThenInclude(st => st.ScheduleTimeCampuses)
             .Include(b => b.TripInstance)
                 .ThenInclude(t => t.Stop)
             .FirstOrDefaultAsync(b => b.QrCodeToken == qrCodeToken);
@@ -38,8 +39,15 @@ public class CheckInService : ICheckInService
         var tripInstance = booking.TripInstance;
         var scheduleTime = tripInstance.ScheduleTime;
 
-        // Step 2: Verify 35-minute scan window
-        // DepartureTime is in SAST (UTC+2). Convert to UTC: tripDate + departureTime - 2 hours
+        // Step 2: RequiresScanning safety net (primary enforcement is client-side)
+        if (!scheduleTime.RequiresScanning)
+        {
+            throw new CheckInException(
+                "This trip is open boarding — no QR scan required.",
+                StatusCodes.Status200OK);
+        }
+
+        // Step 3: Verify 35-minute scan window
         var departureDateTime = tripInstance.TripDate.ToDateTime(scheduleTime.DepartureTime);
         var utcDeparture = departureDateTime - SastOffset;
         var scanWindowStart = utcDeparture - ScanWindowMinutes;
@@ -51,7 +59,7 @@ public class CheckInService : ICheckInService
                 StatusCodes.Status422UnprocessableEntity);
         }
 
-        // Step 3: Verify marshal location binding
+        // Step 4: Verify marshal location binding
         var marshal = await _db.Marshals.FindAsync(marshalId);
         if (marshal is null)
         {
@@ -71,11 +79,15 @@ public class CheckInService : ICheckInService
         }
         else if (direction == "FromCampus")
         {
-            // Marshal must be assigned to the trip's campus
-            if (marshal.AssignedCampusId != scheduleTime.CampusId)
+            // Marshal must be assigned to one of the campuses on this route
+            var routeCampusIds = scheduleTime.ScheduleTimeCampuses
+                .Select(stc => stc.CampusId)
+                .ToList();
+
+            if (!routeCampusIds.Contains(marshal.AssignedCampusId ?? 0))
             {
                 throw new CheckInException(
-                    "Marshal is not authorized to scan at this location",
+                    "Marshal is not authorized to scan at this campus for this route.",
                     StatusCodes.Status403Forbidden);
             }
         }

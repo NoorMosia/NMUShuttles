@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.DTOs.Admin;
 using NmuShuttle.Api.Models;
+using NmuShuttle.Api.Services;
 
 namespace NmuShuttle.Api.Controllers.Admin;
 
@@ -13,10 +14,12 @@ namespace NmuShuttle.Api.Controllers.Admin;
 public class StopsAdminController : ControllerBase
 {
     private readonly ShuttleDbContext _context;
+    private readonly IStopDefaultConvoyService _defaultConvoyService;
 
-    public StopsAdminController(ShuttleDbContext context)
+    public StopsAdminController(ShuttleDbContext context, IStopDefaultConvoyService defaultConvoyService)
     {
         _context = context;
+        _defaultConvoyService = defaultConvoyService;
     }
 
     /// <summary>
@@ -222,5 +225,188 @@ public class StopsAdminController : ControllerBase
             return false;
 
         return true;
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Default Convoy Endpoints
+    // ──────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Get the default convoy for a stop, ordered by OrderPosition.
+    /// </summary>
+    [HttpGet("{stopId}/default-convoy")]
+    public async Task<IActionResult> GetDefaultConvoy(int stopId)
+    {
+        var defaults = await _defaultConvoyService.GetDefaultConvoyAsync(stopId);
+
+        var response = defaults.Select(d => new
+        {
+            d.StopShuttleDefaultId,
+            d.StopId,
+            d.ShuttleId,
+            d.Shuttle.LicensePlate,
+            d.Shuttle.IsAccessibleVehicle,
+            d.Shuttle.Capacity,
+            d.OrderPosition,
+            d.CreatedAt
+        });
+
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Add a shuttle to a stop's default convoy.
+    /// </summary>
+    [HttpPost("{stopId}/default-convoy")]
+    public async Task<IActionResult> AddToDefaultConvoy(int stopId, [FromBody] AddToDefaultConvoyDto dto)
+    {
+        try
+        {
+            var record = await _defaultConvoyService.AssignShuttleToDefaultAsync(stopId, dto.ShuttleId);
+
+            // Reload with shuttle nav for response
+            var shuttle = await _context.Shuttles.FindAsync(record.ShuttleId);
+
+            return CreatedAtAction(nameof(GetDefaultConvoy), new { stopId }, new
+            {
+                record.StopShuttleDefaultId,
+                record.StopId,
+                record.ShuttleId,
+                LicensePlate = shuttle?.LicensePlate ?? "",
+                IsAccessibleVehicle = shuttle?.IsAccessibleVehicle ?? false,
+                Capacity = shuttle?.Capacity ?? 0,
+                record.OrderPosition,
+                record.CreatedAt
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("inactive"))
+        {
+            return UnprocessableEntity(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already"))
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Remove a shuttle from a stop's default convoy.
+    /// </summary>
+    [HttpDelete("{stopId}/default-convoy/{shuttleId}")]
+    public async Task<IActionResult> RemoveFromDefaultConvoy(int stopId, int shuttleId)
+    {
+        try
+        {
+            await _defaultConvoyService.RemoveShuttleFromDefaultAsync(stopId, shuttleId);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Reorder shuttles in a stop's default convoy.
+    /// </summary>
+    [HttpPatch("{stopId}/default-convoy/reorder")]
+    public async Task<IActionResult> ReorderDefaultConvoy(int stopId, [FromBody] ReorderDefaultConvoyDto dto)
+    {
+        try
+        {
+            await _defaultConvoyService.ReorderDefaultAsync(stopId, dto.OrderedShuttleIds);
+            var defaults = await _defaultConvoyService.GetDefaultConvoyAsync(stopId);
+
+            var response = defaults.Select(d => new
+            {
+                d.StopShuttleDefaultId,
+                d.StopId,
+                d.ShuttleId,
+                d.Shuttle.LicensePlate,
+                d.Shuttle.IsAccessibleVehicle,
+                d.Shuttle.Capacity,
+                d.OrderPosition,
+                d.CreatedAt
+            });
+
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return UnprocessableEntity(new { message = ex.Message });
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Stop-Centric Trip View
+    // ──────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// List trips for a stop with convoy summary, filterable by date range and status.
+    /// </summary>
+    [HttpGet("{stopId}/trips")]
+    public async Task<IActionResult> GetTripsForStop(
+        int stopId,
+        [FromQuery] DateOnly? fromDate,
+        [FromQuery] DateOnly? toDate,
+        [FromQuery] string? status)
+    {
+        var stop = await _context.Stops.FindAsync(stopId);
+        if (stop == null)
+            return NotFound(new { message = "Stop not found" });
+
+        var sastToday = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(2));
+        var effectiveFrom = fromDate ?? sastToday;
+        var effectiveTo = toDate ?? sastToday.AddDays(3);
+
+        var query = _context.TripInstances
+            .Include(t => t.ScheduleTime)
+            .Include(t => t.TripShuttleAllocations)
+                .ThenInclude(a => a.Shuttle)
+            .Where(t => t.StopId == stopId && t.TripDate >= effectiveFrom && t.TripDate <= effectiveTo);
+
+        if (!string.IsNullOrWhiteSpace(status))
+            query = query.Where(t => t.Status == status);
+
+        var trips = await query
+            .OrderBy(t => t.TripDate)
+            .ThenBy(t => t.ScheduleTime.DepartureTime)
+            .ToListAsync();
+
+        var response = new List<object>();
+
+        foreach (var trip in trips)
+        {
+            var shuttleCount = trip.TripShuttleAllocations.Count;
+            var totalCapacity = trip.TripShuttleAllocations
+                .Where(a => a.IsOperational)
+                .Sum(a => a.Shuttle.Capacity);
+            var confirmedCount = await _context.Bookings
+                .CountAsync(b => b.TripInstanceId == trip.TripInstanceId && b.BookingStatus == "Confirmed");
+
+            response.Add(new
+            {
+                tripInstanceId = trip.TripInstanceId,
+                tripDate = trip.TripDate,
+                departureTime = trip.ScheduleTime.DepartureTime,
+                direction = trip.ScheduleTime.Direction,
+                status = trip.Status,
+                shuttleCount,
+                totalCapacity,
+                confirmedCount,
+                hasEmptyConvoy = shuttleCount == 0
+            });
+        }
+
+        return Ok(new
+        {
+            stopId,
+            stopName = stop.StopName,
+            trips = response
+        });
     }
 }

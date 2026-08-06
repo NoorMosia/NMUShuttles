@@ -37,4 +37,5 @@ public class Admin
 
     // Navigation properties
     public ICollection<BreakdownLog> ResolvedBreakdownLogs { get; set; } = new List<BreakdownLog>();
+    public ICollection<TripNote> TripNotes { get; set; } = new List<TripNote>();
 }

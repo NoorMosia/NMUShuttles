@@ -21,18 +21,16 @@ public class ScheduleTime
     public string ScheduleType { get; set; } = string.Empty;
 
     [Required]
-    public int CampusId { get; set; }
-
-    [Required]
     public int StopId { get; set; }
 
-    // Navigation properties
-    [ForeignKey(nameof(CampusId))]
-    public Campus Campus { get; set; } = null!;
+    [Required]
+    public bool RequiresScanning { get; set; } = true;
 
+    // Navigation properties
     [ForeignKey(nameof(StopId))]
     public Stop Stop { get; set; } = null!;
 
     public ICollection<TripInstance> TripInstances { get; set; } = new List<TripInstance>();
     public ICollection<PrioritySchedule> PrioritySchedules { get; set; } = new List<PrioritySchedule>();
+    public ICollection<ScheduleTimeCampus> ScheduleTimeCampuses { get; set; } = new List<ScheduleTimeCampus>();
 }

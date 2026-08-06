@@ -156,6 +156,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         child: SizedBox(
           width: double.infinity,
           child: DataTable(
+            showCheckboxColumn: false,
             headingRowColor: WidgetStateProperty.all(
               _navy.withValues(alpha: 0.05),
             ),

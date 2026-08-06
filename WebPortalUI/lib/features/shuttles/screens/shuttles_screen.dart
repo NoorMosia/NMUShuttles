@@ -182,6 +182,16 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                                   ),
                                   DataColumn(
                                     label: Text(
+                                      'Status',
+                                      style: GoogleFonts.hankenGrotesk(
+                                        fontWeight: FontWeight.w700,
+                                        color: _navy,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Text(
                                       'Actions',
                                       style: GoogleFonts.hankenGrotesk(
                                         fontWeight: FontWeight.w700,
@@ -220,6 +230,32 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                                           size: 20,
                                         ),
                                       ),
+                                      DataCell(
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: shuttle.isActive
+                                                ? Colors.green.shade50
+                                                : Colors.red.shade50,
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: shuttle.isActive
+                                                  ? Colors.green.shade300
+                                                  : Colors.red.shade300,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            shuttle.isActive ? 'Active' : 'Inactive',
+                                            style: GoogleFonts.hankenGrotesk(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: shuttle.isActive
+                                                  ? Colors.green.shade700
+                                                  : Colors.red.shade700,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                       DataCell(Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -228,6 +264,18 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                                             tooltip: 'Edit',
                                             onPressed: () => _showShuttleDialog(context, shuttle: shuttle),
                                           ),
+                                          if (shuttle.isActive)
+                                            IconButton(
+                                              icon: Icon(Icons.block, color: Colors.orange.shade700, size: 20),
+                                              tooltip: 'Deactivate',
+                                              onPressed: () => _confirmDeactivate(context, shuttle),
+                                            )
+                                          else
+                                            IconButton(
+                                              icon: Icon(Icons.play_circle_outline, color: Colors.green.shade700, size: 20),
+                                              tooltip: 'Reactivate',
+                                              onPressed: () => _reactivateShuttle(shuttle),
+                                            ),
                                         ],
                                       )),
                                     ],
@@ -241,6 +289,54 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
         ],
       ),
     );
+  }
+
+  /// Confirms deactivation of a shuttle.
+  void _confirmDeactivate(BuildContext context, Shuttle shuttle) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(
+          'Deactivate Shuttle',
+          style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.bold, color: _navy),
+        ),
+        content: Text(
+          'This will remove ${shuttle.licensePlate} from all default convoys. '
+          'Existing trip allocations will not be affected.\n\nProceed?',
+          style: GoogleFonts.hankenGrotesk(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              final error = await ref.read(shuttlesProvider.notifier).deactivateShuttle(shuttle.id);
+              if (error != null && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(error), backgroundColor: Colors.red.shade600),
+                );
+              }
+            },
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange.shade700),
+            child: const Text('Deactivate'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Reactivates a shuttle.
+  Future<void> _reactivateShuttle(Shuttle shuttle) async {
+    final error = await ref.read(shuttlesProvider.notifier).reactivateShuttle(shuttle.id);
+    if (error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error), backgroundColor: Colors.red.shade600),
+      );
+    }
   }
 
   /// Shows the Add/Edit shuttle dialog.

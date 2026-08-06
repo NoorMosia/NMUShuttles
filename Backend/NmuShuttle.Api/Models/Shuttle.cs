@@ -27,6 +27,9 @@ public class Shuttle
     public bool IsAccessibleVehicle { get; set; }
 
     [Required]
+    public bool IsActive { get; set; } = true;
+
+    [Required]
     public DateTime CreatedAt { get; set; }
 
     // Navigation properties
@@ -35,4 +38,5 @@ public class Shuttle
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public ICollection<BreakdownLog> BreakdownLogs { get; set; } = new List<BreakdownLog>();
     public ICollection<BreakdownLog> ReplacementBreakdownLogs { get; set; } = new List<BreakdownLog>();
+    public ICollection<StopShuttleDefault> StopShuttleDefaults { get; set; } = new List<StopShuttleDefault>();
 }

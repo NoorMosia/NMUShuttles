@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.DTOs.Admin;
 using NmuShuttle.Api.Models;
+using NmuShuttle.Api.Services;
 
 namespace NmuShuttle.Api.Controllers.Admin;
 
@@ -13,10 +14,12 @@ namespace NmuShuttle.Api.Controllers.Admin;
 public class ShuttlesAdminController : ControllerBase
 {
     private readonly ShuttleDbContext _context;
+    private readonly IStopDefaultConvoyService _stopDefaultConvoyService;
 
-    public ShuttlesAdminController(ShuttleDbContext context)
+    public ShuttlesAdminController(ShuttleDbContext context, IStopDefaultConvoyService stopDefaultConvoyService)
     {
         _context = context;
+        _stopDefaultConvoyService = stopDefaultConvoyService;
     }
 
     /// <summary>
@@ -35,6 +38,7 @@ public class ShuttlesAdminController : ControllerBase
                 VendorId = s.VendorId,
                 VendorCompanyName = s.Vendor.CompanyName,
                 IsAccessibleVehicle = s.IsAccessibleVehicle,
+                IsActive = s.IsActive,
                 CreatedAt = s.CreatedAt
             })
             .ToListAsync();
@@ -45,7 +49,7 @@ public class ShuttlesAdminController : ControllerBase
     /// <summary>
     /// Get a single shuttle by ID.
     /// </summary>
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var shuttle = await _context.Shuttles
@@ -63,6 +67,7 @@ public class ShuttlesAdminController : ControllerBase
             VendorId = shuttle.VendorId,
             VendorCompanyName = shuttle.Vendor.CompanyName,
             IsAccessibleVehicle = shuttle.IsAccessibleVehicle,
+            IsActive = shuttle.IsActive,
             CreatedAt = shuttle.CreatedAt
         });
     }
@@ -108,6 +113,7 @@ public class ShuttlesAdminController : ControllerBase
             VendorId = shuttle.VendorId,
             VendorCompanyName = vendor.CompanyName,
             IsAccessibleVehicle = shuttle.IsAccessibleVehicle,
+            IsActive = shuttle.IsActive,
             CreatedAt = shuttle.CreatedAt
         });
     }
@@ -152,7 +158,110 @@ public class ShuttlesAdminController : ControllerBase
             VendorId = shuttle.VendorId,
             VendorCompanyName = vendor.CompanyName,
             IsAccessibleVehicle = shuttle.IsAccessibleVehicle,
+            IsActive = shuttle.IsActive,
             CreatedAt = shuttle.CreatedAt
         });
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Shuttle Lifecycle Endpoints
+    // ──────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Deactivate a shuttle. Removes it from all default convoys.
+    /// Existing trip allocations are NOT removed.
+    /// </summary>
+    [HttpPatch("{id}/deactivate")]
+    public async Task<IActionResult> Deactivate(int id)
+    {
+        var shuttle = await _context.Shuttles.FindAsync(id);
+        if (shuttle == null)
+            return NotFound(new { message = "Shuttle not found" });
+
+        if (!shuttle.IsActive)
+            return Ok(new { message = "Shuttle is already inactive", shuttleId = id });
+
+        shuttle.IsActive = false;
+        await _context.SaveChangesAsync();
+
+        // Cleanup default convoy references
+        await _stopDefaultConvoyService.CleanupDecommissionedShuttleAsync(id);
+
+        return Ok(new { message = "Shuttle deactivated", shuttleId = id });
+    }
+
+    /// <summary>
+    /// Reactivate a shuttle. Does NOT re-add it to any default convoy.
+    /// </summary>
+    [HttpPatch("{id}/reactivate")]
+    public async Task<IActionResult> Reactivate(int id)
+    {
+        var shuttle = await _context.Shuttles.FindAsync(id);
+        if (shuttle == null)
+            return NotFound(new { message = "Shuttle not found" });
+
+        if (shuttle.IsActive)
+            return Ok(new { message = "Shuttle is already active", shuttleId = id });
+
+        shuttle.IsActive = true;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Shuttle reactivated", shuttleId = id });
+    }
+
+    /// <summary>
+    /// List only active shuttles (used by shuttle pickers in convoy management).
+    /// </summary>
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActive()
+    {
+        var shuttles = await _context.Shuttles
+            .Include(s => s.Vendor)
+            .Where(s => s.IsActive)
+            .Select(s => new ShuttleResponseDto
+            {
+                ShuttleId = s.ShuttleId,
+                LicensePlate = s.LicensePlate,
+                Capacity = s.Capacity,
+                VendorId = s.VendorId,
+                VendorCompanyName = s.Vendor.CompanyName,
+                IsAccessibleVehicle = s.IsAccessibleVehicle,
+                IsActive = s.IsActive,
+                CreatedAt = s.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(shuttles);
+    }
+
+    /// <summary>
+    /// List active shuttles not assigned to any stop's default convoy.
+    /// Used by the shuttle picker when adding to a default convoy.
+    /// </summary>
+    [HttpGet("available")]
+    public async Task<IActionResult> GetAvailable()
+    {
+        var assignedShuttleIds = await _context.StopShuttleDefaults
+            .Select(d => d.ShuttleId)
+            .Distinct()
+            .ToListAsync();
+
+        var shuttles = await _context.Shuttles
+            .Include(s => s.Vendor)
+            .Where(s => s.IsActive && !assignedShuttleIds.Contains(s.ShuttleId))
+            .Select(s => new ShuttleResponseDto
+            {
+                ShuttleId = s.ShuttleId,
+                LicensePlate = s.LicensePlate,
+                Capacity = s.Capacity,
+                VendorId = s.VendorId,
+                VendorCompanyName = s.Vendor.CompanyName,
+                IsAccessibleVehicle = s.IsAccessibleVehicle,
+                IsActive = s.IsActive,
+                CreatedAt = s.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(shuttles);
     }
 }

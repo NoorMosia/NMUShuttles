@@ -33,6 +33,11 @@ public class ShuttleDbContext : DbContext
     public DbSet<Report> Reports => Set<Report>();
     public DbSet<BreakdownLog> BreakdownLogs => Set<BreakdownLog>();
 
+    // New DbSets — Convoy and Route Model
+    public DbSet<StopShuttleDefault> StopShuttleDefaults => Set<StopShuttleDefault>();
+    public DbSet<ScheduleTimeCampus> ScheduleTimeCampuses => Set<ScheduleTimeCampus>();
+    public DbSet<TripNote> TripNotes => Set<TripNote>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -54,6 +59,11 @@ public class ShuttleDbContext : DbContext
         ConfigureNotification(modelBuilder);
         ConfigureReport(modelBuilder);
         ConfigureBreakdownLog(modelBuilder);
+
+        // Convoy and Route Model configurations
+        ConfigureStopShuttleDefault(modelBuilder);
+        ConfigureScheduleTimeCampus(modelBuilder);
+        ConfigureTripNote(modelBuilder);
 
         // Apply seed data from firstSeed.md specification
         SeedData.Apply(modelBuilder);
@@ -184,6 +194,7 @@ public class ShuttleDbContext : DbContext
             entity.Property(e => e.DepartureTime).IsRequired();
             entity.Property(e => e.Direction).HasColumnType("nvarchar(20)").IsRequired();
             entity.Property(e => e.ScheduleType).HasColumnType("nvarchar(20)").IsRequired();
+            entity.Property(e => e.RequiresScanning).IsRequired().HasDefaultValue(true);
 
             // CHECK constraints for enum-like columns
             entity.ToTable(t => t.HasCheckConstraint(
@@ -195,11 +206,6 @@ public class ShuttleDbContext : DbContext
                 "ScheduleType IN ('Weekday','Saturday')"));
 
             // Relationships
-            entity.HasOne(e => e.Campus)
-                .WithMany(c => c.ScheduleTimes)
-                .HasForeignKey(e => e.CampusId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             entity.HasOne(e => e.Stop)
                 .WithMany(s => s.ScheduleTimes)
                 .HasForeignKey(e => e.StopId)
@@ -239,10 +245,16 @@ public class ShuttleDbContext : DbContext
             entity.Property(e => e.VendorCompanyName).HasColumnType("nvarchar(100)").IsRequired();
             entity.Property(e => e.VendorId).IsRequired();
             entity.Property(e => e.IsAccessibleVehicle).IsRequired().HasDefaultValue(false);
+            entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
                 .HasDefaultValueSql("GETUTCDATE()");
 
             entity.HasIndex(e => e.LicensePlate).IsUnique();
+
+            // Filtered index for active shuttles
+            entity.HasIndex(e => e.IsActive)
+                .HasDatabaseName("IX_Shuttles_IsActive")
+                .HasFilter("IsActive = 1");
 
             // CHECK constraint: Capacity > 0
             entity.ToTable(t => t.HasCheckConstraint(
@@ -612,6 +624,112 @@ public class ShuttleDbContext : DbContext
 
             entity.HasIndex(e => e.CompanyName).IsUnique()
                 .HasDatabaseName("UQ_Vendors_CompanyName");
+        });
+    }
+
+    private static void ConfigureStopShuttleDefault(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<StopShuttleDefault>(entity =>
+        {
+            entity.ToTable("StopShuttleDefaults");
+            entity.HasKey(e => e.StopShuttleDefaultId);
+
+            entity.Property(e => e.OrderPosition).IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            // Composite unique constraints
+            entity.HasIndex(e => new { e.StopId, e.ShuttleId }).IsUnique()
+                .HasDatabaseName("UQ_StopShuttleDefaults_Stop_Shuttle");
+
+            entity.HasIndex(e => new { e.StopId, e.OrderPosition }).IsUnique()
+                .HasDatabaseName("UQ_StopShuttleDefaults_Stop_OrderPosition");
+
+            // Performance index
+            entity.HasIndex(e => e.StopId)
+                .HasDatabaseName("IX_StopShuttleDefaults_StopId");
+
+            // Relationships
+            entity.HasOne(e => e.Stop)
+                .WithMany(s => s.StopShuttleDefaults)
+                .HasForeignKey(e => e.StopId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Shuttle)
+                .WithMany(s => s.StopShuttleDefaults)
+                .HasForeignKey(e => e.ShuttleId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureScheduleTimeCampus(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ScheduleTimeCampus>(entity =>
+        {
+            entity.ToTable("ScheduleTimeCampuses");
+            entity.HasKey(e => e.ScheduleTimeCampusId);
+
+            entity.Property(e => e.StopOrder).IsRequired();
+
+            // Composite unique constraints
+            entity.HasIndex(e => new { e.ScheduleTimeId, e.CampusId }).IsUnique()
+                .HasDatabaseName("UQ_ScheduleTimeCampuses_ScheduleTime_Campus");
+
+            entity.HasIndex(e => new { e.ScheduleTimeId, e.StopOrder }).IsUnique()
+                .HasDatabaseName("UQ_ScheduleTimeCampuses_ScheduleTime_StopOrder");
+
+            // Performance index
+            entity.HasIndex(e => e.ScheduleTimeId)
+                .HasDatabaseName("IX_ScheduleTimeCampuses_ScheduleTimeId");
+
+            // Relationships
+            entity.HasOne(e => e.ScheduleTime)
+                .WithMany(st => st.ScheduleTimeCampuses)
+                .HasForeignKey(e => e.ScheduleTimeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Campus)
+                .WithMany(c => c.ScheduleTimeCampuses)
+                .HasForeignKey(e => e.CampusId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureTripNote(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TripNote>(entity =>
+        {
+            entity.ToTable("TripNotes");
+            entity.HasKey(e => e.TripNoteId);
+
+            entity.Property(e => e.NoteType).HasColumnType("nvarchar(20)").IsRequired();
+            entity.Property(e => e.Body).HasColumnType("nvarchar(max)").IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
+                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.IsResolutionAction).IsRequired().HasDefaultValue(false);
+
+            // CHECK constraint for NoteType
+            entity.ToTable(t => t.HasCheckConstraint(
+                "CK_TripNotes_NoteType",
+                "NoteType IN ('Incident','Replacement','General','NoShow')"));
+
+            // Performance indexes
+            entity.HasIndex(e => e.TripInstanceId)
+                .HasDatabaseName("IX_TripNotes_TripInstanceId");
+
+            entity.HasIndex(e => new { e.TripInstanceId, e.NoteType })
+                .HasDatabaseName("IX_TripNotes_TripInstanceId_NoteType");
+
+            // Relationships
+            entity.HasOne(e => e.TripInstance)
+                .WithMany(ti => ti.TripNotes)
+                .HasForeignKey(e => e.TripInstanceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.CreatedByAdmin)
+                .WithMany(a => a.TripNotes)
+                .HasForeignKey(e => e.CreatedByAdminId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

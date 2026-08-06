@@ -37,7 +37,8 @@ public class TripsController : ControllerBase
     {
         var query = _dbContext.TripInstances
             .Include(t => t.ScheduleTime)
-                .ThenInclude(st => st.Campus)
+                .ThenInclude(st => st.ScheduleTimeCampuses)
+                    .ThenInclude(stc => stc.Campus)
             .Include(t => t.Stop)
             .AsQueryable();
 
@@ -69,13 +70,18 @@ public class TripsController : ControllerBase
             var confirmedCount = await _capacityService.GetConfirmedCountAsync(trip.TripInstanceId);
             var availableSeats = await _capacityService.GetAvailableSeatsAsync(trip.TripInstanceId);
 
+            // Backward compat: return first campus (StopOrder=1) as campusName
+            var firstCampus = trip.ScheduleTime.ScheduleTimeCampuses
+                .OrderBy(stc => stc.StopOrder)
+                .FirstOrDefault();
+
             response.Add(new TripAvailabilityDto
             {
                 TripInstanceId = trip.TripInstanceId,
                 DepartureTime = trip.ScheduleTime.DepartureTime,
                 Direction = trip.ScheduleTime.Direction,
                 StopName = trip.Stop.StopName,
-                CampusName = trip.ScheduleTime.Campus.CampusName,
+                CampusName = firstCampus?.Campus?.CampusName ?? "",
                 TripDate = trip.TripDate,
                 Status = trip.Status,
                 TotalCapacity = totalCapacity,
@@ -97,7 +103,8 @@ public class TripsController : ControllerBase
     {
         var trip = await _dbContext.TripInstances
             .Include(t => t.ScheduleTime)
-                .ThenInclude(st => st.Campus)
+                .ThenInclude(st => st.ScheduleTimeCampuses)
+                    .ThenInclude(stc => stc.Campus)
             .Include(t => t.Stop)
             .Include(t => t.TripShuttleAllocations)
                 .ThenInclude(a => a.Shuttle)
@@ -118,13 +125,18 @@ public class TripsController : ControllerBase
         var confirmedCount = await _capacityService.GetConfirmedCountAsync(trip.TripInstanceId);
         var availableSeats = await _capacityService.GetAvailableSeatsAsync(trip.TripInstanceId);
 
+        // Backward compat: return first campus (StopOrder=1) as campusName
+        var firstCampus = trip.ScheduleTime.ScheduleTimeCampuses
+            .OrderBy(stc => stc.StopOrder)
+            .FirstOrDefault();
+
         var response = new TripDetailDto
         {
             TripInstanceId = trip.TripInstanceId,
             DepartureTime = trip.ScheduleTime.DepartureTime,
             Direction = trip.ScheduleTime.Direction,
             StopName = trip.Stop.StopName,
-            CampusName = trip.ScheduleTime.Campus.CampusName,
+            CampusName = firstCampus?.Campus?.CampusName ?? "",
             TripDate = trip.TripDate,
             Status = trip.Status,
             TotalCapacity = totalCapacity,
@@ -148,5 +160,57 @@ public class TripsController : ControllerBase
         };
 
         return Ok(response);
+    }
+
+    /// <summary>
+    /// Get convoy status for a trip — shuttle allocations with live boarded counts.
+    /// Accessible to Marshal and Admin roles.
+    /// </summary>
+    [HttpGet("{tripId}/convoy")]
+    [Authorize(Roles = "Marshal,Admin")]
+    public async Task<IActionResult> GetConvoyStatus(int tripId)
+    {
+        var trip = await _dbContext.TripInstances
+            .Include(t => t.ScheduleTime)
+            .FirstOrDefaultAsync(t => t.TripInstanceId == tripId);
+
+        if (trip is null)
+            return NotFound(new { message = "Trip not found" });
+
+        var allocations = await _dbContext.TripShuttleAllocations
+            .Include(a => a.Shuttle)
+            .Where(a => a.TripInstanceId == tripId)
+            .OrderBy(a => a.OrderPosition)
+            .ToListAsync();
+
+        var shuttles = new List<object>();
+
+        foreach (var allocation in allocations)
+        {
+            var boardedCount = await _dbContext.Bookings
+                .CountAsync(b =>
+                    b.TripInstanceId == tripId &&
+                    b.ShuttleId == allocation.ShuttleId &&
+                    b.BoardedStatus == "Boarded");
+
+            shuttles.Add(new
+            {
+                allocationId = allocation.AllocationId,
+                orderPosition = allocation.OrderPosition,
+                shuttleId = allocation.ShuttleId,
+                licensePlate = allocation.Shuttle.LicensePlate,
+                isAccessibleVehicle = allocation.Shuttle.IsAccessibleVehicle,
+                capacity = allocation.Shuttle.Capacity,
+                boardedCount,
+                isOperational = allocation.IsOperational
+            });
+        }
+
+        return Ok(new
+        {
+            tripInstanceId = tripId,
+            requiresScanning = trip.ScheduleTime.RequiresScanning,
+            shuttles
+        });
     }
 }

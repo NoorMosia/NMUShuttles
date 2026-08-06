@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nmu_shuttle_admin/features/trips/providers/trips_providers.dart';
@@ -283,11 +284,7 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
     return Column(
       children: [
         InkWell(
-          onTap: () {
-            setState(() {
-              _expandedTripId = isExpanded ? null : trip.id;
-            });
-          },
+          onTap: () => context.go('/trips/${trip.id}'),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(

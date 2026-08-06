@@ -155,13 +155,14 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       context: context,
       builder: (ctx) => _ScheduleTimeFormDialog(
         title: 'Add Schedule Time',
-        onSubmit: (departureTime, direction, scheduleType, campusId, stopId) {
+        onSubmit: (departureTime, direction, scheduleType, campusId, stopId, requiresScanning) {
           ref.read(scheduleTimesProvider.notifier).addScheduleTime(
                 departureTime: departureTime,
                 direction: direction,
                 scheduleType: scheduleType,
                 campusId: campusId,
                 stopId: stopId,
+                requiresScanning: requiresScanning,
               );
         },
       ),
@@ -179,7 +180,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         initialScheduleType: item.scheduleType,
         initialCampusId: item.campusId,
         initialStopId: item.stopId,
-        onSubmit: (departureTime, direction, scheduleType, campusId, stopId) {
+        onSubmit: (departureTime, direction, scheduleType, campusId, stopId, requiresScanning) {
           ref.read(scheduleTimesProvider.notifier).updateScheduleTime(
                 id: item.id,
                 departureTime: departureTime,
@@ -187,6 +188,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                 scheduleType: scheduleType,
                 campusId: campusId,
                 stopId: stopId,
+                requiresScanning: requiresScanning,
               );
         },
       ),
@@ -247,7 +249,7 @@ class _ScheduleTimeFormDialog extends StatefulWidget {
 
   final String title;
   final void Function(String departureTime, String direction,
-      String scheduleType, int campusId, int stopId) onSubmit;
+      String scheduleType, int campusId, int stopId, bool requiresScanning) onSubmit;
   final String? initialDepartureTime;
   final String? initialDirection;
   final String? initialScheduleType;
@@ -268,6 +270,7 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
   late final TextEditingController _stopIdController;
   late String _direction;
   late String _scheduleType;
+  late bool _requiresScanning;
 
   @override
   void initState() {
@@ -280,6 +283,7 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
         TextEditingController(text: widget.initialStopId?.toString() ?? '');
     _direction = widget.initialDirection ?? 'ToCampus';
     _scheduleType = widget.initialScheduleType ?? 'Weekday';
+    _requiresScanning = true;
   }
 
   @override
@@ -403,6 +407,25 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
                 validator: (v) =>
                     (v == null || v.isEmpty) ? 'Required' : null,
               ),
+              const SizedBox(height: 16),
+              // Requires Scanning toggle
+              SwitchListTile(
+                title: Text(
+                  'Requires QR Scanning',
+                  style: GoogleFonts.hankenGrotesk(fontSize: 14, color: _navy),
+                ),
+                subtitle: Text(
+                  'Disable for open-boarding trips (e.g. late-morning ToCampus)',
+                  style: GoogleFonts.hankenGrotesk(
+                    fontSize: 12,
+                    color: const Color(0xFF5A6B7B),
+                  ),
+                ),
+                value: _requiresScanning,
+                onChanged: (v) => setState(() => _requiresScanning = v),
+                activeColor: _navy,
+                contentPadding: EdgeInsets.zero,
+              ),
             ],
           ),
         ),
@@ -430,6 +453,7 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
       _scheduleType,
       campusId,
       stopId,
+      _requiresScanning,
     );
     Navigator.of(context).pop();
   }

@@ -18,3 +18,5 @@
 ## In terms of the use case numbering
     - Use some good practices, you can use your own numbering system.
     - keep the A100 format though. which is the single letter followed by 3 numbers.
+    - Make them make sense in terms of the flow
+        - eg id A1** is for authentication, all authentication use cases follow A101 and A102 or A110. It has to be a format that flows and can be easily explained

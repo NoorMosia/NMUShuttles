@@ -15,11 +15,17 @@ admin use cases.
 changes). This surfaced the automated background operations that no actor explicitly
 invokes.
 
-**Perfect Technology Assumption** — Login, logout, session management, OTP delivery,
-password management, and database maintenance are excluded from the use case model.
-They are technology controls, not domain functions. The system would still be required
-to perform every use case listed below even under perfect conditions where
-authentication never fails.
+**Perfect Technology Assumption** — Logout, session management, and database
+maintenance are excluded from the use case model as standard technology controls.
+
+**Lecturer-agreed exception — Authentication is included.** In this system,
+authentication is not a generic login screen bolted on for security. OTP-based login
+is the domain mechanism that verifies university affiliation — only holders of an
+active NMU university email address can access the system. The OTP process also
+triggers a real domain event: an email is sent to the user's university account.
+That email dispatch is a meaningful system response that must be modelled. On the
+lecturer's guidance, the authentication group is therefore included in the use case
+model under the `U` (User Auth) prefix.
 
 ---
 
@@ -27,19 +33,33 @@ authentication never fails.
 
 | Actor | Type | Description |
 |-------|------|-------------|
-| Student | Primary (external) | NMU student. Books, views, and cancels shuttle trips. Receives notifications. Files reports. |
-| Marshal | Primary (external) | NMU field staff. Scans QR codes at boarding points. Views passenger manifests. Flags shuttle breakdowns. |
-| Admin | Primary (external) | NMU system administrator. Manages all system data and resolves operational incidents. |
+| Student | Primary (external) | NMU student. Authenticates via OTP. Books, views, and cancels shuttle trips. Receives notifications. Files reports. |
+| Marshal | Primary (external) | NMU field staff. Authenticates via OTP. Scans QR codes at boarding points. Views passenger manifests. Flags shuttle breakdowns. |
+| Admin | Primary (external) | NMU system administrator. Authenticates via OTP. Manages all system data and resolves operational incidents. |
 | TIME | Temporal (external) | Represents time-based triggers. Drives the nightly trip generation job and the pre-departure lockout gate. |
+| Email Service | External system | Azure Communication Services. Receives OTP dispatch requests from the system and delivers the email to the user's NMU inbox. |
 
-> **Note on actor generalisation:** Marshal and Student share the same mobile app
-> and both require OTP to access it. They do not share any use cases, so no
-> generalisation relationship is modelled — they are distinct actors with entirely
-> separate role contexts.
+> **Note on actor generalisation:** Student, Marshal, and Admin all go through the
+> same OTP authentication flow. This shared behaviour is modelled via a `User`
+> generalisation — the three role actors inherit from `User`, who owns the auth
+> use cases. Each role actor then has its own additional use cases on top.
 
 ---
 
 ## 2.3 Use Case List by Actor
+
+### User (Authentication — shared by Student, Marshal, Admin)
+
+| ID | Use Case | Event Type |
+|----|----------|------------|
+| U100 | Request OTP | External |
+| U110 | Send OTP Email Notification | State — triggered by U100 |
+| U120 | Verify OTP and Log In | External |
+
+> `U100`, `U110`, and `U120` apply equally to Student, Marshal, and Admin.
+> All three actors inherit these use cases through the `User` generalisation.
+> The `U` prefix groups them separately so it is clear they are cross-cutting
+> and not owned by any single role.
 
 ### Student
 
@@ -99,10 +119,18 @@ authentication never fails.
 
 ```mermaid
 graph LR
+    User((User))
     Student((Student))
     Marshal((Marshal))
     Admin((Admin))
     TIME((TIME))
+    EmailSvc((Email Service))
+
+    subgraph "Authentication - All Users"
+        U100[U100 Request OTP]
+        U110[U110 Send OTP Email Notification]
+        U120[U120 Verify OTP and Log In]
+    end
 
     subgraph "Student Functions"
         S100[S100 View Available Trips]
@@ -148,6 +176,17 @@ graph LR
         T210[T210 Send Waitlist Promotion Notifications]
     end
 
+    %% User generalisation — Student, Marshal, Admin inherit auth use cases
+    User --> U100
+    User --> U120
+    Student -.->|extends| User
+    Marshal -.->|extends| User
+    Admin -.->|extends| User
+
+    %% Email Service participates in OTP dispatch
+    EmailSvc --> U110
+
+    %% Student use cases
     Student --> S100
     Student --> S110
     Student --> S120
@@ -158,11 +197,13 @@ graph LR
     Student --> S300
     Student --> S310
 
+    %% Marshal use cases
     Marshal --> M100
     Marshal --> M110
     Marshal --> M130
     Marshal --> M200
 
+    %% Admin use cases
     Admin --> A100
     Admin --> A110
     Admin --> A120
@@ -177,9 +218,12 @@ graph LR
     Admin --> A500
     Admin --> A510
 
+    %% TIME use cases
     TIME --> T100
     TIME --> T200
 
+    %% Include / Extend relationships
+    U100 -.->|include| U110
     S110 -.->|include| S100
     S140 -.->|include| S120
     M110 -.->|include| M120
@@ -196,6 +240,7 @@ graph LR
 
 | Relationship | Type | Rationale |
 |---|---|---|
+| U100 → U110 | `<<include>>` | Requesting an OTP always triggers an email dispatch — the email is mandatory, not optional. The system cannot complete OTP request without sending the code to the user's inbox. |
 | S110 → S100 | `<<include>>` | A student must view available trips before they can book one. S100 is mandatory to S110. |
 | S140 → S120 | `<<include>>` | Viewing the boarding pass is a sub-view of the full booking detail. The booking must be retrieved first. |
 | M110 → M120 | `<<include>>` | Scanning a QR code always invokes booking verification — the scan is meaningless without it. |
@@ -208,6 +253,73 @@ graph LR
 ---
 
 ## 2.6 Use Case Narratives (Fully Developed)
+
+---
+
+### U100 — Request OTP
+
+| Section | Detail |
+|---------|--------|
+| **Use Case ID** | U100 |
+| **Use Case Name** | Request OTP |
+| **Business Actors** | User (Student, Marshal, or Admin) |
+| **Brief Description** | A user initiates login by submitting their university email address. The system generates a 5-digit one-time password, stores a hashed copy against the account, and triggers an email dispatch (U110) to deliver the code to the user's NMU inbox. |
+| **Pre-Conditions** | — The email address submitted belongs to an active account (`IsActive = true`). <br>— No valid unexpired OTP already exists for this account. |
+| **Triggers** | User submits their email address on the login screen and taps "Login." |
+| **Post-Conditions** | — A 5-digit OTP is generated and its BCrypt hash stored against the account record. <br>— `OtpExpiry` is set to 5 minutes from now. <br>— U110 (Send OTP Email Notification) is executed — the OTP is delivered to the user's inbox. |
+
+**Basic Flow of Events**
+
+| Step | Actor/System | Action |
+|------|-------------|--------|
+| 1 | User | Opens the login screen and enters their NMU university email address. |
+| 2 | User | Taps "Login" / "Request OTP." |
+| 3 | System | Looks up the account by email address. |
+| 4 | System | Generates a 5-digit numeric OTP code. |
+| 5 | System | Hashes the OTP and stores it on the account with a 5-minute expiry. |
+| 6 | System | Executes U110 — dispatches the OTP to the user's email via Azure Communication Services. |
+| 7 | System | Returns a confirmation that the OTP has been sent. |
+| 8 | User | Receives the email and proceeds to U120 (Verify OTP and Log In). |
+
+**Alternate Flow of Events**
+
+| Step | Action |
+|------|--------|
+| 3.1 | No active account found for the submitted email. System returns a generic "check your email" response (no account enumeration). Flow ends. |
+| 6.1 | Email dispatch fails (Azure Comms error). System returns an error. OTP is not stored. User may retry. Flow ends. |
+
+---
+
+### U120 — Verify OTP and Log In
+
+| Section | Detail |
+|---------|--------|
+| **Use Case ID** | U120 |
+| **Use Case Name** | Verify OTP and Log In |
+| **Business Actors** | User (Student, Marshal, or Admin) |
+| **Brief Description** | The user submits the 5-digit OTP they received by email. The system validates it against the stored hash and expiry, and on success issues a signed JWT that grants access to the role-specific features. |
+| **Pre-Conditions** | — U100 has been executed — a hashed OTP and expiry exist on the account. <br>— The OTP has not yet expired (`OtpExpiry > now`). |
+| **Triggers** | User enters the 5-digit code and taps "Confirm OTP." |
+| **Post-Conditions** | — OTP hash and expiry cleared from the account record. <br>— A signed JWT Bearer token is returned, containing the user's ID, role, and expiry. <br>— User is redirected to the home screen for their role. |
+
+**Basic Flow of Events**
+
+| Step | Actor/System | Action |
+|------|-------------|--------|
+| 1 | User | Enters the 5-digit OTP received by email. |
+| 2 | User | Taps "Confirm OTP." |
+| 3 | System | Retrieves the stored OTP hash and expiry for the account. |
+| 4 | System | Verifies the submitted code against the BCrypt hash. |
+| 5 | System | Clears the OTP hash and expiry from the account. |
+| 6 | System | Generates and returns a signed JWT containing the user's ID, role claim, and expiry. |
+| 7 | User | JWT is stored on the device. User is navigated to their role home screen. |
+
+**Alternate Flow of Events**
+
+| Step | Action |
+|------|--------|
+| 3.1 | OTP has expired (`OtpExpiry < now`). System returns HTTP 422. User must restart from U100. Flow ends. |
+| 4.1 | OTP code does not match the stored hash. System returns HTTP 422 with an invalid code message. User may retry entry. Return to step 1. |
 
 ---
 

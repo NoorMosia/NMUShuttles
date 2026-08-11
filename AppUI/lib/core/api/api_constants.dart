@@ -3,7 +3,8 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URL — configured in DioClient, this is for reference
-  static const String defaultBaseUrl = 'https://juicy-dubiously-pushpin.ngrok-free.dev/api/v1';
+  static const String defaultBaseUrl =
+      'https://juicy-dubiously-pushpin.ngrok-free.dev/api/v1';
 
   // Auth endpoints
   static const String studentOtpRequest = '/auth/student/otp/request';

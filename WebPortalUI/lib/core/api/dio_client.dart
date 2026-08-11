@@ -13,7 +13,8 @@ class DioClient {
   })  : _authService = authService ?? AdminAuthService(),
         _dio = Dio(
           BaseOptions(
-            baseUrl: baseUrl ?? 'https://juicy-dubiously-pushpin.ngrok-free.dev/api/v1',
+            baseUrl: baseUrl ??
+                'https://juicy-dubiously-pushpin.ngrok-free.dev/api/v1',
             connectTimeout: const Duration(seconds: 30),
             receiveTimeout: const Duration(seconds: 30),
             headers: {

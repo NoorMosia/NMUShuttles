@@ -1,10 +1,11 @@
+import 'package:nmu_shuttle_app/core/config/env_config.dart';
+
 /// API route constants for the NMU Shuttle backend.
 class ApiConstants {
   ApiConstants._();
 
-  // Base URL — configured in DioClient, this is for reference
-  static const String defaultBaseUrl =
-      'https://juicy-dubiously-pushpin.ngrok-free.dev/api/v1';
+  // Base URL — driven by EnvConfig.useNgrok
+  static const String defaultBaseUrl = EnvConfig.baseUrl;
 
   // Auth endpoints
   static const String studentOtpRequest = '/auth/student/otp/request';

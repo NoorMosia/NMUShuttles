@@ -36,6 +36,7 @@ public class TripsAdminController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> ListTrips(
         [FromQuery] DateOnly? date,
+        [FromQuery] int? stopId,
         [FromQuery] string? status)
     {
         var query = _db.TripInstances
@@ -47,6 +48,9 @@ public class TripsAdminController : ControllerBase
 
         if (date.HasValue)
             query = query.Where(t => t.TripDate == date.Value);
+
+        if (stopId.HasValue)
+            query = query.Where(t => t.StopId == stopId.Value);
 
         if (!string.IsNullOrWhiteSpace(status))
             query = query.Where(t => t.Status == status);

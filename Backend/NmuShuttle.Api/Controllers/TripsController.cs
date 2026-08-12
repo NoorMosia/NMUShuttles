@@ -62,13 +62,36 @@ public class TripsController : ControllerBase
             .ThenBy(t => t.ScheduleTime.DepartureTime)
             .ToListAsync();
 
+        if (trips.Count == 0)
+            return Ok(new List<TripAvailabilityDto>());
+
+        // Batch capacity calculation — avoids N+1 queries
+        var tripIds = trips.Select(t => t.TripInstanceId).ToList();
+
+        var capacityByTrip = await _dbContext.TripShuttleAllocations
+            .Where(a => tripIds.Contains(a.TripInstanceId) && a.IsOperational)
+            .Join(
+                _dbContext.Shuttles,
+                a => a.ShuttleId,
+                s => s.ShuttleId,
+                (a, s) => new { a.TripInstanceId, s.Capacity })
+            .GroupBy(x => x.TripInstanceId)
+            .Select(g => new { TripInstanceId = g.Key, TotalCapacity = g.Sum(x => x.Capacity) })
+            .ToDictionaryAsync(x => x.TripInstanceId, x => x.TotalCapacity);
+
+        var confirmedByTrip = await _dbContext.Bookings
+            .Where(b => tripIds.Contains(b.TripInstanceId) && b.BookingStatus == "Confirmed")
+            .GroupBy(b => b.TripInstanceId)
+            .Select(g => new { TripInstanceId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.TripInstanceId, x => x.Count);
+
         var response = new List<TripAvailabilityDto>();
 
         foreach (var trip in trips)
         {
-            var totalCapacity = await _capacityService.GetTotalCapacityAsync(trip.TripInstanceId);
-            var confirmedCount = await _capacityService.GetConfirmedCountAsync(trip.TripInstanceId);
-            var availableSeats = await _capacityService.GetAvailableSeatsAsync(trip.TripInstanceId);
+            var totalCapacity = capacityByTrip.GetValueOrDefault(trip.TripInstanceId, 0);
+            var confirmedCount = confirmedByTrip.GetValueOrDefault(trip.TripInstanceId, 0);
+            var availableSeats = Math.Max(0, totalCapacity - confirmedCount);
 
             // Backward compat: return first campus (StopOrder=1) as campusName
             var firstCampus = trip.ScheduleTime.ScheduleTimeCampuses

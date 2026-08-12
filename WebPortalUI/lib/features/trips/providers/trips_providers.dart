@@ -141,9 +141,10 @@ class ShuttleOption {
 // ─── Query Parameters ────────────────────────────────────────────────────────
 
 class TripQueryParams {
-  const TripQueryParams({this.date, this.status});
+  const TripQueryParams({this.date, this.stopId, this.status});
 
   final String? date;
+  final int? stopId;
   final String? status;
 
   @override
@@ -152,10 +153,11 @@ class TripQueryParams {
       other is TripQueryParams &&
           runtimeType == other.runtimeType &&
           date == other.date &&
+          stopId == other.stopId &&
           status == other.status;
 
   @override
-  int get hashCode => date.hashCode ^ status.hashCode;
+  int get hashCode => Object.hash(date, stopId, status);
 }
 
 // ─── Providers ───────────────────────────────────────────────────────────────
@@ -168,6 +170,9 @@ final tripsProvider =
   final queryParameters = <String, dynamic>{};
   if (params.date != null && params.date!.isNotEmpty) {
     queryParameters['date'] = params.date;
+  }
+  if (params.stopId != null) {
+    queryParameters['stopId'] = params.stopId;
   }
   if (params.status != null && params.status!.isNotEmpty) {
     queryParameters['status'] = params.status;
@@ -192,6 +197,31 @@ final availableShuttlesProvider =
   final list = response.data as List;
   return list
       .map((e) => ShuttleOption.fromJson(e as Map<String, dynamic>))
+      .toList();
+});
+
+/// A lightweight stop option for the filter dropdown.
+class StopOption {
+  const StopOption({required this.stopId, required this.stopName});
+
+  final int stopId;
+  final String stopName;
+
+  factory StopOption.fromJson(Map<String, dynamic> json) {
+    return StopOption(
+      stopId: json['stopId'] as int,
+      stopName: json['stopName'] as String,
+    );
+  }
+}
+
+/// Fetches all stops for the trip filter dropdown.
+final stopsFilterProvider = FutureProvider<List<StopOption>>((ref) async {
+  final dioClient = ref.watch(dioClientProvider);
+  final response = await dioClient.dio.get('/admin/stops');
+  final list = response.data as List;
+  return list
+      .map((e) => StopOption.fromJson(e as Map<String, dynamic>))
       .toList();
 });
 

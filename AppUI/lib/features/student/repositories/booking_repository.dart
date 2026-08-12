@@ -1,6 +1,7 @@
 import 'package:nmu_shuttle_app/core/api/api_constants.dart';
 import 'package:nmu_shuttle_app/core/api/dio_client.dart';
 import 'package:nmu_shuttle_app/features/student/models/booking_model.dart';
+import 'package:nmu_shuttle_app/features/student/models/paginated_bookings.dart';
 
 /// Repository for booking-related API calls.
 class BookingRepository {
@@ -8,14 +9,22 @@ class BookingRepository {
 
   final DioClient _dioClient;
 
-  /// Fetches all bookings for the authenticated student.
-  /// GET /api/v1/bookings
-  Future<List<BookingModel>> getBookings() async {
-    final response = await _dioClient.dio.get(ApiConstants.bookings);
-    final List<dynamic> data = response.data as List<dynamic>;
-    return data
-        .map((json) => BookingModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+  /// Fetches paginated bookings for the authenticated student.
+  /// GET /api/v1/bookings?filter=upcoming|past|all&page=1&pageSize=20
+  Future<PaginatedBookings> getBookings({
+    String filter = 'all',
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _dioClient.dio.get(
+      ApiConstants.bookings,
+      queryParameters: {
+        'filter': filter,
+        'page': page,
+        'pageSize': pageSize,
+      },
+    );
+    return PaginatedBookings.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// Creates a new booking for the given trip instance.

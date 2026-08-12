@@ -121,6 +121,55 @@ public class BookingService : IBookingService
     }
 
     /// <inheritdoc />
+    public async Task<(List<Booking> Items, int TotalCount)> GetStudentBookingsAsync(
+        int studentId, string filter, int page, int pageSize)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var query = _db.Bookings
+            .Where(b => b.StudentId == studentId)
+            .Include(b => b.TripInstance)
+                .ThenInclude(t => t.ScheduleTime)
+                    .ThenInclude(st => st.ScheduleTimeCampuses)
+                        .ThenInclude(stc => stc.Campus)
+            .Include(b => b.TripInstance)
+                .ThenInclude(t => t.Stop)
+            .AsQueryable();
+
+        switch (filter.ToLowerInvariant())
+        {
+            case "upcoming":
+                query = query.Where(b =>
+                    b.TripInstance.TripDate >= today &&
+                    b.BookingStatus != "Cancelled");
+                query = query.OrderBy(b => b.TripInstance.TripDate)
+                    .ThenBy(b => b.TripInstance.ScheduleTime.DepartureTime);
+                break;
+
+            case "past":
+                query = query.Where(b =>
+                    b.TripInstance.TripDate < today ||
+                    b.BookingStatus == "Cancelled");
+                query = query.OrderByDescending(b => b.TripInstance.TripDate)
+                    .ThenByDescending(b => b.TripInstance.ScheduleTime.DepartureTime);
+                break;
+
+            default: // "all"
+                query = query.OrderByDescending(b => b.CreatedAt);
+                break;
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
+    /// <inheritdoc />
     public async Task<Booking?> GetBookingByIdAsync(int bookingId, int studentId)
     {
         return await _db.Bookings

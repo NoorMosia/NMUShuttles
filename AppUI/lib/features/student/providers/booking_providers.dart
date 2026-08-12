@@ -8,38 +8,38 @@ final bookingRepositoryProvider = Provider<BookingRepository>((ref) {
   return BookingRepository(dioClient: ref.watch(dioClientProvider));
 });
 
-/// Fetches all bookings for the authenticated student.
-final bookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
+/// A "refresh token" provider used solely for invalidation.
+/// When external code calls `ref.invalidate(bookingsProvider)`, this triggers
+/// both [upcomingBookingsProvider] and [pastBookingsProvider] to refetch.
+final bookingsProvider = StateProvider<int>((ref) => 0);
+
+/// Fetches upcoming bookings from the server (tripDate >= today, not cancelled).
+/// Watches [bookingsProvider] so that invalidating it triggers a refetch.
+final upcomingBookingsProvider =
+    FutureProvider<List<BookingModel>>((ref) async {
+  // Depend on the refresh token so invalidation cascades.
+  ref.watch(bookingsProvider);
   final repository = ref.watch(bookingRepositoryProvider);
-  return repository.getBookings();
+  final result = await repository.getBookings(
+    filter: 'upcoming',
+    page: 1,
+    pageSize: 50,
+  );
+  return result.items;
 });
 
-/// Derived provider: upcoming bookings.
-/// Bookings where tripDate >= today AND bookingStatus != 'Cancelled'.
-final upcomingBookingsProvider = Provider<AsyncValue<List<BookingModel>>>((ref) {
-  return ref.watch(bookingsProvider).whenData((bookings) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    return bookings.where((b) {
-      final tripDay = DateTime(b.tripDate.year, b.tripDate.month, b.tripDate.day);
-      return !tripDay.isBefore(today) && b.bookingStatus != 'Cancelled';
-    }).toList()
-      ..sort((a, b) => a.tripDate.compareTo(b.tripDate));
-  });
-});
-
-/// Derived provider: past bookings.
-/// Bookings where tripDate < today OR bookingStatus == 'Cancelled'.
-final pastBookingsProvider = Provider<AsyncValue<List<BookingModel>>>((ref) {
-  return ref.watch(bookingsProvider).whenData((bookings) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    return bookings.where((b) {
-      final tripDay = DateTime(b.tripDate.year, b.tripDate.month, b.tripDate.day);
-      return tripDay.isBefore(today) || b.bookingStatus == 'Cancelled';
-    }).toList()
-      ..sort((a, b) => b.tripDate.compareTo(a.tripDate));
-  });
+/// Fetches past bookings from the server (tripDate < today or cancelled).
+/// Watches [bookingsProvider] so that invalidating it triggers a refetch.
+final pastBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
+  // Depend on the refresh token so invalidation cascades.
+  ref.watch(bookingsProvider);
+  final repository = ref.watch(bookingRepositoryProvider);
+  final result = await repository.getBookings(
+    filter: 'past',
+    page: 1,
+    pageSize: 20,
+  );
+  return result.items;
 });
 
 /// Fetches a single booking by ID.

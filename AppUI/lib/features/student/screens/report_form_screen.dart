@@ -3,12 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dart';
 
-/// Screen for filing a new report.
-/// Category dropdown, description text area, optional trip ID, submit button.
+/// Screen for filing a new report against a specific booking.
+/// Category dropdown, description text area, submit button.
+/// Trip details are automatically linked via the booking on the backend.
 class ReportFormScreen extends ConsumerStatefulWidget {
-  const ReportFormScreen({super.key, this.tripInstanceId});
+  const ReportFormScreen({super.key, required this.bookingId});
 
-  final int? tripInstanceId;
+  final int bookingId;
 
   @override
   ConsumerState<ReportFormScreen> createState() => _ReportFormScreenState();
@@ -17,7 +18,6 @@ class ReportFormScreen extends ConsumerStatefulWidget {
 class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
-  final _tripIdController = TextEditingController();
 
   String _selectedCategory = 'DriverBehavior';
   bool _isSubmitting = false;
@@ -37,17 +37,8 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
   };
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.tripInstanceId != null) {
-      _tripIdController.text = widget.tripInstanceId.toString();
-    }
-  }
-
-  @override
   void dispose() {
     _descriptionController.dispose();
-    _tripIdController.dispose();
     super.dispose();
   }
 
@@ -58,14 +49,11 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
 
     try {
       final repo = ref.read(reportRepositoryProvider);
-      final tripId = _tripIdController.text.trim().isNotEmpty
-          ? int.tryParse(_tripIdController.text.trim())
-          : null;
 
       await repo.createReport(
         category: _selectedCategory,
         description: _descriptionController.text.trim(),
-        tripInstanceId: tripId,
+        bookingId: widget.bookingId,
       );
 
       // Invalidate reports cache so profile screen refreshes
@@ -175,37 +163,6 @@ class _ReportFormScreenState extends ConsumerState<ReportFormScreen> {
                   }
                   if (value.trim().length < 10) {
                     return 'Description must be at least 10 characters';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // ─── Trip Instance ID (Optional) ──────────────
-              Text(
-                'Trip Reference (Optional)',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.navy,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _tripIdController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter trip ID if applicable',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                validator: (value) {
-                  if (value != null && value.trim().isNotEmpty) {
-                    if (int.tryParse(value.trim()) == null) {
-                      return 'Please enter a valid trip ID number';
-                    }
                   }
                   return null;
                 },

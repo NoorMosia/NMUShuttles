@@ -7,6 +7,7 @@ class ReportModel {
     required this.status,
     this.adminNotes,
     this.tripInstanceId,
+    this.bookingId,
     required this.createdAt,
     this.updatedAt,
   });
@@ -17,6 +18,7 @@ class ReportModel {
   final String status;
   final String? adminNotes;
   final int? tripInstanceId;
+  final int? bookingId;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -28,6 +30,7 @@ class ReportModel {
       status: json['status'] as String,
       adminNotes: json['adminNotes'] as String?,
       tripInstanceId: json['tripInstanceId'] as int?,
+      bookingId: json['bookingId'] as int?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
@@ -43,6 +46,7 @@ class ReportModel {
       'status': status,
       'adminNotes': adminNotes,
       'tripInstanceId': tripInstanceId,
+      'bookingId': bookingId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };

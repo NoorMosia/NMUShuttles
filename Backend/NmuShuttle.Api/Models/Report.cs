@@ -26,6 +26,8 @@ public class Report
 
     public int? TripInstanceId { get; set; }
 
+    public int? BookingId { get; set; }
+
     [MaxLength(2000)]
     public string? AdminNotes { get; set; }
 
@@ -40,4 +42,7 @@ public class Report
 
     [ForeignKey(nameof(TripInstanceId))]
     public TripInstance? TripInstance { get; set; }
+
+    [ForeignKey(nameof(BookingId))]
+    public Booking? Booking { get; set; }
 }

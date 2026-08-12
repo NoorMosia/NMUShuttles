@@ -66,13 +66,44 @@ public class ReportsController : ControllerBase
             });
         }
 
+        // Look up the booking and validate it belongs to this student
+        var booking = await _dbContext.Bookings
+            .FirstOrDefaultAsync(b => b.BookingId == dto.BookingId && b.StudentId == studentId.Value);
+
+        if (booking is null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Not Found",
+                Detail = "Booking not found or does not belong to this student.",
+                Instance = HttpContext.Request.Path
+            });
+        }
+
+        // Prevent duplicate reports on the same booking
+        var existingReport = await _dbContext.Reports
+            .AnyAsync(r => r.BookingId == dto.BookingId && r.StudentId == studentId.Value);
+
+        if (existingReport)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Duplicate Report",
+                Detail = "You have already submitted a report for this booking.",
+                Instance = HttpContext.Request.Path
+            });
+        }
+
         var report = new Report
         {
             StudentId = studentId.Value,
             Category = dto.Category,
             Description = dto.Description,
             Status = "Submitted",
-            TripInstanceId = dto.TripInstanceId,
+            BookingId = booking.BookingId,
+            TripInstanceId = booking.TripInstanceId,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -87,6 +118,7 @@ public class ReportsController : ControllerBase
             Status = report.Status,
             AdminNotes = report.AdminNotes,
             TripInstanceId = report.TripInstanceId,
+            BookingId = report.BookingId,
             CreatedAt = report.CreatedAt,
             UpdatedAt = report.UpdatedAt
         };
@@ -115,6 +147,7 @@ public class ReportsController : ControllerBase
                 Status = r.Status,
                 AdminNotes = r.AdminNotes,
                 TripInstanceId = r.TripInstanceId,
+                BookingId = r.BookingId,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt
             })

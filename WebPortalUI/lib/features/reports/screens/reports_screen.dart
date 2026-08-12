@@ -348,8 +348,74 @@ class _ReportDetailViewState extends ConsumerState<_ReportDetailView> {
                   if (report.tripInstanceId != null) ...[
                     const SizedBox(height: 12),
                     _DetailRow(
-                      label: 'Linked Trip Instance',
+                      label: 'Linked Trip',
                       value: '#${report.tripInstanceId}',
+                    ),
+                  ],
+                  if (report.tripDetails != null) ...[
+                    const SizedBox(height: 24),
+                    const Divider(),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Trip Details',
+                      style: GoogleFonts.hankenGrotesk(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: _navy,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.blue.shade100),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _DetailRow(
+                            label: 'Stop',
+                            value: report.tripDetails!.stopName,
+                          ),
+                          const SizedBox(height: 8),
+                          _DetailRow(
+                            label: 'Date',
+                            value: report.tripDetails!.tripDate,
+                          ),
+                          const SizedBox(height: 8),
+                          _DetailRow(
+                            label: 'Departure Time',
+                            value: report.tripDetails!.departureTime,
+                          ),
+                          const SizedBox(height: 8),
+                          _DetailRow(
+                            label: 'Direction',
+                            value: report.tripDetails!.direction,
+                          ),
+                          const SizedBox(height: 8),
+                          _DetailRow(
+                            label: 'Trip Status',
+                            value: report.tripDetails!.tripStatus,
+                          ),
+                          if (report.tripDetails!.shuttlePlate != null) ...[
+                            const SizedBox(height: 8),
+                            _DetailRow(
+                              label: 'Shuttle Plate',
+                              value: report.tripDetails!.shuttlePlate!,
+                            ),
+                          ],
+                          if (report.tripDetails!.vendorName != null) ...[
+                            const SizedBox(height: 8),
+                            _DetailRow(
+                              label: 'Vendor',
+                              value: report.tripDetails!.vendorName!,
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ],
                   const SizedBox(height: 24),

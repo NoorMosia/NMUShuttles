@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.DTOs.Admin;
+using NmuShuttle.Api.Models;
 
 namespace NmuShuttle.Api.Controllers.Admin;
 
@@ -56,6 +57,13 @@ public class ReportsAdminController : ControllerBase
     {
         var report = await _db.Reports
             .Include(r => r.Student)
+            .Include(r => r.Booking)
+                .ThenInclude(b => b!.Shuttle)
+                    .ThenInclude(s => s!.Vendor)
+            .Include(r => r.TripInstance)
+                .ThenInclude(t => t!.ScheduleTime)
+            .Include(r => r.TripInstance)
+                .ThenInclude(t => t!.Stop)
             .FirstOrDefaultAsync(r => r.ReportId == id);
 
         if (report is null)
@@ -69,21 +77,7 @@ public class ReportsAdminController : ControllerBase
             });
         }
 
-        var response = new AdminReportResponseDto
-        {
-            ReportId = report.ReportId,
-            Category = report.Category,
-            Description = report.Description,
-            Status = report.Status,
-            StudentId = report.StudentId,
-            StudentNumber = report.Student.StudentNumber,
-            StudentName = $"{report.Student.FirstName} {report.Student.LastName}",
-            TripInstanceId = report.TripInstanceId,
-            AdminNotes = report.AdminNotes,
-            SubmissionDate = report.CreatedAt,
-            UpdatedAt = report.UpdatedAt
-        };
-
+        var response = MapToDto(report);
         return Ok(response);
     }
 
@@ -95,6 +89,13 @@ public class ReportsAdminController : ControllerBase
     {
         var report = await _db.Reports
             .Include(r => r.Student)
+            .Include(r => r.Booking)
+                .ThenInclude(b => b!.Shuttle)
+                    .ThenInclude(s => s!.Vendor)
+            .Include(r => r.TripInstance)
+                .ThenInclude(t => t!.ScheduleTime)
+            .Include(r => r.TripInstance)
+                .ThenInclude(t => t!.Stop)
             .FirstOrDefaultAsync(r => r.ReportId == id);
 
         if (report is null)
@@ -132,7 +133,13 @@ public class ReportsAdminController : ControllerBase
         report.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
-        var response = new AdminReportResponseDto
+        var response = MapToDto(report);
+        return Ok(response);
+    }
+
+    private static AdminReportResponseDto MapToDto(Report report)
+    {
+        var dto = new AdminReportResponseDto
         {
             ReportId = report.ReportId,
             Category = report.Category,
@@ -142,11 +149,27 @@ public class ReportsAdminController : ControllerBase
             StudentNumber = report.Student.StudentNumber,
             StudentName = $"{report.Student.FirstName} {report.Student.LastName}",
             TripInstanceId = report.TripInstanceId,
+            BookingId = report.BookingId,
             AdminNotes = report.AdminNotes,
             SubmissionDate = report.CreatedAt,
             UpdatedAt = report.UpdatedAt
         };
 
-        return Ok(response);
+        if (report.TripInstance is not null)
+        {
+            dto.TripDetails = new TripDetailsDto
+            {
+                TripInstanceId = report.TripInstance.TripInstanceId,
+                TripDate = report.TripInstance.TripDate.ToString("yyyy-MM-dd"),
+                DepartureTime = report.TripInstance.ScheduleTime.DepartureTime.ToString("HH:mm"),
+                Direction = report.TripInstance.ScheduleTime.Direction,
+                StopName = report.TripInstance.Stop.StopName,
+                TripStatus = report.TripInstance.Status,
+                ShuttlePlate = report.Booking?.Shuttle?.LicensePlate,
+                VendorName = report.Booking?.Shuttle?.Vendor?.CompanyName
+            };
+        }
+
+        return dto;
     }
 }

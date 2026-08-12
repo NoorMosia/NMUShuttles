@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dart';
@@ -98,7 +99,8 @@ class AppDrawer extends ConsumerWidget {
                 // Delete token from secure storage
                 await AuthService().deleteToken();
                 
-                // Invalidate all student-specific data providers so they don't cache the old user's data
+                // Invalidate all providers so they don't cache the old user's data
+                ref.invalidate(authStateProvider);
                 ref.invalidate(studentProfileProvider);
                 ref.invalidate(bookingsProvider);
                 ref.invalidate(reportsProvider);

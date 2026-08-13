@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_admin/features/auth/providers/admin_auth_providers.dart';
 import 'package:nmu_shuttle_admin/features/stops/providers/stops_providers.dart';
 import 'package:nmu_shuttle_admin/features/stops/providers/default_convoy_provider.dart';
+import 'package:nmu_shuttle_admin/features/stops/providers/stop_marshal_provider.dart';
 import 'package:nmu_shuttle_admin/features/trips/providers/trips_providers.dart';
 
 /// Detail screen for a single Stop, showing metadata, default convoy panel,
@@ -102,6 +103,9 @@ class _StopDetailScreenState extends ConsumerState<StopDetailScreen> {
                     // Stop metadata card
                     _buildMetadataCard(stop),
                     const SizedBox(height: 24),
+                    // Assigned Marshal section
+                    _buildAssignedMarshalSection(),
+                    const SizedBox(height: 24),
                     // Default Convoy panel placeholder (Task 4.2)
                     _buildDefaultConvoySection(),
                   ],
@@ -171,6 +175,178 @@ class _StopDetailScreenState extends ConsumerState<StopDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildAssignedMarshalSection() {
+    final marshalAsync = ref.watch(stopMarshalProvider(widget.stopId));
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE8ECF0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Assigned Marshal',
+                style: GoogleFonts.hankenGrotesk(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: _navy,
+                ),
+              ),
+              const Spacer(),
+              FilledButton.icon(
+                onPressed: () => _showAssignMarshalDialog(),
+                icon: const Icon(Icons.person_add_outlined, size: 16),
+                label: const Text('Assign'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: _navy,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          marshalAsync.when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+            error: (_, __) => Text(
+              'Failed to load marshal assignment',
+              style: GoogleFonts.hankenGrotesk(color: Colors.red.shade600, fontSize: 13),
+            ),
+            data: (marshal) {
+              if (marshal == null) {
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'No marshal assigned to this stop',
+                    style: GoogleFonts.hankenGrotesk(
+                      fontSize: 13,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                );
+              }
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  backgroundColor: _navy.withValues(alpha: 0.1),
+                  child: Text(
+                    '${marshal.firstName.isNotEmpty ? marshal.firstName[0] : ''}${marshal.lastName.isNotEmpty ? marshal.lastName[0] : ''}',
+                    style: GoogleFonts.hankenGrotesk(
+                      fontWeight: FontWeight.w700,
+                      color: _navy,
+                    ),
+                  ),
+                ),
+                title: Text(
+                  '${marshal.firstName} ${marshal.lastName}',
+                  style: GoogleFonts.hankenGrotesk(
+                    fontWeight: FontWeight.w600,
+                    color: _navy,
+                  ),
+                ),
+                subtitle: Text(
+                  marshal.staffNumber,
+                  style: GoogleFonts.hankenGrotesk(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                trailing: IconButton(
+                  icon: Icon(Icons.person_remove_outlined, color: Colors.red.shade600, size: 20),
+                  tooltip: 'Unassign marshal',
+                  onPressed: () => _unassignMarshal(marshal.marshalId),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showAssignMarshalDialog() async {
+    List<StopMarshalOption> available;
+    try {
+      final dioClient = ref.read(dioClientProvider);
+      final response = await dioClient.dio.get('/admin/marshals/available-for-stop');
+      final list = response.data as List;
+      available = list
+          .map((e) => StopMarshalOption.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      available = [];
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load marshals: ${_extractError(e)}'),
+            backgroundColor: Colors.red.shade600,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    final selectedId = await showDialog<int>(
+      context: context,
+      builder: (ctx) => _AssignMarshalDialog(marshals: available),
+    );
+
+    if (selectedId != null) {
+      try {
+        final dioClient = ref.read(dioClientProvider);
+        await dioClient.dio.patch(
+          '/admin/marshals/$selectedId/assign-stop',
+          data: {'stopId': widget.stopId},
+        );
+        ref.invalidate(stopMarshalProvider(widget.stopId));
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to assign: ${_extractError(e)}'),
+              backgroundColor: Colors.red.shade600,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _unassignMarshal(int marshalId) async {
+    try {
+      final dioClient = ref.read(dioClientProvider);
+      await dioClient.dio.patch(
+        '/admin/marshals/$marshalId/unassign-stop',
+      );
+      ref.invalidate(stopMarshalProvider(widget.stopId));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to unassign: ${_extractError(e)}'),
+            backgroundColor: Colors.red.shade600,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildDefaultConvoySection() {
@@ -518,6 +694,115 @@ class _AddShuttleToConvoyDialogState extends State<_AddShuttleToConvoyDialog> {
           ),
           child: Text(
             'Add',
+            style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
+// ─── Assign Marshal Dialog ───────────────────────────────────────────────────
+
+class _AssignMarshalDialog extends StatefulWidget {
+  const _AssignMarshalDialog({required this.marshals});
+
+  final List<StopMarshalOption> marshals;
+
+  @override
+  State<_AssignMarshalDialog> createState() => _AssignMarshalDialogState();
+}
+
+class _AssignMarshalDialogState extends State<_AssignMarshalDialog> {
+  static const Color _navy = Color(0xFF132E51);
+  int? _selectedId;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Row(
+        children: [
+          const Icon(Icons.person_add, color: _navy),
+          const SizedBox(width: 8),
+          Text(
+            'Assign Marshal to Stop',
+            style: GoogleFonts.hankenGrotesk(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: _navy,
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 400,
+        child: widget.marshals.isEmpty
+            ? Text(
+                'No marshals available',
+                style: GoogleFonts.hankenGrotesk(color: Colors.grey),
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: widget.marshals.map((marshal) {
+                  final isSelected = _selectedId == marshal.marshalId;
+                  return ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    selected: isSelected,
+                    selectedTileColor: _navy.withValues(alpha: 0.05),
+                    leading: CircleAvatar(
+                      backgroundColor: _navy.withValues(alpha: 0.1),
+                      child: Text(
+                        '${marshal.firstName.isNotEmpty ? marshal.firstName[0] : ''}${marshal.lastName.isNotEmpty ? marshal.lastName[0] : ''}',
+                        style: GoogleFonts.hankenGrotesk(
+                          fontWeight: FontWeight.w700,
+                          color: _navy,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      '${marshal.firstName} ${marshal.lastName}',
+                      style: GoogleFonts.hankenGrotesk(
+                        fontWeight: FontWeight.w600,
+                        color: _navy,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${marshal.staffNumber}${marshal.currentStopName != null ? ' • Currently at ${marshal.currentStopName}' : ''}',
+                      style: GoogleFonts.hankenGrotesk(fontSize: 12),
+                    ),
+                    trailing: isSelected
+                        ? const Icon(Icons.check_circle, color: _navy)
+                        : null,
+                    onTap: () => setState(() => _selectedId = marshal.marshalId),
+                  );
+                }).toList(),
+              ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancel',
+            style: GoogleFonts.hankenGrotesk(color: Colors.grey.shade700),
+          ),
+        ),
+        FilledButton(
+          onPressed: _selectedId != null
+              ? () => Navigator.of(context).pop(_selectedId)
+              : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: _navy,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text(
+            'Assign',
             style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w600),
           ),
         ),

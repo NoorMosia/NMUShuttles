@@ -151,8 +151,8 @@ class MarshalHomeScreen extends ConsumerWidget {
   Widget _buildLocationHeader(BuildContext context, MarshalHomeState state) {
     final locationName = state.assignment?.locationName ?? 'Loading...';
     final locationType = state.assignment?.isCampusAssigned == true
-        ? 'Campus Station — From Campus'
-        : 'Stop Station — To Campus';
+        ? 'Campus Station | From Campus'
+        : 'Stop Station | To Campus';
 
     return Container(
       padding: const EdgeInsets.all(16),

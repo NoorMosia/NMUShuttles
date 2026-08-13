@@ -111,10 +111,10 @@ public class ShuttleDbContext : DbContext
             entity.HasIndex(e => e.StaffNumber).IsUnique();
             entity.HasIndex(e => e.UniversityEmail).IsUnique();
 
-            // Assignment constraint: at least one must be set, or both can be set
+            // Assignment constraint: allows any combination (both, one, or neither)
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Marshals_AssignedXOR",
-                "AssignedCampusId IS NOT NULL OR AssignedStopId IS NOT NULL"));
+                "1=1"));
 
             // Relationships
             entity.HasOne(e => e.AssignedCampus)

@@ -10,7 +10,7 @@ import 'package:nmu_shuttle_app/features/student/providers/notification_provider
 import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/trip_providers.dart';
 import 'package:nmu_shuttle_app/features/student/screens/report_detail_screen.dart';
-import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
+import 'package:nmu_shuttle_app/shared/widgets/student_shell.dart';
 
 /// Profile screen displaying student info, strike points, reports list, and logout.
 class ProfileScreen extends ConsumerWidget {
@@ -81,8 +81,58 @@ class ProfileScreen extends ConsumerWidget {
               ],
             ),
           ),
-          // Floating hamburger menu
-          const HamburgerMenuButton(),
+          // Floating hamburger menu + Profile label
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 12,
+            left: 16,
+            right: 16,
+            child: Row(
+              children: [
+                Material(
+                  color: Colors.white,
+                  elevation: 0,
+                  borderRadius: BorderRadius.circular(8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      if (studentShellScaffoldKey.currentState?.hasDrawer ?? false) {
+                        studentShellScaffoldKey.currentState!.openDrawer();
+                      } else {
+                        Scaffold.of(context).openDrawer();
+                      }
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Icon(
+                        Icons.menu,
+                        color: Color(0xFF132E51),
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Material(
+                    color: Colors.white,
+                    elevation: 0,
+                    borderRadius: BorderRadius.circular(8),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Text(
+                        'Profile',
+                        style: TextStyle(
+                          color: Color(0xFF132E51),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -131,7 +181,6 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey.shade200),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -178,24 +227,6 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        const Icon(Icons.email_outlined,
-                            size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            profile.email,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: Colors.grey.shade700),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -225,7 +256,6 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey.shade200),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -233,7 +263,7 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               Text(
                 'Strike Points',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppTheme.navy,
                     ),

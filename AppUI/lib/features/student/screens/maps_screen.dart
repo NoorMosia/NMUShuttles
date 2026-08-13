@@ -24,6 +24,7 @@ class MapsScreen extends ConsumerStatefulWidget {
 class _MapsScreenState extends ConsumerState<MapsScreen> {
   GoogleMapController? _mapController;
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   String _searchQuery = '';
 
   // Device location state
@@ -48,6 +49,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _mapController?.dispose();
     super.dispose();
   }
@@ -236,6 +238,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                 icon: const Icon(Icons.directions),
                 label: const Text('Get Directions'),
                 style: ElevatedButton.styleFrom(
+                  elevation: 0,
                   backgroundColor: AppTheme.primaryGold,
                   foregroundColor: AppTheme.navy,
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -321,6 +324,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => ref.invalidate(mapStopsProvider),
+                  style: ElevatedButton.styleFrom(elevation: 0),
                   child: const Text('Retry'),
                 ),
               ],
@@ -362,8 +366,19 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                   borderRadius: BorderRadius.circular(12),
                   child: TextField(
                     controller: _searchController,
+                    focusNode: _searchFocusNode,
                     onChanged: (value) {
-                      setState(() => _searchQuery = value);
+                      setState(() {
+                        _searchQuery = value;
+                        if (value.isNotEmpty) {
+                          _showNearbyStops = false;
+                        }
+                      });
+                    },
+                    onTap: () {
+                      if (_showNearbyStops) {
+                        setState(() => _showNearbyStops = false);
+                      }
                     },
                     decoration: InputDecoration(
                       hintText: 'Search stops...',
@@ -448,8 +463,8 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                         shrinkWrap: true,
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         itemCount: filteredStops.length,
-                        separatorBuilder: (_, __) => const Divider(
-                            height: 1, indent: 16, endIndent: 16),
+                        separatorBuilder: (_, __) => Divider(
+                            height: 1, thickness: 0.5, color: Colors.grey.shade200, indent: 16, endIndent: 16),
                         itemBuilder: (context, index) {
                           final stop = filteredStops[index];
                           return ListTile(
@@ -458,12 +473,13 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                                 color: AppTheme.primaryGold, size: 20),
                             title: Text(
                               stop.stopName,
-                              style: const TextStyle(fontSize: 14),
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.grey.shade800),
                             ),
                             subtitle: Text(
                               stop.fullAddress,
                               style: TextStyle(
-                                  fontSize: 12, color: Colors.grey.shade600),
+                                  fontSize: 12, color: Colors.grey.shade500),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -487,42 +503,27 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                   ),
                 ),
 
-              // Nearby Stops FAB
+              // Nearby Stops FAB + My Location button (side by side)
               Positioned(
                 bottom: _showNearbyStops ? 320 : 24,
                 right: 16,
-                child: Column(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // My Location button
-                    FloatingActionButton.small(
-                      heroTag: 'my_location',
-                      onPressed: () {
-                        if (_deviceLat != null && _deviceLon != null) {
-                          _mapController?.animateCamera(
-                            CameraUpdate.newLatLngZoom(
-                              LatLng(_deviceLat!, _deviceLon!),
-                              14.0,
-                            ),
-                          );
-                        } else {
-                          _requestDeviceLocation();
-                        }
-                      },
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        _locationPermissionDenied
-                            ? Icons.location_disabled
-                            : Icons.my_location,
-                        color: AppTheme.navy,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
                     // Nearby stops button
                     FloatingActionButton.extended(
                       heroTag: 'nearby_stops',
+                      elevation: 0,
+                      highlightElevation: 0,
                       onPressed: () {
-                        setState(() => _showNearbyStops = !_showNearbyStops);
+                        setState(() {
+                          _showNearbyStops = !_showNearbyStops;
+                          if (_showNearbyStops) {
+                            _searchFocusNode.unfocus();
+                            _searchController.clear();
+                            _searchQuery = '';
+                          }
+                        });
                       },
                       backgroundColor: AppTheme.primaryGold,
                       foregroundColor: AppTheme.navy,
@@ -530,6 +531,39 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                           _showNearbyStops ? Icons.close : Icons.near_me),
                       label: Text(
                           _showNearbyStops ? 'Close' : 'Nearby Stops'),
+                    ),
+                    const SizedBox(width: 12),
+                    // My Location button (same height as extended FAB)
+                    SizedBox(
+                      height: 48,
+                      width: 48,
+                      child: FloatingActionButton(
+                        heroTag: 'my_location',
+                        elevation: 0,
+                        highlightElevation: 0,
+                        onPressed: () {
+                          if (_deviceLat != null && _deviceLon != null) {
+                            _mapController?.animateCamera(
+                              CameraUpdate.newLatLngZoom(
+                                LatLng(_deviceLat!, _deviceLon!),
+                                14.0,
+                              ),
+                            );
+                          } else {
+                            _requestDeviceLocation();
+                          }
+                        },
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          _locationPermissionDenied
+                              ? Icons.location_disabled
+                              : Icons.my_location,
+                          color: AppTheme.navy,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -598,7 +632,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
           // Stops list
           Expanded(
             child: _locationPermissionDenied
@@ -608,8 +642,8 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                     : ListView.separated(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         itemCount: nearbyStops.length,
-                        separatorBuilder: (_, __) => const Divider(
-                            height: 1, indent: 56, endIndent: 16),
+                        separatorBuilder: (_, __) => Divider(
+                            height: 1, thickness: 0.5, color: Colors.grey.shade200, indent: 56, endIndent: 16),
                         itemBuilder: (context, index) {
                           final stop = nearbyStops[index];
                           final distance = _deviceLat != null
@@ -626,13 +660,15 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                             ),
                             title: Text(
                               stop.stopName,
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey.shade800),
                             ),
                             subtitle: Text(
                               stop.fullAddress,
                               style: TextStyle(
-                                  fontSize: 12, color: Colors.grey.shade600),
+                                  fontSize: 12, color: Colors.grey.shade500),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -641,7 +677,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                                     '${distance.toStringAsFixed(1)} km',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey.shade600,
+                                      color: Colors.grey.shade500,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   )
@@ -695,6 +731,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
               icon: const Icon(Icons.location_on),
               label: const Text('Grant Permission'),
               style: ElevatedButton.styleFrom(
+                elevation: 0,
                 backgroundColor: AppTheme.primaryGold,
                 foregroundColor: AppTheme.navy,
               ),

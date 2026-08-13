@@ -9,7 +9,6 @@ import 'package:nmu_shuttle_app/features/student/screens/booking_detail_screen.d
 import 'package:nmu_shuttle_app/features/student/screens/maps_screen.dart';
 import 'package:nmu_shuttle_app/features/student/screens/alerts_screen.dart';
 import 'package:nmu_shuttle_app/features/student/screens/profile_screen.dart';
-import 'package:nmu_shuttle_app/features/student/screens/report_form_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/marshal_home_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/passenger_list_screen.dart';
 import 'package:nmu_shuttle_app/shared/widgets/student_shell.dart';
@@ -77,11 +76,6 @@ class AppRouter {
           final id = state.pathParameters['id']!;
           return BookingDetailScreen(bookingId: id);
         },
-      ),
-      GoRoute(
-        path: '/student/report/new',
-        name: 'newReport',
-        builder: (context, state) => const ReportFormScreen(),
       ),
 
       // ─── Marshal routes ──────────────────────────────────────

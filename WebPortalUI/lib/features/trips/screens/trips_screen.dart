@@ -16,8 +16,9 @@ class TripsScreen extends ConsumerStatefulWidget {
 class _TripsScreenState extends ConsumerState<TripsScreen> {
   static const Color _navy = Color(0xFF132E51);
 
-  DateTime? _selectedDate;
+  DateTime? _selectedDate = DateTime.now();
   String? _selectedStatus;
+  int? _selectedStopId;
   int? _expandedTripId;
 
   static const List<String> _statusOptions = [
@@ -32,7 +33,7 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
       _selectedDate != null ? DateFormat('yyyy-MM-dd').format(_selectedDate!) : null;
 
   TripQueryParams get _queryParams =>
-      TripQueryParams(date: _formattedDate, status: _selectedStatus);
+      TripQueryParams(date: _formattedDate, stopId: _selectedStopId, status: _selectedStatus);
 
   @override
   Widget build(BuildContext context) {
@@ -100,30 +101,101 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
           _FilterChip(
             label: _selectedDate != null
                 ? DateFormat('dd MMM yyyy').format(_selectedDate!)
-                : 'Select Date',
+                : 'All Days',
             icon: Icons.calendar_today_outlined,
             onTap: () => _pickDate(context),
           ),
+          const SizedBox(width: 12),
+          // Stop dropdown
+          _buildStopDropdown(),
           const SizedBox(width: 12),
           // Status dropdown
           _buildStatusDropdown(),
           const SizedBox(width: 12),
           // Clear filters
-          if (_selectedDate != null || _selectedStatus != null)
+          if (_selectedDate != null || _selectedStatus != null || _selectedStopId != null)
             TextButton.icon(
               onPressed: () {
                 setState(() {
-                  _selectedDate = null;
+                  _selectedDate = DateTime.now();
                   _selectedStatus = null;
+                  _selectedStopId = null;
                 });
               },
               icon: const Icon(Icons.clear, size: 16),
               label: Text(
-                'Clear',
+                'Reset',
+                style: GoogleFonts.hankenGrotesk(fontSize: 13),
+              ),
+            ),
+          const SizedBox(width: 8),
+          // "All Days" button to load without date filter
+          if (_selectedDate != null)
+            OutlinedButton.icon(
+              onPressed: () => setState(() => _selectedDate = null),
+              icon: const Icon(Icons.date_range, size: 16),
+              label: Text(
+                'All Days',
                 style: GoogleFonts.hankenGrotesk(fontSize: 13),
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStopDropdown() {
+    final stopsAsync = ref.watch(stopsFilterProvider);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: _navy.withValues(alpha: 0.2)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: stopsAsync.when(
+        loading: () => SizedBox(
+          width: 120,
+          height: 40,
+          child: Center(
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: _navy),
+            ),
+          ),
+        ),
+        error: (_, __) => Text(
+          'Stops unavailable',
+          style: GoogleFonts.hankenGrotesk(fontSize: 13, color: Colors.red),
+        ),
+        data: (stops) => DropdownButtonHideUnderline(
+          child: DropdownButton<int?>(
+            value: _selectedStopId,
+            hint: Text(
+              'All Stops',
+              style: GoogleFonts.hankenGrotesk(fontSize: 13, color: _navy),
+            ),
+            items: [
+              DropdownMenuItem<int?>(
+                value: null,
+                child: Text(
+                  'All Stops',
+                  style: GoogleFonts.hankenGrotesk(fontSize: 13, color: _navy),
+                ),
+              ),
+              ...stops.map(
+                (s) => DropdownMenuItem<int?>(
+                  value: s.stopId,
+                  child: Text(
+                    s.stopName,
+                    style: GoogleFonts.hankenGrotesk(fontSize: 13, color: _navy),
+                  ),
+                ),
+              ),
+            ],
+            onChanged: (value) => setState(() => _selectedStopId = value),
+          ),
+        ),
       ),
     );
   }

@@ -122,44 +122,20 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
                         // Direction selector
                         _buildSectionLabel('Direction'),
                         const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          child: SegmentedButton<String>(
-                            segments: const [
-                              ButtonSegment(
-                                value: 'ToCampus',
-                                label: Text('To Campus'),
-                                icon: Icon(Icons.arrow_forward),
-                              ),
-                              ButtonSegment(
-                                value: 'FromCampus',
-                                label: Text('From Campus'),
-                                icon: Icon(Icons.arrow_back),
-                              ),
-                            ],
-                            selected: {_direction},
-                            onSelectionChanged: (selection) {
-                              setState(() => _direction = selection.first);
-                            },
-                            style: SegmentedButton.styleFrom(
-                              selectedBackgroundColor: AppTheme.primaryGold,
-                              selectedForegroundColor: AppTheme.navy,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
+                        _buildDirectionTabs(),
+                        const SizedBox(height: 48),
 
                         // Stop search
                         _buildSectionLabel('Stop'),
                         const SizedBox(height: 8),
                         _buildStopSearch(stopsAsync),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 48),
 
                         // Date picker (4-day horizontal chips)
                         _buildSectionLabel('Date'),
                         const SizedBox(height: 8),
                         _buildDateChips(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 48),
 
                         // Departure time list
                         _buildSectionLabel('Available Trips'),
@@ -189,6 +165,90 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
     );
   }
 
+  Widget _buildDirectionTabs() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tabWidth = constraints.maxWidth / 2;
+        final isToCampus = _direction == 'ToCampus';
+
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade200, width: 0.5),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: IntrinsicHeight(
+            child: Stack(
+              children: [
+                // Animated highlight background
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  left: isToCampus ? 0 : tabWidth,
+                  top: 0,
+                  bottom: 0,
+                  width: tabWidth,
+                  child: Container(
+                    color: AppTheme.primaryGold,
+                  ),
+                ),
+                // Tab labels
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _direction = 'ToCampus'),
+                        behavior: HitTestBehavior.opaque,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 250),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: isToCampus
+                                    ? AppTheme.navy
+                                    : AppTheme.navy.withValues(alpha: 0.5),
+                              ),
+                              child: const Text('To Campus'),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _direction = 'FromCampus'),
+                        behavior: HitTestBehavior.opaque,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 250),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: !isToCampus
+                                    ? AppTheme.navy
+                                    : AppTheme.navy.withValues(alpha: 0.5),
+                              ),
+                              child: const Text('From Campus'),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildStopSearch(AsyncValue<List<StopModel>> stopsAsync) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,9 +257,15 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
           controller: _searchController,
           decoration: InputDecoration(
             hintText: 'Search by stop name or address...',
-            prefixIcon: const Icon(Icons.search),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+            prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+            border: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.shade500),
             ),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -267,6 +333,7 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
                           _searchController.text = stop.stopName;
                           _searchQuery = '';
                         });
+                        FocusScope.of(context).unfocus();
                       },
                     );
                   },
@@ -303,15 +370,29 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
           final isSelected = _selectedDate.year == date.year &&
               _selectedDate.month == date.month &&
               _selectedDate.day == date.day;
-          return ChoiceChip(
-            label: Text(_formatDateChip(date)),
-            selected: isSelected,
-            selectedColor: AppTheme.primaryGold,
-            labelStyle: TextStyle(
-              color: isSelected ? AppTheme.navy : Colors.grey.shade700,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          return GestureDetector(
+            onTap: () => setState(() => _selectedDate = date),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOut,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: isSelected ? AppTheme.primaryGold : Colors.transparent,
+                border: Border.all(color: Colors.grey.shade200, width: 0.5),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              alignment: Alignment.center,
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeInOut,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isSelected ? AppTheme.navy : Colors.grey.shade700,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+                child: Text(_formatDateChip(date)),
+              ),
             ),
-            onSelected: (_) => setState(() => _selectedDate = date),
           );
         },
       ),

@@ -1,118 +1,212 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/trip_providers.dart';
 
-/// App navigation drawer. Logout button is pinned to the bottom.
+/// Modern minimalistic app navigation drawer.
+/// Clean white surface, subtle active indicator, logout pinned to bottom.
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key, this.onLogout});
 
   final VoidCallback? onLogout;
 
+  static const Color _border = Color(0xFFE8ECF0);
+
+  static const List<_NavItem> _navItems = [
+    _NavItem(label: 'Home', icon: Icons.home_outlined, path: '/student/home'),
+    _NavItem(label: 'Maps', icon: Icons.map_outlined, path: '/student/maps'),
+    _NavItem(label: 'Alerts', icon: Icons.notifications_outlined, path: '/student/alerts'),
+    _NavItem(label: 'Profile', icon: Icons.person_outlined, path: '/student/profile'),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentPath = GoRouterState.of(context).matchedLocation;
+
     return Drawer(
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+      ),
       child: SafeArea(
-        child: Column(
-          children: [
-            // Drawer header with branding
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              decoration: const BoxDecoration(
-                color: AppTheme.navy,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Image.asset(
-                    'assets/logos/1.png',
-                    height: 48,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'NMU Shuttle',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 24),
+              // ─── Header ───
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primaryGold,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Text(
+                      'LATT mobile',
+                      style: GoogleFonts.hankenGrotesk(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.navy,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            // Navigation items
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.home_outlined),
-                    title: const Text('Home'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.go('/student/home');
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.map_outlined),
-                    title: const Text('Maps'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.go('/student/maps');
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.notifications_outlined),
-                    title: const Text('Alerts'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.go('/student/alerts');
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.person_outlined),
-                    title: const Text('Profile'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.go('/student/profile');
-                    },
-                  ),
-                ],
+              const SizedBox(height: 28),
+              const Divider(height: 1, color: _border),
+              const SizedBox(height: 16),
+
+              // ─── Navigation items ───
+              Expanded(
+                child: ListView.separated(
+                  itemCount: _navItems.length,
+                  padding: EdgeInsets.zero,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (context, index) {
+                    final item = _navItems[index];
+                    final isSelected = currentPath.startsWith(item.path);
+                    return _DrawerNavTile(
+                      item: item,
+                      isSelected: isSelected,
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go(item.path);
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-            // Logout pinned to bottom
-            const Divider(height: 1),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
+
+              // ─── Logout pinned to bottom ───
+              const Divider(height: 1, color: _border),
+              const SizedBox(height: 8),
+              _DrawerNavTile(
+                item: const _NavItem(
+                  label: 'Sign Out',
+                  icon: Icons.logout_outlined,
+                  path: '',
+                ),
+                isSelected: false,
+                isDestructive: true,
+                onTap: () async {
+                  await AuthService().deleteToken();
+                  ref.invalidate(authStateProvider);
+                  ref.invalidate(studentProfileProvider);
+                  ref.invalidate(bookingsProvider);
+                  ref.invalidate(reportsProvider);
+                  ref.invalidate(notificationsProvider);
+                  ref.invalidate(tripAvailabilityProvider);
+                  ref.invalidate(stopsProvider);
+                  onLogout?.call();
+                },
               ),
-              onTap: () async {
-                // Delete token from secure storage
-                await AuthService().deleteToken();
-                
-                // Invalidate all student-specific data providers so they don't cache the old user's data
-                ref.invalidate(studentProfileProvider);
-                ref.invalidate(bookingsProvider);
-                ref.invalidate(reportsProvider);
-                ref.invalidate(notificationsProvider);
-                ref.invalidate(tripAvailabilityProvider);
-                ref.invalidate(stopsProvider);
-                
-                // Navigate to login
-                onLogout?.call();
-              },
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Single navigation tile ──────────────────────────────────────────────────
+
+class _DrawerNavTile extends StatelessWidget {
+  const _DrawerNavTile({
+    required this.item,
+    required this.isSelected,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  final _NavItem item;
+  final bool isSelected;
+  final bool isDestructive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color iconColor;
+    final Color textColor;
+
+    if (isDestructive) {
+      iconColor = Colors.red.shade600;
+      textColor = Colors.red.shade600;
+    } else if (isSelected) {
+      iconColor = AppTheme.navy;
+      textColor = AppTheme.navy;
+    } else {
+      iconColor = const Color(0xFF5A6B7B);
+      textColor = const Color(0xFF5A6B7B);
+    }
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFEF9C3) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            if (isSelected) ...[
+              Container(
+                width: 3.5,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryGold,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Icon(item.icon, size: 24, color: iconColor),
+            const SizedBox(width: 16),
+            Text(
+              item.label,
+              style: GoogleFonts.hankenGrotesk(
+                fontSize: 16,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: textColor,
+              ),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+// ─── Nav item model ──────────────────────────────────────────────────────────
+
+class _NavItem {
+  const _NavItem({
+    required this.label,
+    required this.icon,
+    required this.path,
+  });
+
+  final String label;
+  final IconData icon;
+  final String path;
 }

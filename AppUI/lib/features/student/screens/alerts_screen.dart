@@ -4,7 +4,7 @@ import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/models/notification_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 import 'package:nmu_shuttle_app/features/student/screens/alert_detail_screen.dart';
-import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
+import 'package:nmu_shuttle_app/shared/widgets/student_shell.dart';
 
 /// Alerts screen listing all notifications ordered by CreatedAt DESC.
 /// Uses a floating hamburger menu (no AppBar) and pull-to-refresh.
@@ -21,20 +21,6 @@ class AlertsScreen extends ConsumerWidget {
           Column(
             children: [
               SizedBox(height: MediaQuery.of(context).padding.top + 60),
-              // Screen title
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Notifications',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.navy,
-                        ),
-                  ),
-                ),
-              ),
               const SizedBox(height: 16),
               // Notification list
               Expanded(
@@ -67,8 +53,58 @@ class AlertsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          // Floating hamburger menu
-          const HamburgerMenuButton(),
+          // Floating hamburger menu + Notifications label
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 12,
+            left: 16,
+            right: 16,
+            child: Row(
+              children: [
+                Material(
+                  color: Colors.white,
+                  elevation: 0,
+                  borderRadius: BorderRadius.circular(8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      if (studentShellScaffoldKey.currentState?.hasDrawer ?? false) {
+                        studentShellScaffoldKey.currentState!.openDrawer();
+                      } else {
+                        Scaffold.of(context).openDrawer();
+                      }
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Icon(
+                        Icons.menu,
+                        color: Color(0xFF132E51),
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Material(
+                    color: Colors.white,
+                    elevation: 0,
+                    borderRadius: BorderRadius.circular(8),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Text(
+                        'Notifications',
+                        style: TextStyle(
+                          color: Color(0xFF132E51),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

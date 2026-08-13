@@ -883,6 +883,9 @@ namespace NmuShuttle.Api.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<int?>("BookingId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -915,6 +918,8 @@ namespace NmuShuttle.Api.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("ReportId");
+
+                    b.HasIndex("BookingId");
 
                     b.HasIndex("StudentId");
 
@@ -3287,6 +3292,10 @@ namespace NmuShuttle.Api.Migrations
 
             modelBuilder.Entity("NmuShuttle.Api.Models.Report", b =>
                 {
+                    b.HasOne("NmuShuttle.Api.Models.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId");
+
                     b.HasOne("NmuShuttle.Api.Models.Student", "Student")
                         .WithMany("Reports")
                         .HasForeignKey("StudentId")
@@ -3297,6 +3306,8 @@ namespace NmuShuttle.Api.Migrations
                         .WithMany("Reports")
                         .HasForeignKey("TripInstanceId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Booking");
 
                     b.Navigation("Student");
 

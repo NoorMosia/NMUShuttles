@@ -95,15 +95,27 @@ public class BookingsController : ControllerBase
 
     /// <summary>
     /// Get all bookings for the authenticated student.
+    /// Supports server-side filtering and pagination.
+    /// filter: "upcoming" (future, non-cancelled), "past" (past or cancelled), "all" (default).
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(List<BookingResponseDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetBookings()
+    [ProducesResponseType(typeof(PaginatedBookingResponseDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBookings(
+        [FromQuery] string filter = "all",
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
     {
         var studentId = GetStudentId();
-        var bookings = await _bookingService.GetStudentBookingsAsync(studentId);
 
-        var response = bookings.Select(b => new BookingResponseDto
+        // Clamp pageSize to reasonable bounds
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 1;
+        if (pageSize > 50) pageSize = 50;
+
+        var (bookings, totalCount) = await _bookingService.GetStudentBookingsAsync(
+            studentId, filter, page, pageSize);
+
+        var items = bookings.Select(b => new BookingResponseDto
         {
             BookingId = b.BookingId,
             BookingStatus = b.BookingStatus,
@@ -118,6 +130,14 @@ public class BookingsController : ControllerBase
             BoardedStatus = b.BoardedStatus,
             CreatedAt = b.CreatedAt
         }).ToList();
+
+        var response = new PaginatedBookingResponseDto
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
 
         return Ok(response);
     }

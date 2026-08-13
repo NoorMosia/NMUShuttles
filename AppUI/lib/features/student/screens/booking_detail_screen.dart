@@ -9,6 +9,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/models/booking_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
+import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dart';
 import 'package:nmu_shuttle_app/features/student/screens/report_form_screen.dart';
 import 'package:nmu_shuttle_app/shared/widgets/app_drawer.dart';
 import 'package:nmu_shuttle_app/shared/widgets/back_button.dart';
@@ -117,8 +118,75 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
   void _navigateToReport(BuildContext context, BookingModel booking) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ReportFormScreen(tripInstanceId: booking.bookingId),
+        builder: (_) => ReportFormScreen(bookingId: booking.bookingId),
       ),
+    );
+  }
+
+  Widget _buildReportButton(BuildContext context, BookingModel booking) {
+    final reportsAsync = ref.watch(reportsProvider);
+
+    return reportsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () => _navigateToReport(context, booking),
+          icon: const Icon(Icons.report_outlined),
+          label: const Text('Report an Issue'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppTheme.navy,
+            side: BorderSide(color: Colors.grey.shade400),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
+        ),
+      ),
+      data: (reports) {
+        final existingReport = reports
+            .where((r) => r.bookingId == booking.bookingId)
+            .toList();
+
+        if (existingReport.isNotEmpty) {
+          final report = existingReport.first;
+          return SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: null,
+              icon: const Icon(Icons.report_outlined),
+              label: Text('Report ${report.status}'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.grey,
+                disabledForegroundColor: Colors.grey.shade500,
+                side: BorderSide(color: Colors.grey.shade300),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          );
+        }
+
+        return SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _navigateToReport(context, booking),
+            icon: const Icon(Icons.report_outlined),
+            label: const Text('Report an Issue'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.navy,
+              side: BorderSide(color: Colors.grey.shade400),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -315,22 +383,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
             // Report issue button
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _navigateToReport(context, booking),
-                icon: const Icon(Icons.report_outlined),
-                label: const Text('Report an Issue'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppTheme.navy,
-                  side: BorderSide(color: Colors.grey.shade400),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
-            ),
+            _buildReportButton(context, booking),
           ],
         ),
       ),

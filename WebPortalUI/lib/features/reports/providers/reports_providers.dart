@@ -2,6 +2,42 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nmu_shuttle_admin/features/auth/providers/admin_auth_providers.dart';
 
+/// Model representing trip details linked to a report.
+class TripDetails {
+  const TripDetails({
+    required this.tripInstanceId,
+    required this.tripDate,
+    required this.departureTime,
+    required this.direction,
+    required this.stopName,
+    required this.tripStatus,
+    this.shuttlePlate,
+    this.vendorName,
+  });
+
+  final int tripInstanceId;
+  final String tripDate;
+  final String departureTime;
+  final String direction;
+  final String stopName;
+  final String tripStatus;
+  final String? shuttlePlate;
+  final String? vendorName;
+
+  factory TripDetails.fromJson(Map<String, dynamic> json) {
+    return TripDetails(
+      tripInstanceId: json['tripInstanceId'] as int? ?? 0,
+      tripDate: json['tripDate'] as String? ?? '',
+      departureTime: json['departureTime'] as String? ?? '',
+      direction: json['direction'] as String? ?? '',
+      stopName: json['stopName'] as String? ?? '',
+      tripStatus: json['tripStatus'] as String? ?? '',
+      shuttlePlate: json['shuttlePlate'] as String?,
+      vendorName: json['vendorName'] as String?,
+    );
+  }
+}
+
 /// Model representing a student report.
 class Report {
   const Report({
@@ -13,6 +49,8 @@ class Report {
     this.description,
     this.adminNotes,
     this.tripInstanceId,
+    this.bookingId,
+    this.tripDetails,
   });
 
   final int id;
@@ -23,6 +61,8 @@ class Report {
   final String? description;
   final String? adminNotes;
   final int? tripInstanceId;
+  final int? bookingId;
+  final TripDetails? tripDetails;
 
   factory Report.fromJson(Map<String, dynamic> json) {
     return Report(
@@ -34,6 +74,10 @@ class Report {
       description: json['description'] as String?,
       adminNotes: json['adminNotes'] as String?,
       tripInstanceId: json['tripInstanceId'] as int?,
+      bookingId: json['bookingId'] as int?,
+      tripDetails: json['tripDetails'] != null
+          ? TripDetails.fromJson(json['tripDetails'] as Map<String, dynamic>)
+          : null,
     );
   }
 }

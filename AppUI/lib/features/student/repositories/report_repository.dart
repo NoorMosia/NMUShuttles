@@ -18,19 +18,19 @@ class ReportRepository {
         .toList();
   }
 
-  /// Creates a new report.
+  /// Creates a new report linked to a specific booking.
   /// POST /api/v1/reports
   Future<ReportModel> createReport({
     required String category,
     required String description,
-    int? tripInstanceId,
+    required int bookingId,
   }) async {
     final response = await _dioClient.dio.post(
       ApiConstants.reports,
       data: {
         'category': category,
         'description': description,
-        'tripInstanceId': tripInstanceId,
+        'bookingId': bookingId,
       },
     );
     return ReportModel.fromJson(response.data as Map<String, dynamic>);

@@ -24,6 +24,13 @@ public interface IBookingService
     Task<List<Booking>> GetStudentBookingsAsync(int studentId);
 
     /// <summary>
+    /// Returns filtered and paginated bookings for a student.
+    /// Filter: "upcoming" (tripDate >= today, not cancelled), "past" (tripDate &lt; today or cancelled), "all".
+    /// </summary>
+    Task<(List<Booking> Items, int TotalCount)> GetStudentBookingsAsync(
+        int studentId, string filter, int page, int pageSize);
+
+    /// <summary>
     /// Returns a single booking by ID, ensuring the student owns it.
     /// </summary>
     Task<Booking?> GetBookingByIdAsync(int bookingId, int studentId);

@@ -40,6 +40,26 @@ public class BookingService : IBookingService
         if (duplicateExists)
             throw new InvalidOperationException("Duplicate booking");
 
+        // Enforce one booking per direction per day.
+        // A student may only have one active ToCampus and one active FromCampus booking
+        // for the same date. Cancelled bookings do NOT block — the slot is freed.
+        var direction = await _db.ScheduleTimes
+            .Where(st => st.ScheduleTimeId == tripInstance.ScheduleTimeId)
+            .Select(st => st.Direction)
+            .FirstOrDefaultAsync()
+            ?? throw new KeyNotFoundException("ScheduleTime not found");
+
+        var alreadyBookedForDirectionToday = await _db.Bookings
+            .AnyAsync(b =>
+                b.StudentId == studentId &&
+                b.BookingStatus != "Cancelled" &&
+                b.TripInstance.TripDate == tripInstance.TripDate &&
+                b.TripInstance.ScheduleTime.Direction == direction);
+
+        if (alreadyBookedForDirectionToday)
+            throw new InvalidOperationException(
+                $"You already have a booking {(direction == "ToCampus" ? "to campus" : "from campus")} for this day");
+
         // Determine booking status based on capacity
         var totalCapacity = await _capacityService.GetTotalCapacityAsync(tripInstanceId);
         var confirmedCount = await _capacityService.GetConfirmedCountAsync(tripInstanceId);
@@ -118,6 +138,55 @@ public class BookingService : IBookingService
                 .ThenInclude(t => t.Stop)
             .OrderByDescending(b => b.CreatedAt)
             .ToListAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<(List<Booking> Items, int TotalCount)> GetStudentBookingsAsync(
+        int studentId, string filter, int page, int pageSize)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var query = _db.Bookings
+            .Where(b => b.StudentId == studentId)
+            .Include(b => b.TripInstance)
+                .ThenInclude(t => t.ScheduleTime)
+                    .ThenInclude(st => st.ScheduleTimeCampuses)
+                        .ThenInclude(stc => stc.Campus)
+            .Include(b => b.TripInstance)
+                .ThenInclude(t => t.Stop)
+            .AsQueryable();
+
+        switch (filter.ToLowerInvariant())
+        {
+            case "upcoming":
+                query = query.Where(b =>
+                    b.TripInstance.TripDate >= today &&
+                    b.BookingStatus != "Cancelled");
+                query = query.OrderBy(b => b.TripInstance.TripDate)
+                    .ThenBy(b => b.TripInstance.ScheduleTime.DepartureTime);
+                break;
+
+            case "past":
+                query = query.Where(b =>
+                    b.TripInstance.TripDate < today ||
+                    b.BookingStatus == "Cancelled");
+                query = query.OrderByDescending(b => b.TripInstance.TripDate)
+                    .ThenByDescending(b => b.TripInstance.ScheduleTime.DepartureTime);
+                break;
+
+            default: // "all"
+                query = query.OrderByDescending(b => b.CreatedAt);
+                break;
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
     }
 
     /// <inheritdoc />

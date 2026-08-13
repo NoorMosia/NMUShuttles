@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 
-/// Login screen with two-step auth flow:
-/// Step 1 — Role selector (Student/Marshal) + identifier input → Request OTP
-/// Step 2 — OTP input (5 digits) → Verify OTP → Navigate to role home
+/// Minimalist login screen following the UI mockups:
+/// Step 1 — Tab role selector (Student/Marshal) + underline input → Request OTP
+/// Step 2 — Underline OTP boxes → Verify OTP → Navigate to role home
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -15,18 +19,46 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  static const Color _navy = Color(0xFF132E51);
+  static const Color _gold = Color(0xFFFFCC00);
+  static const int _cooldownSeconds = 60;
+
   final _identifierController = TextEditingController();
   final _otpController = TextEditingController();
-  final _identifierFocusNode = FocusNode();
-  final _otpFocusNode = FocusNode();
+
+  Timer? _cooldownTimer;
+  int _remainingSeconds = 0;
+
+  bool get _isCooldownActive => _remainingSeconds > 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Always start fresh on the identifier step (e.g. after logout)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authStateProvider.notifier).resetToIdentifier();
+    });
+  }
 
   @override
   void dispose() {
     _identifierController.dispose();
     _otpController.dispose();
-    _identifierFocusNode.dispose();
-    _otpFocusNode.dispose();
+    _cooldownTimer?.cancel();
     super.dispose();
+  }
+
+  void _startCooldown() {
+    _cooldownTimer?.cancel();
+    setState(() => _remainingSeconds = _cooldownSeconds);
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _remainingSeconds--;
+        if (_remainingSeconds <= 0) {
+          timer.cancel();
+        }
+      });
+    });
   }
 
   void _onRoleChanged(AuthRole role) {
@@ -47,12 +79,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
+    if (_isCooldownActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please wait $_remainingSeconds seconds before requesting again'),
+        ),
+      );
+      return;
+    }
+
     await notifier.requestOtp(state.role, identifier);
 
-    // After requesting, if moved to OTP step, focus the OTP field
+    // Start cooldown only if OTP was sent successfully
     final newState = ref.read(authStateProvider);
-    if (newState.currentStep == AuthStep.otp && mounted) {
-      _otpFocusNode.requestFocus();
+    if (newState.currentStep == AuthStep.otp) {
+      _startCooldown();
     }
   }
 
@@ -77,24 +118,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.read(authStateProvider.notifier).resetToIdentifier();
   }
 
+  Future<void> _onResendOtp() async {
+    if (_isCooldownActive) return;
+
+    final notifier = ref.read(authStateProvider.notifier);
+    final state = ref.read(authStateProvider);
+    final identifier = _identifierController.text.trim();
+
+    if (identifier.isEmpty) return;
+    await notifier.requestOtp(state.role, identifier);
+
+    _startCooldown();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('OTP resent')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    // Listen for errors → show SnackBar
+    // Listen for errors and navigation
     ref.listen<AuthState>(authStateProvider, (prev, next) {
       if (next.error != null && next.error != prev?.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.error!),
-            backgroundColor: colorScheme.error,
+            backgroundColor: Colors.red.shade700,
           ),
         );
       }
 
-      // Navigate on successful auth
       if (next.authenticatedRole != null &&
           next.authenticatedRole != prev?.authenticatedRole) {
         if (next.authenticatedRole == 'Marshal') {
@@ -106,181 +163,350 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // ─── Logo ──────────────────────────────────────
-                Image.asset(
-                  'assets/logos/1.png',
-                  height: 120,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(height: 40),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                children: [
+                  const SizedBox(height: 48),
 
-                // ─── Title ─────────────────────────────────────
-                Text(
-                  'Welcome',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.secondary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Sign in to continue',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // ─── Role Selector ─────────────────────────────
-                SegmentedButton<AuthRole>(
-                  segments: const [
-                    ButtonSegment<AuthRole>(
-                      value: AuthRole.student,
-                      label: Text('Student'),
-                      icon: Icon(Icons.school_outlined),
+                  // ─── Logo ────────────────────────────────────
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.32,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: Image.asset(
+                          'assets/logos/1.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
-                    ButtonSegment<AuthRole>(
-                      value: AuthRole.marshal,
-                      label: Text('Marshal'),
-                      icon: Icon(Icons.security_outlined),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // ─── Step 1: Identifier ──────────────────────
+                  if (authState.currentStep == AuthStep.identifier) ...[
+                    // Tab role selector
+                    const SizedBox(height: 48),
+                    _buildRoleTabs(authState.role),
+                    const SizedBox(height: 40),
+
+                    // Input field
+                    _buildIdentifierField(authState),
+                    const SizedBox(height: 40),
+
+                    // Login button
+                    _buildActionButton(
+                      label: 'LOGIN',
+                      isLoading: authState.isLoading,
+                      onPressed: _onRequestOtp,
                     ),
                   ],
-                  selected: {authState.role},
-                  onSelectionChanged: authState.currentStep == AuthStep.otp
-                      ? null
-                      : (Set<AuthRole> selected) {
-                          _onRoleChanged(selected.first);
-                        },
-                  style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return colorScheme.primary;
-                      }
-                      return null;
-                    }),
-                    foregroundColor:
-                        WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return colorScheme.onPrimary;
-                      }
-                      return colorScheme.onSurface;
-                    }),
-                  ),
-                ),
-                const SizedBox(height: 24),
 
-                // ─── Step 1: Identifier Input ──────────────────
-                TextField(
-                  controller: _identifierController,
-                  focusNode: _identifierFocusNode,
-                  enabled: authState.currentStep == AuthStep.identifier,
-                  decoration: InputDecoration(
-                    labelText: authState.role == AuthRole.student
-                        ? 'Student Number'
-                        : 'Staff Number',
-                    hintText: authState.role == AuthRole.student
-                        ? 's312345678'
-                        : '4827391',
-                    prefixIcon: Icon(
-                      authState.role == AuthRole.student
-                          ? Icons.badge_outlined
-                          : Icons.work_outline,
-                    ),
-                    border: const OutlineInputBorder(),
-                  ),
-                  keyboardType: authState.role == AuthRole.student
-                      ? TextInputType.text
-                      : TextInputType.number,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) {
-                    if (authState.currentStep == AuthStep.identifier) {
-                      _onRequestOtp();
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // ─── Step 2: OTP Input (visible after request) ─
-                if (authState.currentStep == AuthStep.otp) ...[
-                  TextField(
-                    controller: _otpController,
-                    focusNode: _otpFocusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'OTP Code',
-                      hintText: '12345',
-                      prefixIcon: Icon(Icons.lock_outline),
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    maxLength: 5,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(5),
-                    ],
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _onVerifyOtp(),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-
-                const SizedBox(height: 8),
-
-                // ─── Action Buttons ────────────────────────────
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: authState.currentStep == AuthStep.identifier
-                      ? FilledButton(
-                          onPressed:
-                              authState.isLoading ? null : _onRequestOtp,
-                          child: authState.isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text('Login'),
-                        )
-                      : FilledButton(
-                          onPressed:
-                              authState.isLoading ? null : _onVerifyOtp,
-                          child: authState.isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text('Verify OTP'),
+                  // ─── Step 2: OTP ─────────────────────────────
+                  if (authState.currentStep == AuthStep.otp) ...[
+                    const SizedBox(height: 48),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text.rich(
+                        TextSpan(
+                          text: 'A verification code has been sent to ',
+                          style: GoogleFonts.hankenGrotesk(
+                            fontSize: 16,
+                            color: _navy.withValues(alpha: 0.7),
+                            height: 24 / 16,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: 'your university email',
+                              style: GoogleFonts.hankenGrotesk(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: _navy,
+                              ),
+                            ),
+                          ],
                         ),
-                ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
 
-                // ─── Back / Change Number link ─────────────────
-                if (authState.currentStep == AuthStep.otp) ...[
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed:
-                        authState.isLoading ? null : _onBackToIdentifier,
-                    child: const Text('← Change number'),
-                  ),
+                    // OTP underline inputs
+                    _buildOtpField(),
+                    const SizedBox(height: 28),
+
+                    // CONFIRM button
+                    _buildActionButton(
+                      label: 'CONFIRM',
+                      isLoading: authState.isLoading,
+                      onPressed: _onVerifyOtp,
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Back to login
+                    GestureDetector(
+                      onTap: authState.isLoading ? null : _onBackToIdentifier,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.arrow_back,
+                            size: 16,
+                            color: _navy.withValues(alpha: 0.7),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Back to login',
+                            style: GoogleFonts.hankenGrotesk(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: _navy.withValues(alpha: 0.7),
+                              letterSpacing: 0.01 * 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Resend section
+                    Text(
+                      "Didn't receive the code?",
+                      style: GoogleFonts.hankenGrotesk(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: _navy.withValues(alpha: 0.7),
+                        letterSpacing: 0.02 * 12,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: (authState.isLoading || _isCooldownActive)
+                          ? null
+                          : _onResendOtp,
+                      child: Text(
+                        _isCooldownActive
+                            ? 'Resend OTP (${_remainingSeconds}s)'
+                            : 'Resend OTP',
+                        style: GoogleFonts.hankenGrotesk(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: _isCooldownActive
+                              ? _navy.withValues(alpha: 0.4)
+                              : _navy,
+                          letterSpacing: 0.01 * 14,
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 48),
                 ],
-              ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ─── Tab-style role selector ──────────────────────────────────
+
+  Widget _buildRoleTabs(AuthRole selectedRole) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tabWidth = constraints.maxWidth / 2;
+        final isStudent = selectedRole == AuthRole.student;
+
+        return Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _onRoleChanged(AuthRole.student),
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Center(
+                        child: AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 250),
+                          style: GoogleFonts.hankenGrotesk(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.01 * 14,
+                            color: isStudent
+                                ? _navy
+                                : _navy.withValues(alpha: 0.5),
+                          ),
+                          child: const Text('Student'),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _onRoleChanged(AuthRole.marshal),
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Center(
+                        child: AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 250),
+                          style: GoogleFonts.hankenGrotesk(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.01 * 14,
+                            color: !isStudent
+                                ? _navy
+                                : _navy.withValues(alpha: 0.5),
+                          ),
+                          child: const Text('Marshal'),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Animated underline
+            Container(
+              height: 2,
+              color: _navy.withValues(alpha: 0.1),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  width: tabWidth,
+                  margin: EdgeInsets.only(left: isStudent ? 0 : tabWidth),
+                  height: 2,
+                  color: _gold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ─── Underline input field ─────────────────────────────────────
+
+  Widget _buildIdentifierField(AuthState authState) {
+    final isStudent = authState.role == AuthRole.student;
+
+    return TextField(
+      controller: _identifierController,
+      decoration: InputDecoration(
+        hintText: isStudent
+            ? 'Enter your student number'
+            : 'Enter your staff number',
+        hintStyle: GoogleFonts.hankenGrotesk(
+          fontSize: 16,
+          color: _navy.withValues(alpha: 0.4),
+        ),
+        border: UnderlineInputBorder(
+          borderSide: BorderSide(color: _navy.withValues(alpha: 0.2)),
+        ),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: _navy.withValues(alpha: 0.2)),
+        ),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: _gold, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+      ),
+      style: GoogleFonts.hankenGrotesk(
+        fontSize: 16,
+        color: _navy,
+      ),
+      keyboardType:
+          isStudent ? TextInputType.text : TextInputType.number,
+      textInputAction: TextInputAction.done,
+      onSubmitted: (_) => _onRequestOtp(),
+    );
+  }
+
+  // ─── OTP underline pin fields ─────────────────────────────────
+
+  Widget _buildOtpField() {
+    return PinCodeTextField(
+      appContext: context,
+      length: 5,
+      controller: _otpController,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      animationType: AnimationType.none,
+      enableActiveFill: false,
+      autoFocus: true,
+      textStyle: GoogleFonts.hankenGrotesk(
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        color: _navy,
+      ),
+      pinTheme: PinTheme(
+        shape: PinCodeFieldShape.underline,
+        fieldHeight: 56,
+        fieldWidth: 48,
+        activeColor: _gold,
+        inactiveColor: _navy.withValues(alpha: 0.15),
+        selectedColor: _gold,
+        borderWidth: 2,
+      ),
+      onCompleted: (_) => _onVerifyOtp(),
+      onChanged: (_) {},
+    );
+  }
+
+  // ─── Full-width gold action button ────────────────────────────
+
+  Widget _buildActionButton({
+    required String label,
+    required bool isLoading,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _gold,
+          foregroundColor: _navy,
+          disabledBackgroundColor: _gold.withValues(alpha: 0.5),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+          ),
+        ),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: _navy,
+                ),
+              )
+            : Text(
+                label,
+                style: GoogleFonts.hankenGrotesk(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.05 * 14,
+                ),
+              ),
       ),
     );
   }

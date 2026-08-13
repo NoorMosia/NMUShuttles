@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -42,16 +43,44 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(5),
-          child: Image.asset(
-            'assets/logos/1.png',
-            width: 150,
-            height: 150,
-            fit: BoxFit.contain,
+      body: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Image.asset(
+                  'assets/logos/1.png',
+                  width: 150,
+                  height: 150,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 48),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'by',
+                  style: GoogleFonts.hankenGrotesk(
+                    fontSize: 13,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Image.asset(
+                  'assets/logos/by4sp_net.png',
+                  height: 72,
+                  fit: BoxFit.contain,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

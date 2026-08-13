@@ -118,17 +118,17 @@ public static class SeedData
         // Marshals 4-11: Stop-assigned (AssignedStopId set, AssignedCampusId = null)
         // This respects the XOR constraint: exactly one of AssignedCampusId or AssignedStopId must be non-null
         modelBuilder.Entity<Marshal>().HasData(
-            new Marshal { MarshalId = 1, StaffNumber = "4827391", FirstName = "Bongani", LastName = "Cele", UniversityEmail = "b.cele@mandela.ac.za", AssignedCampusId = 1, AssignedStopId = null, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 2, StaffNumber = "5914826", FirstName = "Karen", LastName = "Swart", UniversityEmail = "k.swart@mandela.ac.za", AssignedCampusId = 2, AssignedStopId = null, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 3, StaffNumber = "3208574", FirstName = "Vuyo", LastName = "Mabena", UniversityEmail = "v.mabena@mandela.ac.za", AssignedCampusId = 3, AssignedStopId = null, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 4, StaffNumber = "6153042", FirstName = "Thulani", LastName = "Ngcobo", UniversityEmail = "t.ngcobo@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 1, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 5, StaffNumber = "7294185", FirstName = "Lindiwe", LastName = "Shabalala", UniversityEmail = "l.shabalala@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 2, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 6, StaffNumber = "8401267", FirstName = "Pieter", LastName = "Venter", UniversityEmail = "p.venter@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 3, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 7, StaffNumber = "9537148", FirstName = "Nombuso", LastName = "Mkhize", UniversityEmail = "n.mkhize@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 4, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 8, StaffNumber = "2648309", FirstName = "Craig", LastName = "Daniels", UniversityEmail = "c.daniels@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 5, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 9, StaffNumber = "1785423", FirstName = "Noluthando", LastName = "Mthethwa", UniversityEmail = "n.mthethwa@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 6, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 10, StaffNumber = "4062891", FirstName = "Willem", LastName = "Pretorius", UniversityEmail = "w.pretorius@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 7, CreatedAt = SeedDate },
-            new Marshal { MarshalId = 11, StaffNumber = "5379216", FirstName = "Zandile", LastName = "Mdluli", UniversityEmail = "z.mdluli@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 8, CreatedAt = SeedDate }
+            new Marshal { MarshalId = 1, StaffNumber = "4827391", FirstName = "Bongani", LastName = "Cele", UniversityEmail = "b.cele@mandela.ac.za", AssignedCampusId = 1, AssignedStopId = null, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 2, StaffNumber = "5914826", FirstName = "Karen", LastName = "Swart", UniversityEmail = "k.swart@mandela.ac.za", AssignedCampusId = 2, AssignedStopId = null, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 3, StaffNumber = "3208574", FirstName = "Vuyo", LastName = "Mabena", UniversityEmail = "v.mabena@mandela.ac.za", AssignedCampusId = 3, AssignedStopId = null, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 4, StaffNumber = "6153042", FirstName = "Thulani", LastName = "Ngcobo", UniversityEmail = "t.ngcobo@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 1, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 5, StaffNumber = "7294185", FirstName = "Lindiwe", LastName = "Shabalala", UniversityEmail = "l.shabalala@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 2, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 6, StaffNumber = "8401267", FirstName = "Pieter", LastName = "Venter", UniversityEmail = "p.venter@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 3, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 7, StaffNumber = "9537148", FirstName = "Nombuso", LastName = "Mkhize", UniversityEmail = "n.mkhize@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 4, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 8, StaffNumber = "2648309", FirstName = "Craig", LastName = "Daniels", UniversityEmail = "c.daniels@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 5, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 9, StaffNumber = "1785423", FirstName = "Noluthando", LastName = "Mthethwa", UniversityEmail = "n.mthethwa@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 6, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 10, StaffNumber = "4062891", FirstName = "Willem", LastName = "Pretorius", UniversityEmail = "w.pretorius@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 7, IsActive = true, CreatedAt = SeedDate },
+            new Marshal { MarshalId = 11, StaffNumber = "5379216", FirstName = "Zandile", LastName = "Mdluli", UniversityEmail = "z.mdluli@mandela.ac.za", AssignedCampusId = null, AssignedStopId = 8, IsActive = true, CreatedAt = SeedDate }
         );
     }
 

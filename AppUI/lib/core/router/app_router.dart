@@ -11,6 +11,8 @@ import 'package:nmu_shuttle_app/features/student/screens/alerts_screen.dart';
 import 'package:nmu_shuttle_app/features/student/screens/profile_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/marshal_home_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/passenger_list_screen.dart';
+import 'package:nmu_shuttle_app/features/marshal/screens/marshal_checkin_screen.dart';
+import 'package:nmu_shuttle_app/features/marshal/screens/marshal_profile_screen.dart';
 import 'package:nmu_shuttle_app/shared/widgets/student_shell.dart';
 
 /// Application router configuration using go_router.
@@ -85,11 +87,30 @@ class AppRouter {
         builder: (context, state) => const MarshalHomeScreen(),
       ),
       GoRoute(
+        path: '/marshal/profile',
+        name: 'marshalProfile',
+        builder: (context, state) => const MarshalProfileScreen(),
+      ),
+      GoRoute(
         path: '/marshal/passengers/:tripId',
         name: 'passengerList',
         builder: (context, state) {
           final tripId = state.pathParameters['tripId']!;
           return PassengerListScreen(tripId: tripId);
+        },
+      ),
+      GoRoute(
+        path: '/marshal/checkin',
+        name: 'marshalCheckin',
+        builder: (context, state) {
+          final departureTime = state.uri.queryParameters['departureTime'] ?? '';
+          final direction = state.uri.queryParameters['direction'] ?? '';
+          final tripDate = state.uri.queryParameters['tripDate'] ?? '';
+          return MarshalCheckinScreen(
+            departureTime: departureTime,
+            direction: direction,
+            tripDate: tripDate,
+          );
         },
       ),
     ],

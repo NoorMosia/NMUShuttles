@@ -19,6 +19,7 @@ class MarshalDrawer extends ConsumerWidget {
 
   static const List<_NavItem> _navItems = [
     _NavItem(label: 'Dashboard', icon: Icons.home_outlined, path: '/marshal/home'),
+    _NavItem(label: 'Profile', icon: Icons.person_outlined, path: '/marshal/profile'),
   ];
 
   @override

@@ -21,6 +21,11 @@ class ApiConstants {
 
   // Check-in endpoints
   static const String checkIn = '/checkin';
+  static const String manualCheckIn = '/checkin/manual';
+
+  // Marshal endpoints
+  static const String marshalTripsToday = '/marshal/trips/today';
+  static const String marshalTimeSlotPassengers = '/marshal/trips/timeslot/passengers';
 
   // Notification endpoints
   static const String notifications = '/notifications';

@@ -25,14 +25,17 @@ public class TripsController : ControllerBase
     }
 
     /// <summary>
-    /// Get available trips filtered by date, stop, and/or direction.
+    /// Get available trips filtered by date, stop, campus, and/or direction.
     /// Returns capacity information for each trip.
+    /// When campusId is provided, only trips whose ScheduleTimeCampus route includes
+    /// that campus are returned.
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(List<TripAvailabilityDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTrips(
         [FromQuery] DateOnly? date,
         [FromQuery] int? stopId,
+        [FromQuery] int? campusId,
         [FromQuery] string? direction)
     {
         var query = _dbContext.TripInstances
@@ -50,6 +53,12 @@ public class TripsController : ControllerBase
         if (stopId.HasValue)
         {
             query = query.Where(t => t.StopId == stopId.Value);
+        }
+
+        if (campusId.HasValue)
+        {
+            query = query.Where(t =>
+                t.ScheduleTime.ScheduleTimeCampuses.Any(stc => stc.CampusId == campusId.Value));
         }
 
         if (!string.IsNullOrWhiteSpace(direction))

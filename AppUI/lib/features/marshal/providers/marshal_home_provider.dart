@@ -1,12 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:nmu_shuttle_app/core/api/dio_client.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
-import 'package:nmu_shuttle_app/features/marshal/models/marshal_trip_model.dart';
+import 'package:nmu_shuttle_app/features/marshal/models/marshal_time_slot_model.dart';
 
-/// Marshal assignment info extracted from JWT claims.
+/// Marshal assignment info retrieved from GET /marshal/me.
 class MarshalAssignment {
   const MarshalAssignment({
+    this.firstName,
+    this.lastName,
+    this.staffNumber,
     this.assignedCampusId,
     this.assignedCampusName,
     this.assignedStopId,
@@ -14,59 +17,67 @@ class MarshalAssignment {
     this.gpsCoordinates,
   });
 
+  final String? firstName;
+  final String? lastName;
+  final String? staffNumber;
   final int? assignedCampusId;
   final String? assignedCampusName;
   final int? assignedStopId;
   final String? assignedStopName;
   final String? gpsCoordinates;
 
+  /// Full display name.
+  String get fullName {
+    final first = firstName ?? '';
+    final last = lastName ?? '';
+    final name = '$first $last'.trim();
+    return name.isNotEmpty ? name : 'Unknown';
+  }
+
   /// The display name for the marshal's assigned location.
   String get locationName =>
       assignedCampusName ?? assignedStopName ?? 'Unknown Location';
 
-  /// Whether this marshal is assigned to a campus (shows FromCampus trips).
+  /// Whether this marshal is assigned to a campus (vs. a stop).
   bool get isCampusAssigned => assignedCampusId != null;
-
-  /// The expected direction for trips at this location.
-  String get direction => isCampusAssigned ? 'FromCampus' : 'ToCampus';
 }
 
 /// State for the Marshal Home screen.
 class MarshalHomeState {
   const MarshalHomeState({
     this.assignment,
-    this.trips = const [],
+    this.timeSlots = const [],
     this.isLoading = false,
     this.error,
   });
 
   final MarshalAssignment? assignment;
-  final List<MarshalTripModel> trips;
+  final List<MarshalTimeSlotModel> timeSlots;
   final bool isLoading;
   final String? error;
 
-  /// Active (non-Completed) trips sorted chronologically.
-  List<MarshalTripModel> get activeTrips =>
-      trips.where((t) => t.isActive).toList();
+  /// Active (non-Completed) time slots sorted chronologically.
+  List<MarshalTimeSlotModel> get activeSlots =>
+      timeSlots.where((t) => t.isActive).toList();
 
-  /// The next boarding trip (soonest non-Completed trip).
-  MarshalTripModel? get nextBoardingTrip =>
-      activeTrips.isNotEmpty ? activeTrips.first : null;
+  /// The next upcoming time slot (soonest non-Completed).
+  MarshalTimeSlotModel? get nextTimeSlot =>
+      activeSlots.isNotEmpty ? activeSlots.first : null;
 
-  /// Remaining trips after the next boarding trip.
-  List<MarshalTripModel> get remainingTrips =>
-      activeTrips.length > 1 ? activeTrips.sublist(1) : [];
+  /// Remaining time slots after the next one.
+  List<MarshalTimeSlotModel> get remainingSlots =>
+      activeSlots.length > 1 ? activeSlots.sublist(1) : [];
 
   MarshalHomeState copyWith({
     MarshalAssignment? assignment,
-    List<MarshalTripModel>? trips,
+    List<MarshalTimeSlotModel>? timeSlots,
     bool? isLoading,
     String? error,
     bool clearError = false,
   }) {
     return MarshalHomeState(
       assignment: assignment ?? this.assignment,
-      trips: trips ?? this.trips,
+      timeSlots: timeSlots ?? this.timeSlots,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
     );
@@ -84,13 +95,13 @@ class MarshalHomeNotifier extends StateNotifier<MarshalHomeState> {
 
   final DioClient _dioClient;
 
-  /// Loads the marshal's assignment and today's trips.
+  /// Loads the marshal's assignment and today's grouped time slots.
   Future<void> loadData() async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      // Extract marshal assignment from JWT claims
-      final assignment = await _getMarshalAssignment();
+      // Fetch marshal assignment info
+      final assignment = await _fetchAssignment();
       if (assignment == null) {
         state = state.copyWith(
           isLoading: false,
@@ -99,12 +110,12 @@ class MarshalHomeNotifier extends StateNotifier<MarshalHomeState> {
         return;
       }
 
-      // Fetch today's trips filtered by location and direction
-      final trips = await _fetchTodayTrips(assignment);
+      // Fetch today's time slots from the new grouped endpoint
+      final timeSlots = await _fetchTodayTimeSlots();
 
       state = state.copyWith(
         assignment: assignment,
-        trips: trips,
+        timeSlots: timeSlots,
         isLoading: false,
       );
     } catch (e) {
@@ -115,59 +126,39 @@ class MarshalHomeNotifier extends StateNotifier<MarshalHomeState> {
     }
   }
 
-  /// Fetches the marshal assignment info from the API.
-  Future<MarshalAssignment?> _getMarshalAssignment() async {
-    return await _fetchAssignmentFromApi();
-  }
-
-  /// Fetches marshal assignment from the API as fallback.
-  Future<MarshalAssignment?> _fetchAssignmentFromApi() async {
+  /// Fetches marshal assignment from GET /marshal/me.
+  Future<MarshalAssignment?> _fetchAssignment() async {
     try {
       final response = await _dioClient.dio.get('/marshal/me');
       final data = response.data as Map<String, dynamic>;
       return MarshalAssignment(
+        firstName: data['firstName'] as String?,
+        lastName: data['lastName'] as String?,
+        staffNumber: data['staffNumber'] as String?,
         assignedCampusId: _parseInt(data['assignedCampusId']),
         assignedCampusName: data['assignedCampusName'] as String?,
         assignedStopId: _parseInt(data['assignedStopId']),
         assignedStopName: data['assignedStopName'] as String?,
         gpsCoordinates: data['gpsCoordinates'] as String?,
       );
-    } catch (_) {
+    } catch (e) {
+      // Log so we can debug — don't swallow silently
+      debugPrint('[MarshalHome] Failed to fetch assignment: $e');
       return null;
     }
   }
 
-  /// Fetches today's trips filtered by the marshal's assigned location and direction.
-  Future<List<MarshalTripModel>> _fetchTodayTrips(
-      MarshalAssignment assignment) async {
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-    final queryParams = <String, dynamic>{
-      'date': today,
-      'direction': assignment.direction,
-    };
-
-    if (assignment.isCampusAssigned) {
-      queryParams['campusId'] = assignment.assignedCampusId;
-    } else {
-      queryParams['stopId'] = assignment.assignedStopId;
-    }
-
-    final response = await _dioClient.dio.get(
-      '/trips',
-      queryParameters: queryParams,
-    );
+  /// Fetches today's grouped time slots from GET /marshal/trips/today.
+  /// The backend handles filtering by marshal's assigned location and
+  /// returns both directions (no direction assumption on the client).
+  Future<List<MarshalTimeSlotModel>> _fetchTodayTimeSlots() async {
+    final response = await _dioClient.dio.get('/marshal/trips/today');
 
     final List<dynamic> data = response.data as List<dynamic>;
-    final trips = data
+    return data
         .map((json) =>
-            MarshalTripModel.fromJson(json as Map<String, dynamic>))
+            MarshalTimeSlotModel.fromJson(json as Map<String, dynamic>))
         .toList();
-
-    // Sort by departure time chronologically
-    trips.sort((a, b) => a.departureTime.compareTo(b.departureTime));
-
-    return trips;
   }
 
   /// Refresh data (for pull-to-refresh).
@@ -183,7 +174,7 @@ class MarshalHomeNotifier extends StateNotifier<MarshalHomeState> {
 
 /// Provider for the MarshalHomeNotifier.
 final marshalHomeProvider =
-    StateNotifierProvider<MarshalHomeNotifier, MarshalHomeState>((ref) {
+    StateNotifierProvider.autoDispose<MarshalHomeNotifier, MarshalHomeState>((ref) {
   return MarshalHomeNotifier(
     dioClient: ref.watch(dioClientProvider),
   );

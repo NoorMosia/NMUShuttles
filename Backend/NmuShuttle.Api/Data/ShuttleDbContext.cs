@@ -111,10 +111,10 @@ public class ShuttleDbContext : DbContext
             entity.HasIndex(e => e.StaffNumber).IsUnique();
             entity.HasIndex(e => e.UniversityEmail).IsUnique();
 
-            // XOR CHECK constraint: either both null (unassigned) or exactly one is set
+            // Assignment constraint: at least one must be set, or both can be set
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Marshals_AssignedXOR",
-                "(AssignedCampusId IS NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NOT NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NULL AND AssignedStopId IS NOT NULL)"));
+                "AssignedCampusId IS NOT NULL OR AssignedStopId IS NOT NULL"));
 
             // Relationships
             entity.HasOne(e => e.AssignedCampus)

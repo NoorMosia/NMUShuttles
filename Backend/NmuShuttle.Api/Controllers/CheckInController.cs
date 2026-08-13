@@ -50,13 +50,101 @@ public class CheckInController : ControllerBase
         // Delegates to CheckInService; exceptions handled by GlobalExceptionHandler
         var booking = await _checkInService.CheckInAsync(dto.QrCodeToken, marshalId);
 
+        // Fetch shuttle details and convoy position for the response
+        string? licensePlate = null;
+        int? convoyPosition = null;
+        int? shuttleCapacity = null;
+
+        if (booking.ShuttleId.HasValue)
+        {
+            var allocation = await _dbContext.TripShuttleAllocations
+                .Include(a => a.Shuttle)
+                .FirstOrDefaultAsync(a =>
+                    a.TripInstanceId == booking.TripInstanceId
+                    && a.ShuttleId == booking.ShuttleId.Value);
+
+            if (allocation != null)
+            {
+                licensePlate = allocation.Shuttle.LicensePlate;
+                convoyPosition = allocation.OrderPosition;
+                shuttleCapacity = allocation.Shuttle.Capacity;
+            }
+        }
+
         return Ok(new
         {
+            booking.BookingId,
             booking.Student.FirstName,
             booking.Student.LastName,
             StudentName = $"{booking.Student.FirstName} {booking.Student.LastName}",
+            booking.Student.StudentNumber,
+            StopName = booking.TripInstance.Stop.StopName,
             booking.BoardedStatus,
             booking.ShuttleId,
+            LicensePlate = licensePlate,
+            ConvoyPosition = convoyPosition,
+            ShuttleCapacity = shuttleCapacity,
+            booking.BoardedAt
+        });
+    }
+
+    /// <summary>
+    /// Manual check-in by booking ID. Used when a student's phone is dead
+    /// and the marshal finds them in the passenger list.
+    /// </summary>
+    [HttpPost("manual")]
+    public async Task<IActionResult> ManualCheckIn([FromBody] ManualCheckInRequestDto dto)
+    {
+        var marshalIdClaim = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                             ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(marshalIdClaim) || !int.TryParse(marshalIdClaim, out var marshalId))
+        {
+            return Unauthorized(new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = "Unauthorized",
+                Detail = "Invalid or missing marshal identity claim.",
+                Instance = HttpContext.Request.Path
+            });
+        }
+
+        var booking = await _checkInService.ManualCheckInAsync(dto.BookingId, marshalId);
+
+        // Fetch shuttle details and convoy position
+        string? licensePlate = null;
+        int? convoyPosition = null;
+        int? shuttleCapacity = null;
+
+        if (booking.ShuttleId.HasValue)
+        {
+            var allocation = await _dbContext.TripShuttleAllocations
+                .Include(a => a.Shuttle)
+                .FirstOrDefaultAsync(a =>
+                    a.TripInstanceId == booking.TripInstanceId
+                    && a.ShuttleId == booking.ShuttleId.Value);
+
+            if (allocation != null)
+            {
+                licensePlate = allocation.Shuttle.LicensePlate;
+                convoyPosition = allocation.OrderPosition;
+                shuttleCapacity = allocation.Shuttle.Capacity;
+            }
+        }
+
+        return Ok(new
+        {
+            booking.BookingId,
+            booking.Student.FirstName,
+            booking.Student.LastName,
+            StudentName = $"{booking.Student.FirstName} {booking.Student.LastName}",
+            booking.Student.StudentNumber,
+            StopName = booking.TripInstance.Stop.StopName,
+            booking.BoardedStatus,
+            booking.ShuttleId,
+            LicensePlate = licensePlate,
+            ConvoyPosition = convoyPosition,
+            ShuttleCapacity = shuttleCapacity,
             booking.BoardedAt
         });
     }

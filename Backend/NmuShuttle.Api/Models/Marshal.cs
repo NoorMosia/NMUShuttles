@@ -26,14 +26,12 @@ public class Marshal
     public string UniversityEmail { get; set; } = string.Empty;
 
     /// <summary>
-    /// FK to Campuses. Nullable. XOR constraint with AssignedStopId:
-    /// exactly one of AssignedCampusId or AssignedStopId must be non-null.
+    /// FK to Campuses. Nullable. Marshal can have both campus and stop assignments.
     /// </summary>
     public int? AssignedCampusId { get; set; }
 
     /// <summary>
-    /// FK to Stops. Nullable. XOR constraint with AssignedCampusId:
-    /// exactly one of AssignedCampusId or AssignedStopId must be non-null.
+    /// FK to Stops. Nullable. Marshal can have both campus and stop assignments.
     /// </summary>
     public int? AssignedStopId { get; set; }
 

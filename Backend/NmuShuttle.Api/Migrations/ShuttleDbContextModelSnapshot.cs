@@ -509,7 +509,7 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("Marshals", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Marshals_AssignedXOR", "(AssignedCampusId IS NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NOT NULL AND AssignedStopId IS NULL) OR (AssignedCampusId IS NULL AND AssignedStopId IS NOT NULL)");
+                            t.HasCheckConstraint("CK_Marshals_AssignedXOR", "AssignedCampusId IS NOT NULL OR AssignedStopId IS NOT NULL");
                         });
 
                     b.HasData(

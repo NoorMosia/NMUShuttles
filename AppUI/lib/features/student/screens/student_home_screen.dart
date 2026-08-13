@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
+import 'package:nmu_shuttle_app/features/student/utils/booking_date_helpers.dart';
 import 'package:nmu_shuttle_app/features/student/widgets/booking_card.dart';
+import 'package:nmu_shuttle_app/features/student/widgets/date_separator.dart';
 import 'package:nmu_shuttle_app/shared/widgets/student_shell.dart';
 
 /// Student home screen with Upcoming/Past tabs and bottom navigation.
@@ -181,7 +183,7 @@ class _UpcomingBookingsTab extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => ref.invalidate(bookingsProvider),
+              onPressed: () => ref.invalidate(upcomingBookingsProvider),
               child: const Text('Retry'),
             ),
           ],
@@ -189,37 +191,66 @@ class _UpcomingBookingsTab extends ConsumerWidget {
       ),
       data: (bookings) {
         if (bookings.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(upcomingBookingsProvider);
+              await ref.read(upcomingBookingsProvider.future);
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                Icon(Icons.directions_bus_outlined,
-                    size: 64, color: Colors.grey.shade400),
-                const SizedBox(height: 16),
-                Text(
-                  'No upcoming bookings',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.grey.shade600,
+                SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.directions_bus_outlined,
+                          size: 64, color: Colors.grey.shade400),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No upcoming bookings',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.grey.shade600,
+                            ),
                       ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Tap the + button to book a shuttle',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade500,
+                      const SizedBox(height: 8),
+                      Text(
+                        'Tap the + button to book a shuttle',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey.shade500,
+                            ),
                       ),
+                    ],
+                  ),
                 ),
               ],
             ),
           );
         }
+
+        final grouped = groupBookingsByDate(bookings);
+        final dateKeys = grouped.keys.toList();
+
         return RefreshIndicator(
-          onRefresh: () async => ref.invalidate(bookingsProvider),
+          onRefresh: () async {
+            ref.invalidate(upcomingBookingsProvider);
+            await ref.read(upcomingBookingsProvider.future);
+          },
           child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: bookings.length,
-            itemBuilder: (context, index) =>
-                BookingCard(booking: bookings[index]),
+            itemCount: dateKeys.length,
+            itemBuilder: (context, dateIndex) {
+              final date = dateKeys[dateIndex];
+              final dateBookings = grouped[date]!;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DateSeparator(label: formatDateLabel(date)),
+                  ...dateBookings.map((booking) =>
+                      BookingCard(booking: booking)),
+                ],
+              );
+            },
           ),
         );
       },
@@ -250,7 +281,7 @@ class _PastBookingsTab extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => ref.invalidate(bookingsProvider),
+              onPressed: () => ref.invalidate(pastBookingsProvider),
               child: const Text('Retry'),
             ),
           ],
@@ -258,29 +289,58 @@ class _PastBookingsTab extends ConsumerWidget {
       ),
       data: (bookings) {
         if (bookings.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(pastBookingsProvider);
+              await ref.read(pastBookingsProvider.future);
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                Icon(Icons.history, size: 64, color: Colors.grey.shade400),
-                const SizedBox(height: 16),
-                Text(
-                  'No past bookings',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.grey.shade600,
+                SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.history, size: 64, color: Colors.grey.shade400),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No past bookings',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.grey.shade600,
+                            ),
                       ),
+                    ],
+                  ),
                 ),
               ],
             ),
           );
         }
+
+        final grouped = groupBookingsByDate(bookings);
+        final dateKeys = grouped.keys.toList();
+
         return RefreshIndicator(
-          onRefresh: () async => ref.invalidate(bookingsProvider),
+          onRefresh: () async {
+            ref.invalidate(pastBookingsProvider);
+            await ref.read(pastBookingsProvider.future);
+          },
           child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: bookings.length,
-            itemBuilder: (context, index) =>
-                BookingCard(booking: bookings[index]),
+            itemCount: dateKeys.length,
+            itemBuilder: (context, dateIndex) {
+              final date = dateKeys[dateIndex];
+              final dateBookings = grouped[date]!;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DateSeparator(label: formatDateLabel(date)),
+                  ...dateBookings.map((booking) =>
+                      BookingCard(booking: booking)),
+                ],
+              );
+            },
           ),
         );
       },

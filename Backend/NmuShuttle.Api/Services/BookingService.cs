@@ -40,6 +40,26 @@ public class BookingService : IBookingService
         if (duplicateExists)
             throw new InvalidOperationException("Duplicate booking");
 
+        // Enforce one booking per direction per day.
+        // A student may only have one active ToCampus and one active FromCampus booking
+        // for the same date. Cancelled bookings do NOT block — the slot is freed.
+        var direction = await _db.ScheduleTimes
+            .Where(st => st.ScheduleTimeId == tripInstance.ScheduleTimeId)
+            .Select(st => st.Direction)
+            .FirstOrDefaultAsync()
+            ?? throw new KeyNotFoundException("ScheduleTime not found");
+
+        var alreadyBookedForDirectionToday = await _db.Bookings
+            .AnyAsync(b =>
+                b.StudentId == studentId &&
+                b.BookingStatus != "Cancelled" &&
+                b.TripInstance.TripDate == tripInstance.TripDate &&
+                b.TripInstance.ScheduleTime.Direction == direction);
+
+        if (alreadyBookedForDirectionToday)
+            throw new InvalidOperationException(
+                $"You already have a booking {(direction == "ToCampus" ? "to campus" : "from campus")} for this day");
+
         // Determine booking status based on capacity
         var totalCapacity = await _capacityService.GetTotalCapacityAsync(tripInstanceId);
         var confirmedCount = await _capacityService.GetConfirmedCountAsync(tripInstanceId);

@@ -85,6 +85,7 @@ class ProfileScreen extends ConsumerWidget {
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             left: 16,
+            right: 16,
             child: Row(
               children: [
                 Material(
@@ -111,18 +112,20 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Material(
-                  color: Colors.white,
-                  elevation: 0,
-                  borderRadius: BorderRadius.circular(8),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    child: Text(
-                      'Profile',
-                      style: TextStyle(
-                        color: Color(0xFF132E51),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
+                Expanded(
+                  child: Material(
+                    color: Colors.white,
+                    elevation: 0,
+                    borderRadius: BorderRadius.circular(8),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Text(
+                        'Profile',
+                        style: TextStyle(
+                          color: Color(0xFF132E51),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   ),
@@ -178,7 +181,6 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey.shade200),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -225,24 +227,6 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        const Icon(Icons.email_outlined,
-                            size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            profile.email,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: Colors.grey.shade700),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -272,7 +256,6 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey.shade200),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -280,7 +263,7 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               Text(
                 'Strike Points',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppTheme.navy,
                     ),

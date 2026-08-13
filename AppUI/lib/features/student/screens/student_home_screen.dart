@@ -98,6 +98,7 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             left: 16,
+            right: 16,
             child: Row(
               children: [
                 // Hamburger menu button
@@ -126,21 +127,23 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
                 ),
                 const SizedBox(width: 6),
                 // Home button
-                Material(
-                  color: Colors.white,
-                  elevation: 0,
-                  borderRadius: BorderRadius.circular(8),
-                  child: InkWell(
+                Expanded(
+                  child: Material(
+                    color: Colors.white,
+                    elevation: 0,
                     borderRadius: BorderRadius.circular(8),
-                    onTap: () => context.go('/student/home'),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      child: Text(
-                        'Home',
-                        style: TextStyle(
-                          color: Color(0xFF132E51),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => context.go('/student/home'),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        child: Text(
+                          'Home',
+                          style: TextStyle(
+                            color: Color(0xFF132E51),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                     ),

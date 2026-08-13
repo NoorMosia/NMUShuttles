@@ -57,6 +57,7 @@ class AlertsScreen extends ConsumerWidget {
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             left: 16,
+            right: 16,
             child: Row(
               children: [
                 Material(
@@ -83,18 +84,20 @@ class AlertsScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Material(
-                  color: Colors.white,
-                  elevation: 0,
-                  borderRadius: BorderRadius.circular(8),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    child: Text(
-                      'Notifications',
-                      style: TextStyle(
-                        color: Color(0xFF132E51),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
+                Expanded(
+                  child: Material(
+                    color: Colors.white,
+                    elevation: 0,
+                    borderRadius: BorderRadius.circular(8),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Text(
+                        'Notifications',
+                        style: TextStyle(
+                          color: Color(0xFF132E51),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   ),

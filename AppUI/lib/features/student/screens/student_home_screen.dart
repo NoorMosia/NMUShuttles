@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
 import 'package:nmu_shuttle_app/features/student/widgets/booking_card.dart';
-import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
+import 'package:nmu_shuttle_app/shared/widgets/student_shell.dart';
 
 /// Student home screen with Upcoming/Past tabs and bottom navigation.
 class StudentHomeScreen extends ConsumerStatefulWidget {
@@ -74,8 +74,61 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
               ),
             ],
           ),
-          // Floating hamburger menu
-          const HamburgerMenuButton(),
+          // Floating hamburger menu + Home button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 12,
+            left: 16,
+            child: Row(
+              children: [
+                // Hamburger menu button
+                Material(
+                  color: Colors.white,
+                  elevation: 0,
+                  borderRadius: BorderRadius.circular(8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      if (studentShellScaffoldKey.currentState?.hasDrawer ?? false) {
+                        studentShellScaffoldKey.currentState!.openDrawer();
+                      } else {
+                        Scaffold.of(context).openDrawer();
+                      }
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Icon(
+                        Icons.menu,
+                        color: Color(0xFF132E51),
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                // Home button
+                Material(
+                  color: Colors.white,
+                  elevation: 0,
+                  borderRadius: BorderRadius.circular(8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => context.go('/student/home'),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Text(
+                        'Home',
+                        style: TextStyle(
+                          color: Color(0xFF132E51),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

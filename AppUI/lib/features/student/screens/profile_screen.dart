@@ -10,7 +10,7 @@ import 'package:nmu_shuttle_app/features/student/providers/notification_provider
 import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/trip_providers.dart';
 import 'package:nmu_shuttle_app/features/student/screens/report_detail_screen.dart';
-import 'package:nmu_shuttle_app/shared/widgets/hamburger_menu_button.dart';
+import 'package:nmu_shuttle_app/shared/widgets/student_shell.dart';
 
 /// Profile screen displaying student info, strike points, reports list, and logout.
 class ProfileScreen extends ConsumerWidget {
@@ -81,8 +81,55 @@ class ProfileScreen extends ConsumerWidget {
               ],
             ),
           ),
-          // Floating hamburger menu
-          const HamburgerMenuButton(),
+          // Floating hamburger menu + Profile label
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 12,
+            left: 16,
+            child: Row(
+              children: [
+                Material(
+                  color: Colors.white,
+                  elevation: 0,
+                  borderRadius: BorderRadius.circular(8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      if (studentShellScaffoldKey.currentState?.hasDrawer ?? false) {
+                        studentShellScaffoldKey.currentState!.openDrawer();
+                      } else {
+                        Scaffold.of(context).openDrawer();
+                      }
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Icon(
+                        Icons.menu,
+                        color: Color(0xFF132E51),
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Material(
+                  color: Colors.white,
+                  elevation: 0,
+                  borderRadius: BorderRadius.circular(8),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    child: Text(
+                      'Profile',
+                      style: TextStyle(
+                        color: Color(0xFF132E51),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

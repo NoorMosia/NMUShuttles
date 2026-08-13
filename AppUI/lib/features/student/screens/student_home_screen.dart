@@ -17,6 +17,8 @@ class StudentHomeScreen extends ConsumerStatefulWidget {
 class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  bool _isFabExtended = true;
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +29,19 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    // Only react to vertical scrolls (ignore TabBarView horizontal swipes)
+    if (notification.metrics.axis != Axis.vertical) return false;
+
+    final offset = notification.metrics.pixels;
+    final shouldExtend = offset <= 20;
+
+    if (shouldExtend != _isFabExtended) {
+      setState(() => _isFabExtended = shouldExtend);
+    }
+    return false;
   }
 
   @override
@@ -64,12 +79,15 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
               const SizedBox(height: 16),
               // Tab views
               Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: const [
-                    _UpcomingBookingsTab(),
-                    _PastBookingsTab(),
-                  ],
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: _handleScrollNotification,
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: const [
+                      _UpcomingBookingsTab(),
+                      _PastBookingsTab(),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -131,12 +149,9 @@ class _StudentHomeScreenState extends ConsumerState<StudentHomeScreen>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _AnimatedFab(
+        isExtended: _isFabExtended,
         onPressed: () => context.push('/student/booking/new'),
-        elevation: 0,
-        highlightElevation: 0,
-        icon: const Icon(Icons.add),
-        label: const Text('New Booking'),
       ),
     );
   }
@@ -269,6 +284,64 @@ class _PastBookingsTab extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// A custom FAB that smoothly animates between extended (pill with label)
+/// and collapsed (circle with just "+") states with a controlled duration.
+class _AnimatedFab extends StatelessWidget {
+  const _AnimatedFab({
+    required this.isExtended,
+    required this.onPressed,
+  });
+
+  final bool isExtended;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final fabColor = theme.colorScheme.primaryContainer;
+    final iconColor = theme.colorScheme.onPrimaryContainer;
+
+    return GestureDetector(
+      onTap: onPressed,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        height: 56,
+        padding: EdgeInsets.symmetric(horizontal: isExtended ? 20 : 16),
+        decoration: BoxDecoration(
+          color: fabColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.add, color: iconColor),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
+              child: isExtended
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Text(
+                        'New Booking',
+                        style: TextStyle(
+                          color: iconColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.clip,
+                        maxLines: 1,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

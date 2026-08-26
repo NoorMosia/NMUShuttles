@@ -96,7 +96,7 @@ every possible entity state represented.
 
 ## 6. StopShuttleDefaults (Standing Convoy Rosters)
 
-Accessible shuttles always in position 1. Busier stops get 3-shuttle convoys.
+Accessible shuttles always in position 1 (where available). Busier stops get 3-shuttle convoys.
 
 | StopShuttleDefaultId | StopId | ShuttleId | OrderPosition | CreatedAt |
 |---|---|---|---|---|
@@ -624,7 +624,7 @@ Inactive students (47–50) have NO bookings in the seed window (they were struc
 | Confirmed | Boarded | Priority | Set | Priority auto-booking, checked in |
 | Confirmed | NoShow | Standard | NULL | Student didn't show up |
 | Confirmed | NoShow | Priority | NULL | Priority student didn't show |
-| Confirmed | Pending | Standard | NULL | Should NOT exist for past completed trips (only if trip was incident) |
+| Confirmed | Pending | Standard | NULL | Exists on completed trips with mid-boarding breakdown (capacity dropped, student couldn't board) |
 | WaitingList | Pending | Standard | NULL | Student never got promoted (trip was full) |
 | Cancelled | Pending | Standard | NULL | Student cancelled before lock |
 
@@ -654,11 +654,13 @@ Most bookings are `Confirmed / Boarded / Standard` with ShuttleId assigned.
 
 ### Explicit booking records for scenario trips:
 
-#### Trip 593 — Waitlist overflow scenario (83 total bookings)
+#### Trip 593 — Waitlist overflow scenario (83 total booking records)
+
+**Breakdown: 79 Confirmed + 2 WaitingList + 2 Cancelled = 83 total.** The 2 promoted students (45, 46) are counted within the 79 Confirmed. The 2 cancelled students (39, 40) freed their slots which the promoted students filled.
 
 | BookingId | StudentId | TripInstanceId | BookingStatus | BookingType | BoardedStatus | QrCodeToken | ShuttleId | BoardedAt | CreatedAt |
 |---|---|---|---|---|---|---|---|---|---|
-| (base+1) | 3 | 593 | Confirmed | Priority | Boarded | qr_593_s3_pri | 1 | 2026-08-05T04:35:00Z | 2026-08-02T22:00:00Z |
+| (base+1) | 3 | 593 | Confirmed | Priority | Boarded | qr_593_s3_pri | 1 | 2026-08-05T04:35:00Z | 2026-08-01T22:00:00Z |
 | (base+2) | 1 | 593 | Confirmed | Standard | Boarded | qr_593_s1 | 1 | 2026-08-05T04:37:00Z | 2026-08-03T06:10:00Z |
 | (base+3) | 2 | 593 | Confirmed | Standard | Boarded | qr_593_s2 | 1 | 2026-08-05T04:38:00Z | 2026-08-03T06:15:00Z |
 | (base+4) | 16 | 593 | Confirmed | Standard | Boarded | qr_593_s16 | 2 | 2026-08-05T04:36:00Z | 2026-08-03T06:20:00Z |
@@ -666,17 +668,17 @@ Most bookings are `Confirmed / Boarded / Standard` with ShuttleId assigned.
 | (base+6) | 18 | 593 | Confirmed | Standard | NoShow | qr_593_s18 | NULL | NULL | 2026-08-03T06:30:00Z |
 | (base+7) | 51 | 593 | Confirmed | Standard | NoShow | qr_593_s51 | NULL | NULL | 2026-08-03T07:00:00Z |
 | (base+8) | 52 | 593 | Confirmed | Standard | Boarded | qr_593_s52 | 3 | 2026-08-05T04:40:00Z | 2026-08-03T07:05:00Z |
-| ... | (students from other stops occasionally book here too) | ... | ... | ... | ... | ... | ... | ... | ... |
-| (base+79) | 44 | 593 | Confirmed | Standard | Boarded | qr_593_s44 | 3 | 2026-08-05T04:42:00Z | 2026-08-03T14:00:00Z |
-| (base+80) | 45 | 593 | Confirmed | Standard | Boarded | qr_593_s45_promoted | 1 | 2026-08-05T04:44:00Z | 2026-08-03T14:30:00Z |
-| (base+81) | 46 | 593 | Confirmed | Standard | Boarded | qr_593_s46_promoted | 2 | 2026-08-05T04:43:00Z | 2026-08-03T14:45:00Z |
-| (base+82) | 43 | 593 | WaitingList | Standard | Pending | qr_593_s43_wl | NULL | NULL | 2026-08-03T15:00:00Z |
-| (base+83) | 42 | 593 | WaitingList | Standard | Pending | qr_593_s42_wl | NULL | NULL | 2026-08-03T15:15:00Z |
-| (base+84) | 39 | 593 | Cancelled | Standard | Pending | qr_593_s39_cx | NULL | NULL | 2026-08-03T08:00:00Z |
-| (base+85) | 40 | 593 | Cancelled | Standard | Pending | qr_593_s40_cx | NULL | NULL | 2026-08-03T09:00:00Z |
+| ... | (remaining confirmed students fill shuttle positions sequentially) | ... | ... | ... | ... | ... | ... | ... | ... |
+| (base+77) | 44 | 593 | Confirmed | Standard | Boarded | qr_593_s44 | 3 | 2026-08-05T04:42:00Z | 2026-08-03T14:00:00Z |
+| (base+78) | 45 | 593 | Confirmed | Standard | Boarded | qr_593_s45_promoted | 1 | 2026-08-05T04:44:00Z | 2026-08-03T14:30:00Z |
+| (base+79) | 46 | 593 | Confirmed | Standard | Boarded | qr_593_s46_promoted | 2 | 2026-08-05T04:43:00Z | 2026-08-03T14:45:00Z |
+| (base+80) | 43 | 593 | WaitingList | Standard | Pending | qr_593_s43_wl | NULL | NULL | 2026-08-03T15:00:00Z |
+| (base+81) | 42 | 593 | WaitingList | Standard | Pending | qr_593_s42_wl | NULL | NULL | 2026-08-03T15:15:00Z |
+| (base+82) | 39 | 593 | Cancelled | Standard | Pending | qr_593_s39_cx | NULL | NULL | 2026-08-03T08:00:00Z |
+| (base+83) | 40 | 593 | Cancelled | Standard | Pending | qr_593_s40_cx | NULL | NULL | 2026-08-03T09:00:00Z |
 
 **Notes on Trip 593:**
-- Student 3 (priority) was auto-booked by rolling injection job (CreatedAt = midnight 3 days ahead = Aug 2 22:00 UTC = Aug 3 00:00 SAST)
+- Student 3 (priority) was auto-booked by rolling injection job (CreatedAt = midnight SAST 3 days before trip = Aug 2 00:00 SAST = Aug 1 22:00 UTC)
 - Students 39 and 40 cancelled before lock time
 - Students 45 and 46 were promoted from WaitingList → Confirmed at lock time (FIFO by CreatedAt)
 - Students 42 and 43 remained on waitlist (booked after 45 and 46, so lower priority in FIFO)
@@ -697,7 +699,7 @@ For a normal weekday 06:45 trip at Stop 1 (capacity 79):
 - suffix: empty for normal, `pri` for priority, `wl` for waitlist, `cx` for cancelled
 
 **CreatedAt for bookings:**
-- Priority bookings: midnight SAST 3 days before trip (rolling injection) = TripDate - 3 days at 22:00:00 UTC
+- Priority bookings: midnight SAST on (TripDate - 3 days). In UTC = (TripDate - 4 days) at 22:00:00 UTC. Example: Trip on Aug 5 → CreatedAt = Aug 1 at 22:00 UTC.
 - Standard bookings: random times 1–3 days before trip, during waking hours (06:00–22:00 SAST)
 - Cancelled bookings: created normally, then cancelled before LockedAt
 
@@ -763,9 +765,9 @@ Notifications are sent to students for various system events. All notifications 
 
 | NotificationId | StudentId | Title | Message | IsRead | RelatedTripInstanceId | CreatedAt |
 |---|---|---|---|---|---|---|
-| 1 | 6 | Priority Booking Confirmed | Your priority seat for Humewood → South Campus on 28 Jul (06:45) has been automatically reserved. | TRUE | 12 | 2026-07-25T22:00:00Z |
-| 2 | 20 | Priority Booking Confirmed | Your priority seat for Newton Park → South Campus on 28 Jul (06:45) has been automatically reserved. | TRUE | 23 | 2026-07-25T22:00:00Z |
-| 3 | 3 | Priority Booking Confirmed | Your priority seat for Summerstrand Village → South Campus on 29 Jul (06:45) has been automatically reserved. | TRUE | 89 | 2026-07-26T22:00:00Z |
+| 1 | 6 | Priority Booking Confirmed | Your priority seat for Humewood → South Campus on 28 Jul (06:45) has been automatically reserved. | TRUE | 12 | 2026-07-24T22:00:00Z |
+| 2 | 20 | Priority Booking Confirmed | Your priority seat for Newton Park → South Campus on 28 Jul (06:45) has been automatically reserved. | TRUE | 23 | 2026-07-24T22:00:00Z |
+| 3 | 3 | Priority Booking Confirmed | Your priority seat for Summerstrand Village → South Campus on 29 Jul (06:45) has been automatically reserved. | TRUE | 89 | 2026-07-25T22:00:00Z |
 | 4 | 1 | Booking Confirmed | Your seat for Summerstrand Village → South Campus on 28 Jul (06:45) is confirmed. Show your QR code to the marshal when boarding. | TRUE | 1 | 2026-07-26T08:15:00Z |
 | 5 | 2 | Booking Confirmed | Your seat for Summerstrand Village → South Campus on 28 Jul (06:45) is confirmed. Show your QR code to the marshal when boarding. | TRUE | 1 | 2026-07-26T09:30:00Z |
 | 6 | 1 | Trip Locked | Your trip from Summerstrand Village (06:45, 28 Jul) is now locked. No changes can be made. Please be at the stop 10 minutes early. | TRUE | 1 | 2026-07-28T03:45:00Z |
@@ -780,9 +782,9 @@ Notifications are sent to students for various system events. All notifications 
 | 15 | 3 | Shuttle Cancelled | Shuttle EC 389-720 on your trip (Summerstrand Village, 06:45, 07 Aug) broke down and no replacement is available. Remaining shuttles will serve all passengers. Expect possible delays. | TRUE | 769 | 2026-08-07T04:55:00Z |
 | 16 | 45 | Waitlist Promoted | Great news! A spot opened up for your trip from Summerstrand Village (06:45, 05 Aug). Your booking is now confirmed. | TRUE | 593 | 2026-08-05T03:45:00Z |
 | 17 | 46 | Waitlist Promoted | Great news! A spot opened up for your trip from Summerstrand Village (06:45, 05 Aug). Your booking is now confirmed. | FALSE | 593 | 2026-08-05T03:45:00Z |
-| 18 | 6 | Priority Booking Confirmed | Your priority seat for Humewood → South Campus on 04 Aug (06:45) has been automatically reserved. | TRUE | 516 | 2026-08-01T22:00:00Z |
-| 19 | 13 | Priority Booking Confirmed | Your priority seat for Walmer Heights → South Campus on 03 Aug (06:45) has been automatically reserved. | TRUE | 450 | 2026-07-31T22:00:00Z |
-| 20 | 35 | Priority Booking Confirmed | Your priority seat for Lorraine → South Campus on 03 Aug (06:45) has been automatically reserved. | TRUE | 461 | 2026-07-31T22:00:00Z |
+| 18 | 6 | Priority Booking Confirmed | Your priority seat for Humewood → South Campus on 04 Aug (06:45) has been automatically reserved. | TRUE | 516 | 2026-07-31T22:00:00Z |
+| 19 | 13 | Priority Booking Confirmed | Your priority seat for Walmer Heights → South Campus on 03 Aug (06:45) has been automatically reserved. | TRUE | 450 | 2026-07-30T22:00:00Z |
+| 20 | 35 | Priority Booking Confirmed | Your priority seat for Lorraine → South Campus on 03 Aug (06:45) has been automatically reserved. | TRUE | 461 | 2026-07-30T22:00:00Z |
 
 **Note:** In full implementation, Trip Locked notifications would be sent to ALL confirmed passengers on each trip at lock time. The above shows representative samples. The seed implementation should generate these programmatically for all bookings.
 
@@ -856,14 +858,11 @@ Notifications are sent to students for various system events. All notifications 
 - Effective capacity drops from 79 to 57 (S1=22, S2=35)
 - 06:55 SAST: Admin Nomsa resolves as Cancelled (no replacement available)
 - System: BreakdownLog.ResolutionType = 'Cancelled', notification sent to passengers
-- Remaining S1 and S2 serve passengers (57 boarded from the original ~67 bookings)
-- Some passengers who were confirmed become NoShow because shuttle capacity insufficient? No — the business rule says students are assigned at scan time filling front first. If capacity is reached, remaining confirmed students simply can't board but that's an edge case. For this seed: 57 boarded (capacity filled), remaining confirmed students show as NoShow (couldn't fit).
-- Actually per domain rules: students are Confirmed when they book (based on capacity at booking time). If capacity drops after booking due to breakdown, confirmed students who arrive but can't fit... this is handled by the breakdown notification + reduced capacity. In practice, confirmed students still show up, get scanned into S1/S2 until full. Remaining are recorded as Confirmed/Boarded (they all fit because bookings were ~67 and capacity is 57... wait that doesn't work).
-
-**Correction for Scenario 4:** Since the breakdown happened AFTER lock (scanning was already open — 06:28 is within the 35-min window for 06:45 departure), and ~67 were confirmed:
-- 57 boarded successfully into S1 and S2 (filled to capacity)
-- 10 confirmed students couldn't board (no room) → these are special: they're Confirmed but effectively stranded. Per domain rules, they'd remain as `Confirmed / Pending` (not scanned) or the system handles this differently.
-- For simplicity in this seed: 55 Boarded, 7 NoShow (some genuinely didn't come, some couldn't fit), 5 were confirmed but their BoardedStatus = Pending (couldn't board due to reduced capacity — these students received the breakdown notification)
+- Trip had ~67 confirmed bookings. With only 57 seats now available:
+  - 55 students boarded successfully into S1 and S2 (Confirmed/Boarded)
+  - 7 students marked as NoShow (mix of genuine no-shows + some who arrived after capacity was reached)
+  - 5 students remain as Confirmed/Pending (arrived at the stop but couldn't board due to reduced capacity; received the breakdown notification)
+- This edge case demonstrates that BoardedStatus = 'Pending' CAN exist on completed trips when capacity drops mid-boarding
 
 ---
 
@@ -920,3 +919,90 @@ Notifications are sent to students for various system events. All notifications 
 | TripNotes | 6 |
 | Notifications | ~120,000+ (generated programmatically — trip locked notifications alone = ~38,000) |
 | Reports | 8 |
+
+---
+
+## 24. Implementation Recommendations
+
+### Notification volume management
+
+The full seed generates ~120,000+ notification records (38,000 Trip Locked + 38,000 Booking Confirmed + priority/breakdown/promotion notifications). This is realistic but heavy for development environments.
+
+**Recommended approach:**
+- **Full notifications** only for the 3 scenario trips (505, 593, 769) plus a sample of ~50 normal trips spread across different days and stops
+- **Skip Trip Locked and Booking Confirmed notifications** for the remaining ~1,040 trips
+- This brings the notification count down to ~2,000–3,000 records — enough for dashboard pagination, filtering, and read/unread state testing without bloating the DB
+- If full-volume testing is needed later (e.g., performance testing), add a flag like `--full-notifications` to the seed runner
+
+### Booking generation seeded randomness
+
+Use `new Random(42)` (or any fixed seed) for all random decisions in booking generation:
+- Which students book which trips
+- CreatedAt time offsets
+- BoardedAt time distribution within the scanning window
+- Which students are NoShow (~5% rate)
+
+This ensures the seed is **reproducible** — running it twice produces the same database state. Critical for test assertions and for syncing between developers.
+
+### Seed execution strategy
+
+Given the volume (~38,000 bookings + ~2,600 allocations + 1,096 trips), do NOT use EF Core `HasData()` for the runtime entities. Instead:
+
+1. **Static seed via `HasData()`**: Admins, Campuses, Stops, Vendors, Shuttles, StopShuttleDefaults, Marshals, Students, ScheduleTimes, ScheduleTimeCampuses, CalendarExceptions, PrioritySchedules, DeviceRegistrations (small, config-level data)
+2. **Programmatic seed via `IHostedService` or a dedicated seed command**: TripInstances, TripShuttleAllocations, Bookings, Notifications, BreakdownLogs, TripNotes, Reports (large, runtime data generated by algorithm)
+
+Reason: EF Core migrations with 38,000+ `HasData()` rows generate enormous migration files and are extremely slow to apply. A programmatic seeder using `context.BulkInsert()` or batched `SaveChanges()` is far more practical.
+
+**Suggested pattern:**
+```csharp
+// In Program.cs or a dedicated SeedCommand
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<HistoricalDataSeeder>();
+    await seeder.SeedAsync(); // Only runs if TripInstances table is empty
+}
+```
+
+### Dashboard analytics coverage
+
+The seed data produces the following analytics scenarios for the admin portal:
+
+| Metric | Expected values |
+|---|---|
+| Total trips (period) | 1,096 |
+| Average load factor | ~55% (weighted across all timeslots) |
+| Peak load factor (06:45 ToCampus) | ~90% |
+| Breakdown incidents | 2 (both Bay Transit Corp) |
+| Vendor reliability ranking | Coastal Movers & Metro Link SA: 100%, Bay Transit Corp: 99.8% (2 incidents / ~770 allocations) |
+| No-show rate | ~5% overall |
+| Busiest stop | Stop 1 (Summerstrand) — 3-shuttle convoy, highest load |
+| Quietest stop | Stop 7 (Framesby) — 2-shuttle convoy, 50 seat capacity |
+| Reports by vendor | Coastal Movers: 2, Metro Link SA: 2, Bay Transit Corp: 2, Non-vendor: 2 |
+| Student activity | 56 active bookers, 4 struck out |
+| Priority students served | 5 (with recurring auto-bookings) |
+| Waitlist events | 1 trip with overflow (Trip 593) |
+
+### Deprecation of firstSeed.md
+
+This document (`seed.md`) fully replaces `MySpecGuide/firstSeed.md`. The old seed covered only configuration entities (Admins, Campuses, Stops, Students, Marshals, Shuttles, ScheduleTimes, CalendarExceptions, PrioritySchedules) with no runtime data.
+
+**What this seed adds over the old one:**
+- Vendors entity (extracted from Shuttle.VendorCompanyName)
+- StopShuttleDefaults (convoy assignments)
+- ScheduleTimeCampus (route junction)
+- DeviceRegistrations
+- 45 additional students (60 total vs 15)
+- 9 additional shuttles (19 total vs 10)
+- 4 inactive/struck-out students
+- 2 additional priority students
+- Full 2-week historical trip data (1,096 trips)
+- Complete booking lifecycle coverage (all status combinations)
+- Breakdown incidents with resolution paths
+- Trip notes (admin operational documentation)
+- Notifications (all system event types)
+- Reports (all categories and statuses)
+- Programmatic generation rules for high-volume data
+- Scenario narratives documenting the "story" behind edge-case data
+
+Once the new seed implementation is complete, `MySpecGuide/firstSeed.md` can be deleted.

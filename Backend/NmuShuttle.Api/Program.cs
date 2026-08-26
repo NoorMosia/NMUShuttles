@@ -275,6 +275,15 @@ app.UseMiddleware<NmuShuttle.Api.Infrastructure.ActiveUserMiddleware>();
 
 app.MapControllers();
 
+// Seed historical data in development (only runs if TripInstances table is empty)
+if (app.Environment.IsDevelopment())
+{
+    using var seedScope = app.Services.CreateScope();
+    var seeder = new NmuShuttle.Api.Data.HistoricalDataSeeder(
+        seedScope.ServiceProvider.GetRequiredService<ShuttleDbContext>());
+    await seeder.SeedAsync();
+}
+
 // Generate trips on startup (today through today+3) so there's data immediately
 await NmuShuttle.Api.Infrastructure.StartupTripGenerator.GenerateTripsAsync(app.Services);
 

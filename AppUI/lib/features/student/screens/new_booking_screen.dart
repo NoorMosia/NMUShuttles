@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:nmu_shuttle_app/core/api/api_exception.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/core/ui/error_display.dart';
 import 'package:nmu_shuttle_app/features/student/models/trip_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/trip_providers.dart';
@@ -11,7 +13,11 @@ import 'package:nmu_shuttle_app/shared/widgets/back_button.dart';
 
 /// New booking screen with direction, stop search, and capacity display.
 class NewBookingScreen extends ConsumerStatefulWidget {
-  const NewBookingScreen({super.key});
+  const NewBookingScreen({super.key, this.initialStopId});
+
+  /// When provided (e.g. from the Maps screen), the matching stop is
+  /// pre-selected as the origin once the stops list loads.
+  final int? initialStopId;
 
   @override
   ConsumerState<NewBookingScreen> createState() => _NewBookingScreenState();
@@ -24,7 +30,33 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
   String _searchQuery = '';
   bool _isBooking = false;
 
+  /// Guards the one-time pre-selection from [widget.initialStopId].
+  bool _appliedInitialStop = false;
+
   final TextEditingController _searchController = TextEditingController();
+
+  /// Pre-selects the stop matching [widget.initialStopId] from the loaded
+  /// [stops] list. Runs once.
+  void _applyInitialStop(List<StopModel> stops) {
+    if (_appliedInitialStop) return;
+    final id = widget.initialStopId;
+    if (id == null) {
+      _appliedInitialStop = true;
+      return;
+    }
+    StopModel? match;
+    for (final s in stops) {
+      if (s.stopId == id) {
+        match = s;
+        break;
+      }
+    }
+    if (match != null) {
+      _selectedStop = match;
+      _searchController.text = match.stopName;
+    }
+    _appliedInitialStop = true;
+  }
 
   /// Available dates: today through today + 3.
   List<DateTime> get _availableDates {
@@ -63,14 +95,19 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
       if (mounted) {
         context.go('/student/booking/${booking.bookingId}');
       }
+    } on ApiException catch (e) {
+      if (mounted) {
+        handleApiError(
+          context,
+          e,
+          conflictTitle: 'Booking Not Allowed',
+          conflictActionLabel: 'View My Bookings',
+          onConflictAction: () => context.go('/student/home'),
+        );
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Booking failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackBar(context, 'Something went wrong. Please try again.');
       }
     } finally {
       if (mounted) setState(() => _isBooking = false);
@@ -86,6 +123,11 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
   @override
   Widget build(BuildContext context) {
     final stopsAsync = ref.watch(stopsProvider);
+
+    // Pre-select the origin stop passed in from the Maps screen (once).
+    if (!_appliedInitialStop) {
+      stopsAsync.whenData(_applyInitialStop);
+    }
 
     return Scaffold(
       drawer: AppDrawer(
@@ -255,7 +297,9 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
       children: [
         TextField(
           controller: _searchController,
+          maxLength: 60,
           decoration: InputDecoration(
+            counterText: '',
             hintText: 'Search by stop name or address...',
             prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
             border: UnderlineInputBorder(
@@ -419,17 +463,10 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
         padding: EdgeInsets.all(24),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (error, _) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Center(
-          child: Column(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.red),
-              const SizedBox(height: 8),
-              Text('Failed to load trips: $error'),
-            ],
-          ),
-        ),
+      error: (error, _) => ErrorRetry(
+        error: error,
+        title: 'Failed to load trips',
+        onRetry: () => ref.invalidate(tripAvailabilityProvider(query)),
       ),
       data: (trips) {
         // Filter out trips whose departure time has already passed (today only)

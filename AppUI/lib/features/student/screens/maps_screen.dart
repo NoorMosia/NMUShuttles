@@ -3,8 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/core/ui/error_display.dart';
 import 'package:nmu_shuttle_app/features/student/models/stop_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/maps_provider.dart';
 import 'package:nmu_shuttle_app/features/student/providers/stops_provider.dart';
@@ -21,7 +23,8 @@ class MapsScreen extends ConsumerStatefulWidget {
   ConsumerState<MapsScreen> createState() => _MapsScreenState();
 }
 
-class _MapsScreenState extends ConsumerState<MapsScreen> {
+class _MapsScreenState extends ConsumerState<MapsScreen>
+    with SingleTickerProviderStateMixin {
   GoogleMapController? _mapController;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -40,14 +43,42 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
   // Bottom sheet state
   bool _showNearbyStops = false;
 
+  // Single controller drives BOTH the sheet and the FAB row so they stay
+  // perfectly in sync. 0 = hidden, 1 = fully shown.
+  late final AnimationController _sheetController;
+  late final Animation<double> _sheetAnim;
+
+  // Sheet height (must match the container in _buildNearbyStopsSheet).
+  static const double _sheetHeight = 300;
+
   @override
   void initState() {
     super.initState();
+    _sheetController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+    _sheetAnim = CurvedAnimation(
+      parent: _sheetController,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
     _requestDeviceLocation();
+  }
+
+  /// Opens or closes the nearby stops sheet, driving the shared animation.
+  void _setNearbyStops(bool show) {
+    setState(() => _showNearbyStops = show);
+    if (show) {
+      _sheetController.forward();
+    } else {
+      _sheetController.reverse();
+    }
   }
 
   @override
   void dispose() {
+    _sheetController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
     _mapController?.dispose();
@@ -227,20 +258,44 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
               ),
             ],
             const SizedBox(height: 20),
-            // Get Directions button
+            // Book button — takes user to the booking page with this stop
+            // pre-selected as the origin.
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  context.go(
+                    '/student/booking/new?stopId=${stop.stopId}',
+                  );
+                },
+                icon: const Icon(Icons.directions_bus),
+                label: const Text('Book a Shuttle'),
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: AppTheme.primaryGold,
+                  foregroundColor: AppTheme.navy,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Get Directions button (secondary)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
                 onPressed: () {
                   Navigator.pop(context);
                   _launchDirections(stop.latitude, stop.longitude);
                 },
                 icon: const Icon(Icons.directions),
                 label: const Text('Get Directions'),
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: AppTheme.primaryGold,
+                style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.navy,
+                  side: const BorderSide(color: AppTheme.navy),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -303,33 +358,10 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppTheme.primaryGold),
         ),
-        error: (error, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
-                const SizedBox(height: 16),
-                Text(
-                  'Failed to load stops',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.invalidate(mapStopsProvider),
-                  style: ElevatedButton.styleFrom(elevation: 0),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
+        error: (error, stack) => ErrorRetry(
+          error: error,
+          title: 'Failed to load stops',
+          onRetry: () => ref.invalidate(mapStopsProvider),
         ),
         data: (allStops) {
           final filteredStops = _filterStops(allStops);
@@ -351,6 +383,18 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                 onMapCreated: (controller) {
                   _mapController = controller;
                 },
+                // Tapping the map (outside any control) dismisses the keyboard,
+                // closes the nearby stops sheet, and clears the search dropdown.
+                onTap: (_) {
+                  _searchFocusNode.unfocus();
+                  if (_showNearbyStops) _setNearbyStops(false);
+                  if (_searchQuery.isNotEmpty) {
+                    setState(() {
+                      _searchQuery = '';
+                      _searchController.clear();
+                    });
+                  }
+                },
               ),
 
               // Hamburger menu button (top-left)
@@ -367,20 +411,20 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                   child: TextField(
                     controller: _searchController,
                     focusNode: _searchFocusNode,
+                    maxLength: 60,
                     onChanged: (value) {
                       setState(() {
                         _searchQuery = value;
-                        if (value.isNotEmpty) {
-                          _showNearbyStops = false;
-                        }
                       });
-                    },
-                    onTap: () {
-                      if (_showNearbyStops) {
-                        setState(() => _showNearbyStops = false);
+                      if (value.isNotEmpty && _showNearbyStops) {
+                        _setNearbyStops(false);
                       }
                     },
+                    onTap: () {
+                      if (_showNearbyStops) _setNearbyStops(false);
+                    },
                     decoration: InputDecoration(
+                      counterText: '',
                       hintText: 'Search stops...',
                       prefixIcon:
                           const Icon(Icons.search, color: AppTheme.navy),
@@ -503,10 +547,20 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                   ),
                 ),
 
-              // Nearby Stops FAB + My Location button (side by side)
-              Positioned(
-                bottom: _showNearbyStops ? 320 : 24,
-                right: 16,
+              // Nearby Stops FAB + My Location button (side by side).
+              // Driven by the shared sheet animation so it rises/falls exactly
+              // in step with the sheet.
+              AnimatedBuilder(
+                animation: _sheetAnim,
+                builder: (context, child) {
+                  // Travels from 24 (hidden) to 320 (shown) in lockstep.
+                  final bottom = 24 + (_sheetAnim.value * (320 - 24));
+                  return Positioned(
+                    bottom: bottom,
+                    right: 16,
+                    child: child!,
+                  );
+                },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -516,14 +570,13 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                       elevation: 0,
                       highlightElevation: 0,
                       onPressed: () {
-                        setState(() {
-                          _showNearbyStops = !_showNearbyStops;
-                          if (_showNearbyStops) {
-                            _searchFocusNode.unfocus();
-                            _searchController.clear();
-                            _searchQuery = '';
-                          }
-                        });
+                        final willShow = !_showNearbyStops;
+                        if (willShow) {
+                          _searchFocusNode.unfocus();
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        }
+                        _setNearbyStops(willShow);
                       },
                       backgroundColor: AppTheme.primaryGold,
                       foregroundColor: AppTheme.navy,
@@ -569,14 +622,28 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                 ),
               ),
 
-              // Nearby Stops bottom sheet
-              if (_showNearbyStops)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: _buildNearbyStopsSheet(allStops),
-                ),
+              // Nearby Stops bottom sheet — slides up/down smoothly, driven by
+              // the shared animation so it moves in lockstep with the FAB row.
+              AnimatedBuilder(
+                animation: _sheetAnim,
+                builder: (context, child) {
+                  // Travels from -_sheetHeight (hidden) to 0 (shown).
+                  final bottom = (_sheetAnim.value - 1) * _sheetHeight;
+                  return Positioned(
+                    bottom: bottom,
+                    left: 0,
+                    right: 0,
+                    child: Opacity(
+                      opacity: _sheetAnim.value.clamp(0.0, 1.0),
+                      child: IgnorePointer(
+                        ignoring: !_showNearbyStops,
+                        child: child,
+                      ),
+                    ),
+                  );
+                },
+                child: _buildNearbyStopsSheet(allStops),
+              ),
             ],
           );
         },
@@ -652,18 +719,20 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                               : null;
 
                           return ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  AppTheme.primaryGold.withValues(alpha: 0.2),
-                              child: const Icon(Icons.location_on,
+                            leading: const CircleAvatar(
+                              backgroundColor: AppTheme.primaryGold,
+                              child: Icon(Icons.location_on,
                                   color: AppTheme.navy, size: 20),
                             ),
                             title: Text(
                               stop.stopName,
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey.shade800),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.navy,
+                                  ),
                             ),
                             subtitle: Text(
                               stop.fullAddress,
@@ -689,7 +758,7 @@ class _MapsScreenState extends ConsumerState<MapsScreen> {
                                   15.0,
                                 ),
                               );
-                              setState(() => _showNearbyStops = false);
+                              _setNearbyStops(false);
                               _showStopDetails(stop);
                             },
                           );

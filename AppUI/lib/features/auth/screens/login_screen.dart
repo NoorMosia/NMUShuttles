@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 
 /// Minimalist login screen following the UI mockups:
@@ -71,10 +73,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final notifier = ref.read(authStateProvider.notifier);
     final state = ref.read(authStateProvider);
     final identifier = _identifierController.text.trim();
+    final isStudent = state.role == AuthRole.student;
 
     if (identifier.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your number')),
+        SnackBar(
+          content: Text(isStudent
+              ? 'Please enter your student number'
+              : 'Please enter your staff number'),
+        ),
+      );
+      return;
+    }
+
+    // Validate the exact expected format before hitting the network.
+    final validFormat = isStudent
+        ? RegExp(r'^s\d{9}$').hasMatch(identifier)
+        : RegExp(r'^\d{7}$').hasMatch(identifier);
+    if (!validFormat) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isStudent
+              ? 'Enter a valid student number (e.g. s312847563)'
+              : 'Enter a valid 7-digit staff number'),
+        ),
       );
       return;
     }
@@ -164,27 +186,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Column(
-                children: [
-                  const SizedBox(height: 48),
+      resizeToAvoidBottomInset: false,
+      body: GestureDetector(
+        // Dismiss the keyboard when tapping outside any input field.
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SafeArea(
+          child: Column(
+            children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 48),
 
                   // ─── Logo ────────────────────────────────────
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.32,
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: Image.asset(
-                          'assets/logos/1.png',
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.32,
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: SvgPicture.asset(
+                          'assets/logo.svg',
                           fit: BoxFit.contain,
+                          colorFilter: const ColorFilter.mode(
+                            AppTheme.navy,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                     ),
@@ -308,11 +342,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ],
 
-                  const SizedBox(height: 48),
-                ],
+                        const SizedBox(height: 48),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
+        ),
         ),
       ),
     );
@@ -380,7 +418,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             // Animated underline
             Container(
-              height: 2,
+              height: 4,
               color: _navy.withValues(alpha: 0.1),
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -389,7 +427,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   curve: Curves.easeInOut,
                   width: tabWidth,
                   margin: EdgeInsets.only(left: isStudent ? 0 : tabWidth),
-                  height: 2,
+                  height: 4,
                   color: _gold,
                 ),
               ),
@@ -405,36 +443,62 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildIdentifierField(AuthState authState) {
     final isStudent = authState.role == AuthRole.student;
 
-    return TextField(
-      controller: _identifierController,
-      decoration: InputDecoration(
-        hintText: isStudent
-            ? 'Enter your student number'
-            : 'Enter your staff number',
-        hintStyle: GoogleFonts.hankenGrotesk(
-          fontSize: 16,
-          color: _navy.withValues(alpha: 0.4),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _identifierController,
+          decoration: InputDecoration(
+            hintText: isStudent
+                ? 'Enter your student number'
+                : 'Enter your staff number',
+            hintStyle: GoogleFonts.hankenGrotesk(
+              fontSize: 16,
+              color: _navy.withValues(alpha: 0.4),
+            ),
+            border: UnderlineInputBorder(
+              borderSide: BorderSide(color: _navy.withValues(alpha: 0.2)),
+            ),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: _navy.withValues(alpha: 0.2)),
+            ),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: _gold, width: 2),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+          ),
+          style: GoogleFonts.hankenGrotesk(
+            fontSize: 16,
+            color: _navy,
+          ),
+          keyboardType:
+              isStudent ? TextInputType.text : TextInputType.number,
+          textInputAction: TextInputAction.done,
+          // Constrain input to the only possible formats:
+          //  • Student number: "s" + 9 digits (10 chars total)
+          //  • Marshal staff number: 7 digits
+          inputFormatters: isStudent
+              ? [
+                  _StudentNumberFormatter(),
+                  LengthLimitingTextInputFormatter(10),
+                ]
+              : [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(7),
+                ],
+          onSubmitted: (_) => _onRequestOtp(),
         ),
-        border: UnderlineInputBorder(
-          borderSide: BorderSide(color: _navy.withValues(alpha: 0.2)),
+        const SizedBox(height: 8),
+        Text(
+          isStudent ? 'Student Number' : 'Staff Number',
+          style: GoogleFonts.hankenGrotesk(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: _navy,
+          ),
         ),
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: _navy.withValues(alpha: 0.2)),
-        ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: _gold, width: 2),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
-      ),
-      style: GoogleFonts.hankenGrotesk(
-        fontSize: 16,
-        color: _navy,
-      ),
-      keyboardType:
-          isStudent ? TextInputType.text : TextInputType.number,
-      textInputAction: TextInputAction.done,
-      onSubmitted: (_) => _onRequestOtp(),
+      ],
     );
   }
 
@@ -508,6 +572,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
       ),
+    );
+  }
+}
+
+/// Formats a student-number entry: forces a leading lowercase "s" followed by
+/// digits only. Anything else the user types is rejected as they type, so the
+/// field can only ever hold values shaped like "s" + digits.
+class _StudentNumberFormatter extends TextInputFormatter {
+  static final RegExp _valid = RegExp(r'^s?\d*$');
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Normalise a leading "S" to lowercase so "S3128..." becomes "s3128...".
+    var text = newValue.text;
+    if (text.isNotEmpty && text[0] == 'S') {
+      text = 's${text.substring(1)}';
+    }
+    if (!_valid.hasMatch(text)) {
+      // Reject the change; keep the previous valid value.
+      return oldValue;
+    }
+    if (text == newValue.text) return newValue;
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
     );
   }
 }

@@ -228,7 +228,7 @@ builder.Services.AddScoped<IWaitlistPromotionService, WaitlistPromotionService>(
 // Background Services (disabled temporarily for local dev — re-enable for production)
 // ──────────────────────────────────────────────────────────────────
 // builder.Services.AddHostedService<RollingInjectionService>();
-// builder.Services.AddHostedService<LockoutGateService>();
+builder.Services.AddHostedService<LockoutGateService>();
 
 // ──────────────────────────────────────────────────────────────────
 // Controllers
@@ -286,6 +286,17 @@ if (app.Environment.IsDevelopment())
 
 // Generate trips on startup (today through today+3) so there's data immediately
 await NmuShuttle.Api.Infrastructure.StartupTripGenerator.GenerateTripsAsync(app.Services);
+
+// Seed a demo trip at capacity with waitlisted students (for notification demo)
+if (app.Environment.IsDevelopment())
+{
+    using var demoScope = app.Services.CreateScope();
+    var demoSeeder = new NmuShuttle.Api.Data.DemoWaitlistSeeder(
+        demoScope.ServiceProvider.GetRequiredService<NmuShuttle.Api.Data.ShuttleDbContext>(),
+        demoScope.ServiceProvider.GetRequiredService<NmuShuttle.Api.Services.IWaitlistPromotionService>(),
+        demoScope.ServiceProvider.GetRequiredService<ILogger<NmuShuttle.Api.Data.DemoWaitlistSeeder>>());
+    await demoSeeder.SeedAsync();
+}
 
 app.Run();
 

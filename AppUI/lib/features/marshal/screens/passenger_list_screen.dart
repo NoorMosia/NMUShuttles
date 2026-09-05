@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nmu_shuttle_app/core/api/api_exception.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/core/ui/error_display.dart';
 import 'package:nmu_shuttle_app/features/marshal/models/passenger_model.dart';
 import 'package:nmu_shuttle_app/features/marshal/providers/passenger_list_provider.dart';
 import 'package:nmu_shuttle_app/features/marshal/providers/convoy_provider.dart';
@@ -93,21 +95,13 @@ class _PassengerListScreenState extends ConsumerState<PassengerListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to flag breakdown: ${_extractError(e)}'),
-            backgroundColor: Colors.red.shade700,
-          ),
-        );
+        if (e is ApiException) {
+          showErrorSnackBar(context, e.message);
+        } else {
+          showErrorSnackBar(context, 'Failed to flag breakdown. Please try again.');
+        }
       }
     }
-  }
-
-  String _extractError(Object error) {
-    if (error is Exception) {
-      return error.toString().replaceFirst('Exception: ', '');
-    }
-    return 'Unknown error';
   }
 
   @override
@@ -164,26 +158,11 @@ class _PassengerListScreenState extends ConsumerState<PassengerListScreen> {
             child: manifestAsync.when(
               data: (manifest) => _buildManifestContent(manifest, theme),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
-                      const SizedBox(height: 16),
-                      Text('Failed to load passengers', style: theme.textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                      Text(_extractError(error), textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: () => ref.invalidate(passengerManifestProvider(_tripIdInt)),
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                ),
+              error: (error, _) => ErrorRetry(
+                error: error,
+                title: 'Failed to load passengers',
+                onRetry: () =>
+                    ref.invalidate(passengerManifestProvider(_tripIdInt)),
               ),
             ),
           ),

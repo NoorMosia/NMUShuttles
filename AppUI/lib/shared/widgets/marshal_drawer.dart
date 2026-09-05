@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
@@ -46,12 +47,13 @@ class MarshalDrawer extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Row(
                   children: [
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.primaryGold,
-                        shape: BoxShape.circle,
+                    SvgPicture.asset(
+                      'assets/logo.svg',
+                      width: 37,
+                      height: 37,
+                      colorFilter: const ColorFilter.mode(
+                        AppTheme.navy,
+                        BlendMode.srcIn,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -175,7 +177,7 @@ class _DrawerNavTile extends StatelessWidget {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFEF9C3) : Colors.transparent,
+          color: isSelected ? AppTheme.primaryGold : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -185,7 +187,7 @@ class _DrawerNavTile extends StatelessWidget {
                 width: 3.5,
                 height: 22,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryGold,
+                  color: AppTheme.navy,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

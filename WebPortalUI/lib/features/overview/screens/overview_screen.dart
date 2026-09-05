@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:nmu_shuttle_admin/features/overview/models/overview_model.dart';
@@ -123,31 +122,6 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                 DateRangeParams(
                   fromDate: _formatDate(_fromDate),
                   toDate: _formatDate(_toDate),
-                ),
-              ),
-            ),
-          ),
-        ),
-        // View Detailed Analytics button
-        SizedBox(
-          width: 840,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: FilledButton.icon(
-              onPressed: () => context.go('/analytics/detailed'),
-              icon: const Icon(Icons.analytics_outlined),
-              label: const Text('View Detailed Analytics'),
-              style: FilledButton.styleFrom(
-                backgroundColor: _navy,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                textStyle: GoogleFonts.hankenGrotesk(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
                 ),
               ),
             ),

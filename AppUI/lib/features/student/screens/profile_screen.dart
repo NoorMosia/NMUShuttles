@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/core/ui/error_display.dart';
 import 'package:nmu_shuttle_app/features/student/models/report_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
@@ -24,19 +25,23 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(reportsProvider);
-              ref.invalidate(studentProfileProvider);
-            },
-            child: ListView(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 70,
-                left: 16,
-                right: 16,
-                bottom: 100,
-              ),
-              children: [
+          Column(
+            children: [
+              SizedBox(height: MediaQuery.of(context).padding.top + 60),
+              const SizedBox(height: 16),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(reportsProvider);
+                    ref.invalidate(studentProfileProvider);
+                  },
+                  child: ListView(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: 100,
+                    ),
+                    children: [
                 // ─── Profile Card ─────────────────────────────
                 _buildProfileCard(context, profileAsync),
                 const SizedBox(height: 16),
@@ -60,7 +65,7 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildReportsList(context, reportsAsync),
+                _buildReportsList(context, ref, reportsAsync),
                 const SizedBox(height: 24),
                 // ─── Logout Button ────────────────────────────
                 OutlinedButton.icon(
@@ -78,8 +83,11 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ],
-            ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           // Floating hamburger menu + Profile label
           Positioned(
@@ -183,7 +191,9 @@ class ProfileScreen extends ConsumerWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Avatar placeholder
               CircleAvatar(
@@ -198,37 +208,33 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${profile.firstName} ${profile.lastName}',
-                      style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.navy,
-                              ),
+              const SizedBox(height: 12),
+              // Name
+              Text(
+                '${profile.firstName} ${profile.lastName}',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.navy,
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.badge_outlined,
-                            size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(
-                          profile.studentNumber,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(color: Colors.grey.shade700),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              ),
+              const SizedBox(height: 4),
+              // Student number
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.badge_outlined,
+                      size: 16, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    profile.studentNumber,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: Colors.grey.shade700),
+                  ),
+                ],
               ),
             ],
           ),
@@ -252,6 +258,14 @@ class ProfileScreen extends ConsumerWidget {
         final clampedStrikes = profile.strikePoints;
         const maxStrikes = 6;
 
+        // Border/accent color escalates with strike severity:
+        // green while safe, orange as it climbs, red at the max.
+        final Color strikeColor = clampedStrikes >= maxStrikes
+            ? Colors.red.shade600
+            : clampedStrikes >= 4
+                ? Colors.orange.shade700
+                : Colors.green.shade600;
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -261,60 +275,88 @@ class ProfileScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Strike Points',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.navy,
+              // Strike points box — white background, thick colored border
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: strikeColor, width: 2.5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '$clampedStrikes',
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall
+                              ?.copyWith(
+                                color: strikeColor,
+                                fontWeight: FontWeight.bold,
+                                height: 1,
+                              ),
+                        ),
+                        const SizedBox(width: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            '/ $maxStrikes strike points',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: AppTheme.navy,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
-              ),
-              const SizedBox(height: 12),
-              // Strike progress bar
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: clampedStrikes / maxStrikes,
-                  minHeight: 10,
-                  backgroundColor: Colors.grey.shade200,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    clampedStrikes >= maxStrikes
-                        ? Colors.red
-                        : clampedStrikes >= 4
-                            ? Colors.orange
-                            : AppTheme.primaryGold,
-                  ),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: clampedStrikes / maxStrikes,
+                        minHeight: 10,
+                        backgroundColor: Colors.grey.shade200,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(strikeColor),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '$clampedStrikes / $maxStrikes strike points',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: clampedStrikes >= maxStrikes
-                          ? Colors.red
-                          : AppTheme.navy,
+              const SizedBox(height: 16),
+              // Breakdown boxes — side by side with thick colored borders
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _buildStrikeStat(
+                        context,
+                        icon: Icons.person_off_outlined,
+                        label: 'No-shows',
+                        count: noShowCount,
+                        color: Colors.orange.shade700,
+                      ),
                     ),
-              ),
-              const SizedBox(height: 12),
-              // Breakdown row
-              Row(
-                children: [
-                  _buildStrikeStat(
-                    context,
-                    icon: Icons.person_off_outlined,
-                    label: 'No-shows',
-                    count: noShowCount,
-                    color: Colors.red.shade600,
-                  ),
-                  const SizedBox(width: 24),
-                  _buildStrikeStat(
-                    context,
-                    icon: Icons.cancel_outlined,
-                    label: 'Cancelled',
-                    count: cancelledCount,
-                    color: Colors.orange.shade700,
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStrikeStat(
+                        context,
+                        icon: Icons.cancel_outlined,
+                        label: 'Cancelled',
+                        count: cancelledCount,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -330,23 +372,46 @@ class ProfileScreen extends ConsumerWidget {
     required int count,
     required Color color,
   }) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: color),
-        const SizedBox(width: 6),
-        Text(
-          '$count $label',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w500,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color, width: 2.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: color),
+              const Spacer(),
+              Text(
+                '$count',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      height: 1,
+                    ),
               ),
-        ),
-      ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.navy,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildReportsList(
     BuildContext context,
+    WidgetRef ref,
     AsyncValue<List<ReportModel>> reportsAsync,
   ) {
     return reportsAsync.when(
@@ -356,20 +421,10 @@ class ProfileScreen extends ConsumerWidget {
           child: CircularProgressIndicator(),
         ),
       ),
-      error: (error, _) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const Icon(Icons.error_outline, size: 40, color: Colors.red),
-              const SizedBox(height: 8),
-              Text(
-                'Failed to load reports',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ],
-          ),
-        ),
+      error: (error, _) => ErrorRetry(
+        error: error,
+        title: 'Failed to load reports',
+        onRetry: () => ref.invalidate(reportsProvider),
       ),
       data: (reports) {
         if (reports.isEmpty) {

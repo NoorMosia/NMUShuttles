@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
+import 'package:nmu_shuttle_app/core/config/env_config.dart';
 
 /// Configures and provides a singleton Dio HTTP client.
 /// - Attaches JWT Bearer token to all requests via interceptor.
@@ -13,13 +14,13 @@ class DioClient {
   })  : _authService = authService ?? AuthService(),
         _dio = Dio(
           BaseOptions(
-            baseUrl: baseUrl ?? 'https://juicy-dubiously-pushpin.ngrok-free.dev/api/v1',
+            baseUrl: baseUrl ?? EnvConfig.baseUrl,
             connectTimeout: const Duration(seconds: 30),
             receiveTimeout: const Duration(seconds: 30),
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
-              'ngrok-skip-browser-warning': 'true',
+              if (EnvConfig.useNgrok) 'ngrok-skip-browser-warning': 'true',
             },
           ),
         ) {

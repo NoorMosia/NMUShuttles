@@ -39,6 +39,7 @@ bld/
 **/.packages
 **/.pub-cache/
 **/.pub/
+flutter_*.log
 
 # =========================
 # IDE

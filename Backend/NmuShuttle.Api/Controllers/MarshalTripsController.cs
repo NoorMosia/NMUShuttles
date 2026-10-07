@@ -135,7 +135,9 @@ public class MarshalTripsController : ControllerBase
                 var departureDateTime = today.ToDateTime(g.Key.DepartureTime);
                 var utcDeparture = departureDateTime - SastOffset;
                 var scanWindowStart = utcDeparture - ScanWindowMinutes;
-                var isScanningOpen = DateTime.UtcNow >= scanWindowStart;
+                // Scanning is open only for the upcoming trip: within [departure - 35min, departure].
+                var now = DateTime.UtcNow;
+                var isScanningOpen = now >= scanWindowStart && now <= utcDeparture;
 
                 return new MarshalTimeSlotDto
                 {

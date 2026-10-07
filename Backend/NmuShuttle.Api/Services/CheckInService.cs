@@ -48,7 +48,9 @@ public class CheckInService : ICheckInService
                 StatusCodes.Status200OK);
         }
 
-        // Step 3: Verify 35-minute scan window
+        // Step 3: Verify 35-minute scan window — scanning is only allowed for the
+        // upcoming trip, i.e. within [departure - 35min, departure]. Once the trip's
+        // departure time has passed it is no longer upcoming and scanning is closed.
         var departureDateTime = tripInstance.TripDate.ToDateTime(scheduleTime.DepartureTime);
         var utcDeparture = departureDateTime - SastOffset;
         var scanWindowStart = utcDeparture - ScanWindowMinutes;
@@ -57,6 +59,13 @@ public class CheckInService : ICheckInService
         {
             throw new CheckInException(
                 "Scanning is not yet available. Opens 35 minutes before departure.",
+                StatusCodes.Status422UnprocessableEntity);
+        }
+
+        if (DateTime.UtcNow > utcDeparture)
+        {
+            throw new CheckInException(
+                "Scanning is closed — this trip has already departed.",
                 StatusCodes.Status422UnprocessableEntity);
         }
 
@@ -177,7 +186,9 @@ public class CheckInService : ICheckInService
                 StatusCodes.Status200OK);
         }
 
-        // Step 3: Verify 35-minute scan window
+        // Step 3: Verify 35-minute scan window — scanning is only allowed for the
+        // upcoming trip, i.e. within [departure - 35min, departure]. Once the trip's
+        // departure time has passed it is no longer upcoming and scanning is closed.
         var departureDateTime = tripInstance.TripDate.ToDateTime(scheduleTime.DepartureTime);
         var utcDeparture = departureDateTime - SastOffset;
         var scanWindowStart = utcDeparture - ScanWindowMinutes;
@@ -186,6 +197,13 @@ public class CheckInService : ICheckInService
         {
             throw new CheckInException(
                 "Scanning is not yet available. Opens 35 minutes before departure.",
+                StatusCodes.Status422UnprocessableEntity);
+        }
+
+        if (DateTime.UtcNow > utcDeparture)
+        {
+            throw new CheckInException(
+                "Scanning is closed — this trip has already departed.",
                 StatusCodes.Status422UnprocessableEntity);
         }
 

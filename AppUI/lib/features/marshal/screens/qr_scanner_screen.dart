@@ -6,11 +6,17 @@ import 'package:nmu_shuttle_app/core/api/api_constants.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 import 'package:nmu_shuttle_app/features/marshal/models/passenger_model.dart';
+import 'package:nmu_shuttle_app/features/marshal/providers/passenger_list_provider.dart';
+import 'package:nmu_shuttle_app/features/marshal/providers/convoy_provider.dart';
 
 /// QR scanner screen for marshal check-in.
 /// Decodes the QR code token and submits it to POST /api/v1/checkin.
-/// On success, shows a green banner and pops back with the result.
-/// On failure, shows an inline error with the reason.
+///
+/// Continuous scanning: the camera stays active after each scan. A successful
+/// check-in shows a persistent result panel (student + assigned shuttle) that
+/// remains until the next code is scanned. The same code is never processed
+/// twice in a row — a different code (or a short cooldown) is required before
+/// the scanner fires again.
 class QrScannerScreen extends ConsumerStatefulWidget {
   const QrScannerScreen({super.key, required this.tripId});
 
@@ -26,9 +32,23 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
     facing: CameraFacing.back,
   );
 
+  /// Cooldown after a scan before the SAME value may fire again. A different
+  /// value is accepted immediately. This stops the camera from re-triggering
+  /// on the same QR that is still sitting in front of the lens.
+  static const Duration _sameCodeCooldown = Duration(seconds: 3);
+
   bool _isProcessing = false;
   String? _errorMessage;
-  bool _hasScanned = false;
+
+  /// The raw value of the last barcode we acted on. A detection is ignored
+  /// while it matches this value within the cooldown window.
+  String? _lastScannedValue;
+  DateTime? _lastScanAt;
+
+  /// The most recent successful check-in, shown in a persistent panel until
+  /// the next scan. Also returned to the caller on back-navigation so the
+  /// passenger list refreshes.
+  CheckInResultModel? _lastResult;
 
   @override
   void dispose() {
@@ -38,7 +58,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
 
   /// Processes a detected barcode/QR code.
   Future<void> _onDetect(BarcodeCapture capture) async {
-    if (_isProcessing || _hasScanned) return;
+    if (_isProcessing) return;
 
     final barcodes = capture.barcodes;
     if (barcodes.isEmpty) return;
@@ -46,10 +66,19 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
     final rawValue = barcodes.first.rawValue;
     if (rawValue == null || rawValue.isEmpty) return;
 
+    // Dedupe: ignore the same code until it changes or the cooldown elapses.
+    if (rawValue == _lastScannedValue) {
+      final elapsed = _lastScanAt == null
+          ? _sameCodeCooldown
+          : DateTime.now().difference(_lastScanAt!);
+      if (elapsed < _sameCodeCooldown) return;
+    }
+
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
-      _hasScanned = true;
+      _lastScannedValue = rawValue;
+      _lastScanAt = DateTime.now();
     });
 
     await _submitCheckIn(rawValue);
@@ -67,42 +96,38 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
       final result =
           CheckInResultModel.fromJson(response.data as Map<String, dynamic>);
 
-      if (mounted) {
-        // Show success banner
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    '${result.studentName} — Boarded (Shuttle ${result.orderPosition})',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green.shade700,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+      if (!mounted) return;
 
-        // Pop back with the result so the passenger list updates
-        Navigator.of(context).pop(result);
-      }
+      // Refresh the manifest + convoy counts immediately so the passenger list
+      // is current even while the marshal keeps scanning.
+      ref.invalidate(passengerManifestProvider(widget.tripId));
+      ref.invalidate(convoyStatusProvider(widget.tripId));
+
+      // Keep scanning: show the result in a persistent panel, reset the
+      // processing flag so the next (different) code can be scanned. Record
+      // the scan time so the cooldown applies to this same code.
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = null;
+        _lastResult = result;
+        _lastScanAt = DateTime.now();
+      });
     } on DioException catch (e) {
       final message = _mapCheckInError(e);
+      if (!mounted) return;
       setState(() {
         _isProcessing = false;
         _errorMessage = message;
-        _hasScanned = false; // Allow re-scanning after error
+        _lastResult = null;
+        _lastScanAt = DateTime.now();
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isProcessing = false;
         _errorMessage = 'An unexpected error occurred.';
-        _hasScanned = false;
+        _lastResult = null;
+        _lastScanAt = DateTime.now();
       });
     }
   }
@@ -135,23 +160,46 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
     }
   }
 
-  /// Dismisses the error and allows re-scanning.
+  /// Dismisses the error and allows the same code to be re-scanned immediately.
   void _dismissError() {
     setState(() {
       _errorMessage = null;
-      _hasScanned = false;
+      _lastScannedValue = null;
+      _lastScanAt = null;
     });
+  }
+
+  /// Returns the most recent successful result to the caller (if any) so the
+  /// passenger list refreshes, then leaves the scanner.
+  void _finishScanning() {
+    Navigator.of(context).pop(_lastResult);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Navigator.of(context).pop(_lastResult);
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Scan QR Code'),
         backgroundColor: AppTheme.navy,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _finishScanning,
+        ),
+        actions: [
+          TextButton(
+            onPressed: _finishScanning,
+            child: const Text('Done', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -170,7 +218,9 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                 border: Border.all(
                   color: _errorMessage != null
                       ? Colors.red
-                      : AppTheme.primaryGold,
+                      : _lastResult != null
+                          ? Colors.green
+                          : AppTheme.primaryGold,
                   width: 3,
                 ),
                 borderRadius: BorderRadius.circular(16),
@@ -247,8 +297,64 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
               ),
             ),
 
-          // Instruction text at bottom (when no error)
-          if (_errorMessage == null && !_isProcessing)
+          // Persistent success panel — stays until the next scan.
+          if (_errorMessage == null && !_isProcessing && _lastResult != null)
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 40,
+              child: Card(
+                color: Colors.green.shade50,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.green.shade300),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green.shade700),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _lastResult!.studentName,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: Colors.green.shade900,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Boarded — Shuttle ${_lastResult!.orderPosition} '
+                              '(${_lastResult!.assignedShuttleLicensePlate})',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.green.shade800,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Scan the next student',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.green.shade700,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+          // Instruction text at bottom (before the first scan).
+          if (_errorMessage == null && !_isProcessing && _lastResult == null)
             Positioned(
               left: 16,
               right: 16,
@@ -273,6 +379,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
               ),
             ),
         ],
+      ),
       ),
     );
   }

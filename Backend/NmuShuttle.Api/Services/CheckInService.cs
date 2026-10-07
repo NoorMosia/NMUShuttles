@@ -48,26 +48,10 @@ public class CheckInService : ICheckInService
                 StatusCodes.Status200OK);
         }
 
-        // Step 3: Verify 35-minute scan window — scanning is only allowed for the
-        // upcoming trip, i.e. within [departure - 35min, departure]. Once the trip's
-        // departure time has passed it is no longer upcoming and scanning is closed.
-        var departureDateTime = tripInstance.TripDate.ToDateTime(scheduleTime.DepartureTime);
-        var utcDeparture = departureDateTime - SastOffset;
-        var scanWindowStart = utcDeparture - ScanWindowMinutes;
-
-        if (DateTime.UtcNow < scanWindowStart)
-        {
-            throw new CheckInException(
-                "Scanning is not yet available. Opens 35 minutes before departure.",
-                StatusCodes.Status422UnprocessableEntity);
-        }
-
-        if (DateTime.UtcNow > utcDeparture)
-        {
-            throw new CheckInException(
-                "Scanning is closed — this trip has already departed.",
-                StatusCodes.Status422UnprocessableEntity);
-        }
+        // Step 3: Verify scan window. The very next upcoming trip is open at any time;
+        // all other future trips only open 35 minutes before departure. A trip whose
+        // departure has already passed is closed.
+        await ValidateScanWindowAsync(tripInstance);
 
         // Step 4: Verify marshal location binding
         var marshal = await _db.Marshals.FindAsync(marshalId);
@@ -186,26 +170,10 @@ public class CheckInService : ICheckInService
                 StatusCodes.Status200OK);
         }
 
-        // Step 3: Verify 35-minute scan window — scanning is only allowed for the
-        // upcoming trip, i.e. within [departure - 35min, departure]. Once the trip's
-        // departure time has passed it is no longer upcoming and scanning is closed.
-        var departureDateTime = tripInstance.TripDate.ToDateTime(scheduleTime.DepartureTime);
-        var utcDeparture = departureDateTime - SastOffset;
-        var scanWindowStart = utcDeparture - ScanWindowMinutes;
-
-        if (DateTime.UtcNow < scanWindowStart)
-        {
-            throw new CheckInException(
-                "Scanning is not yet available. Opens 35 minutes before departure.",
-                StatusCodes.Status422UnprocessableEntity);
-        }
-
-        if (DateTime.UtcNow > utcDeparture)
-        {
-            throw new CheckInException(
-                "Scanning is closed — this trip has already departed.",
-                StatusCodes.Status422UnprocessableEntity);
-        }
+        // Step 3: Verify scan window. The very next upcoming trip is open at any time;
+        // all other future trips only open 35 minutes before departure. A trip whose
+        // departure has already passed is closed.
+        await ValidateScanWindowAsync(tripInstance);
 
         // Step 4: Verify marshal location binding
         var marshal = await _db.Marshals.FindAsync(marshalId);
@@ -292,5 +260,86 @@ public class CheckInService : ICheckInService
         await _db.SaveChangesAsync();
 
         return booking;
+    }
+
+    /// <summary>
+    /// Converts a trip's SAST date + departure time into its UTC departure instant.
+    /// </summary>
+    private static DateTime ToUtcDeparture(DateOnly tripDate, TimeOnly departureTime)
+        => tripDate.ToDateTime(departureTime) - SastOffset;
+
+    /// <summary>
+    /// Determines whether the given trip is the "very next" upcoming trip overall —
+    /// the trip with the earliest departure instant that has not yet departed, across
+    /// the entire system (all stops, campuses, and directions). The next trip is open
+    /// to scanning at any time; every other future trip only opens 35 minutes before
+    /// its own departure.
+    /// </summary>
+    private async Task<bool> IsNextUpcomingTripAsync(TripInstance tripInstance)
+    {
+        var now = DateTime.UtcNow;
+
+        // Narrow the candidate set to today's and tomorrow's trips (a departure can only
+        // be "next" if it is near-term), then compute UTC departure instants in memory
+        // because TripDate (DateOnly) and DepartureTime (TimeOnly) are stored separately.
+        var today = DateOnly.FromDateTime(now + SastOffset);
+        var tomorrow = today.AddDays(1);
+
+        var candidates = await _db.TripInstances
+            .Where(t => t.ScheduleTime.RequiresScanning
+                && (t.TripDate == today || t.TripDate == tomorrow))
+            .Select(t => new
+            {
+                t.TripInstanceId,
+                t.TripDate,
+                t.ScheduleTime.DepartureTime
+            })
+            .ToListAsync();
+
+        // The next trip is the one with the smallest departure instant still in the future.
+        var next = candidates
+            .Select(c => new
+            {
+                c.TripInstanceId,
+                Departure = ToUtcDeparture(c.TripDate, c.DepartureTime)
+            })
+            .Where(c => c.Departure >= now)
+            .OrderBy(c => c.Departure)
+            .FirstOrDefault();
+
+        return next is not null && next.TripInstanceId == tripInstance.TripInstanceId;
+    }
+
+    /// <summary>
+    /// Enforces the scan window. The very next upcoming trip is open at any time until
+    /// its departure passes. Any other future trip only opens 35 minutes before departure.
+    /// Throws <see cref="CheckInException"/> (422) when scanning is not permitted.
+    /// </summary>
+    private async Task ValidateScanWindowAsync(TripInstance tripInstance)
+    {
+        var now = DateTime.UtcNow;
+        var utcDeparture = ToUtcDeparture(tripInstance.TripDate, tripInstance.ScheduleTime.DepartureTime);
+
+        // Once a trip's departure has passed it is no longer upcoming — scanning is closed.
+        if (now > utcDeparture)
+        {
+            throw new CheckInException(
+                "Scanning is closed — this trip has already departed.",
+                StatusCodes.Status422UnprocessableEntity);
+        }
+
+        // The very next trip is open at any point. All other future trips are gated to
+        // the 35-minute pre-departure window.
+        var isNextTrip = await IsNextUpcomingTripAsync(tripInstance);
+        if (!isNextTrip)
+        {
+            var scanWindowStart = utcDeparture - ScanWindowMinutes;
+            if (now < scanWindowStart)
+            {
+                throw new CheckInException(
+                    "Scanning is not yet available. Opens 35 minutes before departure.",
+                    StatusCodes.Status422UnprocessableEntity);
+            }
+        }
     }
 }

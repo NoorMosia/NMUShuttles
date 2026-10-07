@@ -114,6 +114,27 @@ public class MarshalTripsController : ControllerBase
             .Select(g => new { TripInstanceId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.TripInstanceId, x => x.Count);
 
+        // Determine the "very next" upcoming trip overall (system-wide, all stops/
+        // campuses/directions). That trip is open to scanning at any time; every other
+        // future trip only opens 35 minutes before departure. This mirrors the authority
+        // in CheckInService.ValidateScanWindowAsync.
+        var nowUtc = DateTime.UtcNow;
+        var sastToday = DateOnly.FromDateTime(nowUtc.Add(SastOffset));
+        var sastTomorrow = sastToday.AddDays(1);
+
+        var upcomingCandidates = await _dbContext.TripInstances
+            .Where(t => t.ScheduleTime.RequiresScanning
+                && (t.TripDate == sastToday || t.TripDate == sastTomorrow))
+            .Select(t => new { t.TripDate, t.ScheduleTime.DepartureTime })
+            .ToListAsync();
+
+        DateTime? nextDeparture = upcomingCandidates
+            .Select(c => c.TripDate.ToDateTime(c.DepartureTime) - SastOffset)
+            .Where(d => d >= nowUtc)
+            .OrderBy(d => d)
+            .Cast<DateTime?>()
+            .FirstOrDefault();
+
         // Group trips by (DepartureTime, Direction) for campus marshals
         var grouped = trips
             .GroupBy(t => new { t.ScheduleTime.DepartureTime, t.ScheduleTime.Direction })
@@ -131,13 +152,17 @@ public class MarshalTripsController : ControllerBase
                 // Determine aggregate status (most active wins)
                 var status = ResolveGroupStatus(groupTrips.Select(t => t.Status));
 
-                // Check if scanning is open
+                // Check if scanning is open.
                 var departureDateTime = today.ToDateTime(g.Key.DepartureTime);
                 var utcDeparture = departureDateTime - SastOffset;
                 var scanWindowStart = utcDeparture - ScanWindowMinutes;
-                // Scanning is open only for the upcoming trip: within [departure - 35min, departure].
                 var now = DateTime.UtcNow;
-                var isScanningOpen = now >= scanWindowStart && now <= utcDeparture;
+
+                // The very next upcoming trip overall is open at any time until it departs.
+                // Every other future trip is gated to the 35-minute pre-departure window.
+                var isNextTrip = nextDeparture.HasValue && utcDeparture == nextDeparture.Value;
+                var isScanningOpen = now <= utcDeparture
+                    && (isNextTrip || now >= scanWindowStart);
 
                 return new MarshalTimeSlotDto
                 {

@@ -6,7 +6,7 @@ class EnvConfig {
   EnvConfig._();
 
   /// Toggle this to `true` to route traffic through ngrok.
-  static const bool useNgrok = false;
+  static const bool useNgrok = true;
 
   static const String _localBaseUrl = 'http://10.0.2.2:5050/api/v1';
   static const String _ngrokBaseUrl =

@@ -27,7 +27,6 @@ class _AdminScaffoldState extends State<AdminScaffold>
   static const Color _border = Color(0xFFE8ECF0);
   static const Color _bg = Color(0xFFF8F9FB);
   static const Color _textSecondary = Color(0xFF5A6B7B);
-  static const Color _textTertiary = Color(0xFF9CA3AF);
 
   static const double _collapsedWidth = 68.0;
   static const double _expandedWidth = 240.0;
@@ -93,11 +92,6 @@ class _AdminScaffoldState extends State<AdminScaffold>
     return index >= 0 ? index : 0;
   }
 
-  String get _currentPageTitle {
-    final index = _selectedIndex;
-    return _navItems[index].label;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -159,27 +153,6 @@ class _AdminScaffoldState extends State<AdminScaffold>
             ),
           ),
           const Spacer(),
-          // Breadcrumb
-          Text(
-            'Admin',
-            style: GoogleFonts.hankenGrotesk(
-              fontSize: 13,
-              color: _textTertiary,
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
-            child: Icon(Icons.chevron_right, size: 16, color: _textTertiary),
-          ),
-          Text(
-            _currentPageTitle,
-            style: GoogleFonts.hankenGrotesk(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: _navy,
-            ),
-          ),
-          const SizedBox(width: 20),
           // User pill
           Container(
             padding: const EdgeInsets.only(left: 4, right: 12, top: 4, bottom: 4),

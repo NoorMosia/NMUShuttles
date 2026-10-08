@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_admin/features/stops/providers/stops_providers.dart';
+import 'package:nmu_shuttle_admin/features/stops/widgets/map_location_picker.dart';
 
 /// Full CRUD screen for managing shuttle stops.
 class StopsScreen extends ConsumerStatefulWidget {
@@ -422,6 +423,13 @@ class _StopsScreenState extends ConsumerState<StopsScreen> {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Interactive map picker — writes the tapped point
+                        // back into latController / lngController.
+                        MapLocationPicker(
+                          latController: latController,
+                          lngController: lngController,
                         ),
                       ],
                     ),

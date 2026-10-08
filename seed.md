@@ -223,7 +223,7 @@ Accessible shuttles always in position 1. Busier stops get 3-shuttle convoys.
 **Summary:** 60 students — 5 priority, 4 inactive (struck out), 51 active regular.
 
 ---
-
+ 
 ## 9. Schedule Times
 
 19 entries per stop × 8 stops = **152 total ScheduleTime records**.

@@ -13,19 +13,46 @@ public class OtpService : IOtpService
 {
     private readonly ShuttleDbContext _db;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IEmailService _emailService;
     private readonly ILogger<OtpService> _logger;
     private readonly IHostEnvironment _environment;
 
     public OtpService(
         ShuttleDbContext db,
         IJwtTokenService jwtTokenService,
+        IEmailService emailService,
         ILogger<OtpService> logger,
         IHostEnvironment environment)
     {
         _db = db;
         _jwtTokenService = jwtTokenService;
+        _emailService = emailService;
         _logger = logger;
         _environment = environment;
+    }
+
+    /// <summary>
+    /// Sends the OTP by email. In Development, email failures are logged but do not
+    /// fail the request (the code is also written to the console). Outside Development,
+    /// a send failure propagates so the caller can surface it.
+    /// </summary>
+    private async Task SendOtpEmailAsync(string toEmail, string otp, string? recipientName)
+    {
+        // TEMP: Resend's test sender (onboarding@resend.dev) only delivers to the
+        // account's own verified address. Until a sending domain is verified in Resend,
+        // route every OTP email to this fixed inbox regardless of the user's record email.
+        // Remove this override and use `toEmail` once a domain is verified.
+        const string overrideRecipient = "s229895735@mandela.ac.za";
+
+        try
+        {
+            await _emailService.SendOtpAsync(overrideRecipient, otp, recipientName);
+        }
+        catch (Exception ex) when (_environment.IsDevelopment())
+        {
+            _logger.LogWarning(ex,
+                "OTP email send failed in Development for {Email}; relying on console log.", overrideRecipient);
+        }
     }
 
     /// <inheritdoc />
@@ -56,10 +83,9 @@ public class OtpService : IOtpService
 
         await _db.SaveChangesAsync();
 
-        if (_environment.IsDevelopment())
-        {
-            _logger.LogInformation("OTP for {Identifier}: {Otp}", studentNumber, otp);
-        }
+        _logger.LogInformation("OTP for {Identifier}: {Otp}", studentNumber, otp);
+
+        await SendOtpEmailAsync(student.UniversityEmail, otp, student.FirstName);
 
         return true;
     }
@@ -104,10 +130,9 @@ public class OtpService : IOtpService
 
         await _db.SaveChangesAsync();
 
-        if (_environment.IsDevelopment())
-        {
-            _logger.LogInformation("OTP for {Identifier}: {Otp}", staffNumber, otp);
-        }
+        _logger.LogInformation("OTP for {Identifier}: {Otp}", staffNumber, otp);
+
+        await SendOtpEmailAsync(marshal.UniversityEmail, otp, marshal.FirstName);
 
         return true;
     }
@@ -152,10 +177,9 @@ public class OtpService : IOtpService
 
         await _db.SaveChangesAsync();
 
-        if (_environment.IsDevelopment())
-        {
-            _logger.LogInformation("OTP for admin {Identifier}: {Otp}", email, otp);
-        }
+        _logger.LogInformation("OTP for admin {Identifier}: {Otp}", email, otp);
+
+        await SendOtpEmailAsync(admin.Email, otp, admin.FirstName);
 
         return true;
     }

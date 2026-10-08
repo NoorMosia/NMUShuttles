@@ -27,8 +27,8 @@
 
 ## Infrastructure
 
-- **Cloud**: Azure (SQL Database, Communication Services)
-- **Email**: Azure Communication Services (Email) — used exclusively for OTP delivery to students and marshals
+- **Cloud**: Azure (SQL Database)
+- **Email**: Resend (https://resend.com) transactional email API — used exclusively for OTP delivery to students, marshals, and admins. Called server-side from the .NET API via a typed `HttpClient` (`ResendEmailService`), keyed by `Email:Resend:ApiKey`. Behind the `IEmailService` abstraction so the provider can be swapped without touching OTP logic.
 - **Notifications**: Firebase Cloud Messaging (push notifications to devices)
 - **Time zone**: SAST (UTC+2) for all scheduling logic
 
@@ -90,5 +90,8 @@ dotnet test
 | JWT_SECRET | JWT signing key (min 32 chars) |
 | FCM_SERVICE_ACCOUNT_PATH | Path to Firebase service account JSON |
 | OTP_EXPIRY_MINUTES | OTP lifetime (default: 5) |
-| AZURE_COMM_CONNECTION_STRING | Azure Communication Services connection string |
-| AZURE_COMM_SENDER_ADDRESS | Verified sender email (e.g., DoNotReply@your-domain.azurecomm.net) |
+| Email__Resend__ApiKey | Resend API key (secret — keep out of git; use user-secrets or host env var) |
+| Email__Resend__FromAddress | Verified sender address (e.g., `onboarding@resend.dev` for testing, or `noreply@mandela.ac.za` once the domain is verified in Resend) |
+| Email__Resend__FromName | Sender display name (default: `NMU Shuttle`) |
+
+> Config binds via the standard .NET `Email:Resend:*` section. As environment variables use the double-underscore form (`Email__Resend__ApiKey`). For local dev, prefer user-secrets: `dotnet user-secrets set "Email:Resend:ApiKey" "<key>"` in the `NmuShuttle.Api` project. Never commit the key.

@@ -67,6 +67,11 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // ──────────────────────────────────────────────────────────────────
+// Email Service — Resend (transactional email for OTP delivery)
+// ──────────────────────────────────────────────────────────────────
+builder.Services.AddHttpClient<IEmailService, ResendEmailService>();
+
+// ──────────────────────────────────────────────────────────────────
 // OTP Service
 // ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IOtpService, OtpService>();

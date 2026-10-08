@@ -9,8 +9,18 @@ public class Notification
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int NotificationId { get; set; }
 
+    /// <summary>
+    /// The StudentId or MarshalId depending on <see cref="OwnerType"/>.
+    /// </summary>
     [Required]
-    public int StudentId { get; set; }
+    public int OwnerId { get; set; }
+
+    /// <summary>
+    /// "Student" or "Marshal". Determines which user the notification belongs to.
+    /// </summary>
+    [Required]
+    [MaxLength(10)]
+    public string OwnerType { get; set; } = "Student";
 
     [Required]
     [MaxLength(200)]
@@ -29,9 +39,6 @@ public class Notification
     public DateTime CreatedAt { get; set; }
 
     // Navigation properties
-    [ForeignKey(nameof(StudentId))]
-    public Student Student { get; set; } = null!;
-
     [ForeignKey(nameof(RelatedTripInstanceId))]
     public TripInstance? RelatedTripInstance { get; set; }
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.DTOs.Admin;
 using NmuShuttle.Api.Models;
+using NmuShuttle.Api.Services;
 
 namespace NmuShuttle.Api.Controllers.Admin;
 
@@ -13,10 +14,12 @@ namespace NmuShuttle.Api.Controllers.Admin;
 public class CalendarAdminController : ControllerBase
 {
     private readonly ShuttleDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public CalendarAdminController(ShuttleDbContext context)
+    public CalendarAdminController(ShuttleDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     /// <summary>
@@ -60,6 +63,19 @@ public class CalendarAdminController : ControllerBase
 
         _context.CalendarExceptions.Add(calendarException);
         await _context.SaveChangesAsync();
+
+        // Notify all active marshals that a new calendar exception affects scheduling.
+        var typeLabel = calendarException.ExceptionType == "PublicHoliday"
+            ? "Public holiday"
+            : "University recess";
+        var dateLabel = calendarException.TargetDate.ToString("dddd, dd MMM yyyy");
+        var body = string.IsNullOrWhiteSpace(calendarException.Description)
+            ? $"{typeLabel} added for {dateLabel}. No shuttles will run on this date."
+            : $"{typeLabel} added for {dateLabel}: {calendarException.Description}. No shuttles will run on this date.";
+
+        await _notificationService.DispatchToAllMarshalsAsync(
+            "Schedule exception added",
+            body);
 
         var response = new CalendarExceptionResponseDto
         {

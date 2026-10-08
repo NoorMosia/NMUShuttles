@@ -659,10 +659,15 @@ namespace NmuShuttle.Api.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<int?>("RelatedTripInstanceId")
+                    b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("StudentId")
+                    b.Property<string>("OwnerType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int?>("RelatedTripInstanceId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -674,10 +679,13 @@ namespace NmuShuttle.Api.Migrations
 
                     b.HasIndex("RelatedTripInstanceId");
 
-                    b.HasIndex("StudentId", "IsRead")
-                        .HasDatabaseName("IX_Notifications_StudentId_IsRead");
+                    b.HasIndex("OwnerId", "OwnerType", "IsRead")
+                        .HasDatabaseName("IX_Notifications_Owner_IsRead");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Notifications_OwnerType", "OwnerType IN ('Student','Marshal')");
+                        });
                 });
 
             modelBuilder.Entity("NmuShuttle.Api.Models.PrioritySchedule", b =>
@@ -3252,15 +3260,7 @@ namespace NmuShuttle.Api.Migrations
                         .HasForeignKey("RelatedTripInstanceId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("NmuShuttle.Api.Models.Student", "Student")
-                        .WithMany("Notifications")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("RelatedTripInstance");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("NmuShuttle.Api.Models.PrioritySchedule", b =>
@@ -3488,8 +3488,6 @@ namespace NmuShuttle.Api.Migrations
             modelBuilder.Entity("NmuShuttle.Api.Models.Student", b =>
                 {
                     b.Navigation("Bookings");
-
-                    b.Navigation("Notifications");
 
                     b.Navigation("PrioritySchedules");
 

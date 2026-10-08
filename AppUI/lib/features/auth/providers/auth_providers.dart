@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nmu_shuttle_app/core/api/dio_client.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
+import 'package:nmu_shuttle_app/core/notifications/push_notification_service.dart';
 import 'package:nmu_shuttle_app/features/auth/repositories/auth_repository.dart';
 import 'package:nmu_shuttle_app/features/auth/services/auth_api_service.dart';
 
@@ -132,10 +133,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       // Register device for push notifications (graceful failure)
       try {
-        await _authRepository.registerDevice(
-          'placeholder_fcm_token',
-          'android',
-        );
+        final fcmToken = await PushNotificationService.instance.getToken();
+        if (fcmToken != null && fcmToken.isNotEmpty) {
+          await _authRepository.registerDevice(fcmToken, 'android');
+        } else {
+          debugPrint('[Auth] No FCM token available; skipping device registration.');
+        }
       } catch (e) {
         // Non-blocking — device registration failure shouldn't prevent login
         debugPrint('[Auth] Device registration failed: $e');
@@ -196,6 +199,29 @@ final authApiServiceProvider = Provider<AuthApiService>((ref) {
 /// Provides the AuthRepository for data-layer API calls.
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(dioClient: ref.watch(dioClientProvider));
+});
+
+/// Keeps the backend in sync when FCM rotates the device token.
+/// Watch this provider once at app root so the subscription stays alive.
+/// Re-registration only succeeds when a JWT is present (the Dio interceptor
+/// attaches it); otherwise the backend returns 401 and we ignore it.
+final fcmTokenRefreshProvider = Provider<void>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  final authRepository = ref.watch(authRepositoryProvider);
+
+  final subscription =
+      PushNotificationService.instance.onTokenRefresh.listen((token) async {
+    if (token.isEmpty) return;
+    if (!await authService.isAuthenticated()) return;
+    try {
+      await authRepository.registerDevice(token, 'android');
+      debugPrint('[FCM] Re-registered refreshed device token.');
+    } catch (e) {
+      debugPrint('[FCM] Token refresh re-registration failed: $e');
+    }
+  });
+
+  ref.onDispose(subscription.cancel);
 });
 
 /// Provides the AuthNotifier StateNotifier + AuthState.

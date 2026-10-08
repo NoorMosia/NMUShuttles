@@ -42,6 +42,5 @@ public class Student
     // Navigation properties
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public ICollection<PrioritySchedule> PrioritySchedules { get; set; } = new List<PrioritySchedule>();
-    public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     public ICollection<Report> Reports { get; set; } = new List<Report>();
 }

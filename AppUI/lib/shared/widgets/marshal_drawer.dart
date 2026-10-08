@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
+import 'package:nmu_shuttle_app/core/notifications/push_notification_service.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 import 'package:nmu_shuttle_app/features/marshal/providers/marshal_home_provider.dart';
 import 'package:nmu_shuttle_app/features/marshal/providers/passenger_list_provider.dart';
+import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 
 /// Modern minimalistic marshal navigation drawer.
 /// Clean white surface, subtle active indicator, logout pinned to bottom.
@@ -19,6 +21,7 @@ class MarshalDrawer extends ConsumerWidget {
 
   static const List<_NavItem> _navItems = [
     _NavItem(label: 'Dashboard', icon: Icons.home_outlined, path: '/marshal/home'),
+    _NavItem(label: 'Alerts', icon: Icons.notifications_outlined, path: '/marshal/alerts'),
     _NavItem(label: 'Profile', icon: Icons.person_outlined, path: '/marshal/profile'),
   ];
 
@@ -119,6 +122,7 @@ class MarshalDrawer extends ConsumerWidget {
                 isSelected: false,
                 isDestructive: true,
                 onTap: () async {
+                  await PushNotificationService.instance.deleteToken();
                   await AuthService().deleteToken();
                   ref.invalidate(authStateProvider);
                   ref.invalidate(marshalHomeProvider);
@@ -126,6 +130,7 @@ class MarshalDrawer extends ConsumerWidget {
                   ref.invalidate(checkInProvider);
                   ref.invalidate(flagBreakdownProvider);
                   ref.invalidate(tripShuttlesProvider);
+                  ref.invalidate(notificationsProvider);
                   onLogout?.call();
                 },
               ),

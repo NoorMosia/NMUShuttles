@@ -492,22 +492,24 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Notifications");
             entity.HasKey(e => e.NotificationId);
 
+            entity.Property(e => e.OwnerId).IsRequired();
+            entity.Property(e => e.OwnerType).HasColumnType("nvarchar(10)").IsRequired();
             entity.Property(e => e.Title).HasColumnType("nvarchar(200)").IsRequired();
             entity.Property(e => e.Message).HasColumnType("nvarchar(1000)").IsRequired();
             entity.Property(e => e.IsRead).IsRequired().HasDefaultValue(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
                 .HasDefaultValueSql("GETUTCDATE()");
 
-            // Performance index
-            entity.HasIndex(e => new { e.StudentId, e.IsRead })
-                .HasDatabaseName("IX_Notifications_StudentId_IsRead");
+            // CHECK constraint for enum-like OwnerType
+            entity.ToTable(t => t.HasCheckConstraint(
+                "CK_Notifications_OwnerType",
+                "OwnerType IN ('Student','Marshal')"));
+
+            // Performance index: fetch a user's notifications and count unread
+            entity.HasIndex(e => new { e.OwnerId, e.OwnerType, e.IsRead })
+                .HasDatabaseName("IX_Notifications_Owner_IsRead");
 
             // Relationships
-            entity.HasOne(e => e.Student)
-                .WithMany(s => s.Notifications)
-                .HasForeignKey(e => e.StudentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             entity.HasOne(e => e.RelatedTripInstance)
                 .WithMany(ti => ti.Notifications)
                 .HasForeignKey(e => e.RelatedTripInstanceId)

@@ -2,12 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nmu_shuttle_app/core/notifications/push_notification_service.dart';
 import 'package:nmu_shuttle_app/core/router/app_router.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 
-void main() {
+Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // Initialise Firebase + push notifications. Failures must not block startup
+  // (e.g. missing google-services.json in a dev build).
+  try {
+    await PushNotificationService.instance.initialize();
+  } catch (e) {
+    debugPrint('[FCM] Push notification init failed: $e');
+  }
 
   // White status bar background with dark icons
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -23,14 +33,14 @@ void main() {
   );
 }
 
-class NmuShuttleApp extends StatefulWidget {
+class NmuShuttleApp extends ConsumerStatefulWidget {
   const NmuShuttleApp({super.key});
 
   @override
-  State<NmuShuttleApp> createState() => _NmuShuttleAppState();
+  ConsumerState<NmuShuttleApp> createState() => _NmuShuttleAppState();
 }
 
-class _NmuShuttleAppState extends State<NmuShuttleApp> {
+class _NmuShuttleAppState extends ConsumerState<NmuShuttleApp> {
   late final AppRouter _appRouter;
 
   @override
@@ -40,8 +50,11 @@ class _NmuShuttleAppState extends State<NmuShuttleApp> {
     FlutterNativeSplash.remove();
   }
 
-  // @override
+  @override
   Widget build(BuildContext context) {
+    // Keep the FCM token-refresh subscription alive for the app's lifetime.
+    ref.watch(fcmTokenRefreshProvider);
+
     return MaterialApp.router(
       title: 'NMU Shuttle',
       debugShowCheckedModeBanner: false,

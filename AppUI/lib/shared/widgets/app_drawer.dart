@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
+import 'package:nmu_shuttle_app/core/notifications/push_notification_service.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
@@ -107,6 +108,7 @@ class AppDrawer extends ConsumerWidget {
                 isSelected: false,
                 isDestructive: true,
                 onTap: () async {
+                  await PushNotificationService.instance.deleteToken();
                   await AuthService().deleteToken();
                   ref.invalidate(authStateProvider);
                   ref.invalidate(studentProfileProvider);

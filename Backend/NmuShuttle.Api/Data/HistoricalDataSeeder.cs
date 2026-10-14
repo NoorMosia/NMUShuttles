@@ -728,7 +728,8 @@ public class HistoricalDataSeeder
             notifications.Add(new Notification
             {
                 NotificationId = notifId++,
-                StudentId = booking.StudentId,
+                OwnerId = booking.StudentId,
+                OwnerType = "Student",
                 Title = "Trip Locked",
                 Message = $"Your trip is now locked. No changes can be made. Please be at the stop 10 minutes early.",
                 IsRead = true,
@@ -745,7 +746,8 @@ public class HistoricalDataSeeder
             notifications.Add(new Notification
             {
                 NotificationId = notifId++,
-                StudentId = booking.StudentId,
+                OwnerId = booking.StudentId,
+                OwnerType = "Student",
                 Title = "Shuttle Update",
                 Message = "Shuttle EC 256-491 on your trip experienced a breakdown. A replacement shuttle EC 331-058 has been dispatched. Your trip will proceed.",
                 IsRead = true,
@@ -762,7 +764,8 @@ public class HistoricalDataSeeder
             notifications.Add(new Notification
             {
                 NotificationId = notifId++,
-                StudentId = booking.StudentId,
+                OwnerId = booking.StudentId,
+                OwnerType = "Student",
                 Title = "Shuttle Cancelled",
                 Message = "Shuttle EC 389-720 on your trip broke down and no replacement is available. Remaining shuttles will serve all passengers. Expect possible delays.",
                 IsRead = true,
@@ -775,7 +778,8 @@ public class HistoricalDataSeeder
         notifications.Add(new Notification
         {
             NotificationId = notifId++,
-            StudentId = 45,
+            OwnerId = 45,
+            OwnerType = "Student",
             Title = "Waitlist Promoted",
             Message = "Great news! A spot opened up for your trip from Summerstrand Village (06:45, 05 Aug). Your booking is now confirmed.",
             IsRead = true,
@@ -786,7 +790,8 @@ public class HistoricalDataSeeder
         notifications.Add(new Notification
         {
             NotificationId = notifId++,
-            StudentId = 46,
+            OwnerId = 46,
+            OwnerType = "Student",
             Title = "Waitlist Promoted",
             Message = "Great news! A spot opened up for your trip from Summerstrand Village (06:45, 05 Aug). Your booking is now confirmed.",
             IsRead = false,

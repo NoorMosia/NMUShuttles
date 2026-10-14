@@ -23,39 +23,11 @@ public class NotificationService : INotificationService
         _logger = logger;
     }
 
-    public async Task DispatchAsync(int studentId, string title, string message, int? tripInstanceId = null)
-    {
-        // Always create a Notification DB record
-        var notification = new Notification
-        {
-            StudentId = studentId,
-            Title = title,
-            Message = message,
-            RelatedTripInstanceId = tripInstanceId,
-            IsRead = false,
-            CreatedAt = DateTime.UtcNow
-        };
+    public Task DispatchAsync(int studentId, string title, string message, int? tripInstanceId = null)
+        => DispatchToOwnerAsync(studentId, "Student", title, message, tripInstanceId);
 
-        _db.Notifications.Add(notification);
-        await _db.SaveChangesAsync();
-
-        // Look up all device tokens for this student
-        var tokens = await _db.DeviceRegistrations
-            .Where(d => d.OwnerId == studentId && d.OwnerType == "Student")
-            .Select(d => d.FcmToken)
-            .ToListAsync();
-
-        if (tokens.Count > 0)
-        {
-            await _fcmSender.SendToTokensAsync(tokens, title, message);
-        }
-        else
-        {
-            _logger.LogDebug(
-                "No device tokens found for student {StudentId}. Notification saved to DB only.",
-                studentId);
-        }
-    }
+    public Task DispatchToMarshalAsync(int marshalId, string title, string message, int? tripInstanceId = null)
+        => DispatchToOwnerAsync(marshalId, "Marshal", title, message, tripInstanceId);
 
     public async Task DispatchToTripPassengersAsync(int tripInstanceId, string title, string message)
     {
@@ -73,7 +45,64 @@ public class NotificationService : INotificationService
         // Dispatch to each student (creates individual DB records + FCM)
         foreach (var studentId in studentIds)
         {
-            await DispatchAsync(studentId, title, message, tripInstanceId);
+            await DispatchToOwnerAsync(studentId, "Student", title, message, tripInstanceId);
+        }
+    }
+
+    public async Task DispatchToAllMarshalsAsync(string title, string message, int? tripInstanceId = null)
+    {
+        var marshalIds = await _db.Marshals
+            .Where(m => m.IsActive)
+            .Select(m => m.MarshalId)
+            .ToListAsync();
+
+        _logger.LogInformation(
+            "Dispatching broadcast notification to {Count} active marshal(s). Title: {Title}",
+            marshalIds.Count, title);
+
+        foreach (var marshalId in marshalIds)
+        {
+            await DispatchToOwnerAsync(marshalId, "Marshal", title, message, tripInstanceId);
+        }
+    }
+
+    /// <summary>
+    /// Core dispatch: always persists a Notification row for the owner, then
+    /// pushes to that owner's registered device tokens (if any).
+    /// </summary>
+    private async Task DispatchToOwnerAsync(
+        int ownerId, string ownerType, string title, string message, int? tripInstanceId)
+    {
+        // Always create a Notification DB record
+        var notification = new Notification
+        {
+            OwnerId = ownerId,
+            OwnerType = ownerType,
+            Title = title,
+            Message = message,
+            RelatedTripInstanceId = tripInstanceId,
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _db.Notifications.Add(notification);
+        await _db.SaveChangesAsync();
+
+        // Look up all device tokens for this owner
+        var tokens = await _db.DeviceRegistrations
+            .Where(d => d.OwnerId == ownerId && d.OwnerType == ownerType)
+            .Select(d => d.FcmToken)
+            .ToListAsync();
+
+        if (tokens.Count > 0)
+        {
+            await _fcmSender.SendToTokensAsync(tokens, title, message);
+        }
+        else
+        {
+            _logger.LogDebug(
+                "No device tokens found for {OwnerType} {OwnerId}. Notification saved to DB only.",
+                ownerType, ownerId);
         }
     }
 }

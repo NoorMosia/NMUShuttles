@@ -10,6 +10,7 @@ import 'package:nmu_shuttle_app/features/student/screens/maps_screen.dart';
 import 'package:nmu_shuttle_app/features/student/screens/alerts_screen.dart';
 import 'package:nmu_shuttle_app/features/student/screens/profile_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/marshal_home_screen.dart';
+import 'package:nmu_shuttle_app/features/marshal/screens/marshal_alerts_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/passenger_list_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/marshal_checkin_screen.dart';
 import 'package:nmu_shuttle_app/features/marshal/screens/marshal_profile_screen.dart';
@@ -69,11 +70,7 @@ class AppRouter {
       GoRoute(
         path: '/student/booking/new',
         name: 'newBooking',
-        builder: (context, state) {
-          final stopIdParam = state.uri.queryParameters['stopId'];
-          final initialStopId = int.tryParse(stopIdParam ?? '');
-          return NewBookingScreen(initialStopId: initialStopId);
-        },
+        builder: (context, state) => const NewBookingScreen(),
       ),
       GoRoute(
         path: '/student/booking/:id',
@@ -89,6 +86,11 @@ class AppRouter {
         path: '/marshal/home',
         name: 'marshalHome',
         builder: (context, state) => const MarshalHomeScreen(),
+      ),
+      GoRoute(
+        path: '/marshal/alerts',
+        name: 'marshalAlerts',
+        builder: (context, state) => const MarshalAlertsScreen(),
       ),
       GoRoute(
         path: '/marshal/profile',

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
+import 'package:nmu_shuttle_app/core/notifications/push_notification_service.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
@@ -51,13 +51,12 @@ class AppDrawer extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Row(
                   children: [
-                    SvgPicture.asset(
-                      'assets/logo.svg',
-                      width: 37,
-                      height: 37,
-                      colorFilter: const ColorFilter.mode(
-                        AppTheme.navy,
-                        BlendMode.srcIn,
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primaryGold,
+                        shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -109,6 +108,7 @@ class AppDrawer extends ConsumerWidget {
                 isSelected: false,
                 isDestructive: true,
                 onTap: () async {
+                  await PushNotificationService.instance.deleteToken();
                   await AuthService().deleteToken();
                   ref.invalidate(authStateProvider);
                   ref.invalidate(studentProfileProvider);
@@ -166,7 +166,7 @@ class _DrawerNavTile extends StatelessWidget {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryGold : Colors.transparent,
+          color: isSelected ? const Color(0xFFFEF9C3) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -176,7 +176,7 @@ class _DrawerNavTile extends StatelessWidget {
                 width: 3.5,
                 height: 22,
                 decoration: BoxDecoration(
-                  color: AppTheme.navy,
+                  color: AppTheme.primaryGold,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

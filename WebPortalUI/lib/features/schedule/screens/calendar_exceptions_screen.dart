@@ -163,12 +163,25 @@ class _CalendarExceptionsScreenState
     showDialog(
       context: context,
       builder: (ctx) => _CalendarExceptionFormDialog(
-        onSubmit: (targetDate, exceptionType, description) {
-          ref.read(calendarExceptionsProvider.notifier).addCalendarException(
+        onSubmit: (targetDate, exceptionType, description) async {
+          final messenger = ScaffoldMessenger.of(context);
+          final ok = await ref
+              .read(calendarExceptionsProvider.notifier)
+              .addCalendarException(
                 targetDate: targetDate,
                 exceptionType: exceptionType,
                 description: description,
               );
+          if (!context.mounted) return;
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(ok
+                  ? 'Calendar exception added.'
+                  : ref.read(calendarExceptionsProvider).errorMessage ??
+                      'Could not add calendar exception. It may already exist for that date.'),
+              backgroundColor: ok ? null : Colors.red.shade700,
+            ),
+          );
         },
       ),
     );
@@ -196,11 +209,20 @@ class _CalendarExceptionsScreenState
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
-              ref
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              Navigator.of(ctx).pop();
+              final ok = await ref
                   .read(calendarExceptionsProvider.notifier)
                   .deleteCalendarException(item.id);
-              Navigator.of(ctx).pop();
+              messenger.showSnackBar(
+                SnackBar(
+                  content: Text(ok
+                      ? 'Calendar exception deleted.'
+                      : 'Could not delete calendar exception.'),
+                  backgroundColor: ok ? null : Colors.red.shade700,
+                ),
+              );
             },
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red.shade700,
@@ -296,8 +318,6 @@ class _CalendarExceptionFormDialogState
                   DropdownMenuItem(
                       value: 'UniversityRecess',
                       child: Text('University Recess')),
-                  DropdownMenuItem(
-                      value: 'SpecialEvent', child: Text('Special Event')),
                 ],
                 onChanged: (v) =>
                     setState(() => _exceptionType = v ?? 'PublicHoliday'),

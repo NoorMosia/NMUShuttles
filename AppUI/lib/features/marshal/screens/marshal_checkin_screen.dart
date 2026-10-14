@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:nmu_shuttle_app/core/api/api_constants.dart';
+import 'package:nmu_shuttle_app/core/api/api_exception.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/core/ui/error_display.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
 import 'package:nmu_shuttle_app/features/marshal/providers/time_slot_passengers_provider.dart';
 
@@ -123,13 +125,8 @@ class _MarshalCheckinScreenState extends ConsumerState<MarshalCheckinScreen>
       }
     } on DioException catch (e) {
       if (mounted) {
-        final message = _extractError(e);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.red.shade700,
-          ),
-        );
+        final apiError = ApiException.fromDioException(e);
+        showErrorSnackBar(context, apiError.message);
       }
     }
   }
@@ -191,16 +188,6 @@ class _MarshalCheckinScreenState extends ConsumerState<MarshalCheckinScreen>
     );
   }
 
-  String _extractError(DioException e) {
-    final data = e.response?.data;
-    if (data is Map<String, dynamic>) {
-      return data['message'] as String? ??
-          data['detail'] as String? ??
-          data['title'] as String? ??
-          'Check-in failed';
-    }
-    return 'Check-in failed. Please try again.';
-  }
 }
 
 // ─── QR Scanner Tab ────────────────────────────────────────────
@@ -501,7 +488,9 @@ class _PassengerListTab extends ConsumerWidget {
           color: Colors.grey.shade50,
           child: TextField(
             controller: searchController,
+            maxLength: 50,
             decoration: InputDecoration(
+              counterText: '',
               hintText: 'Search by name or student number',
               prefixIcon: const Icon(Icons.search),
               suffixIcon: searchController.text.isNotEmpty
@@ -541,25 +530,10 @@ class _PassengerListTab extends ConsumerWidget {
             loading: () => const Center(
               child: CircularProgressIndicator(color: AppTheme.primaryGold),
             ),
-            error: (error, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                    const SizedBox(height: 12),
-                    const Text('Failed to load passengers'),
-                    const SizedBox(height: 12),
-                    FilledButton.icon(
-                      onPressed: () =>
-                          ref.invalidate(timeSlotPassengersProvider(query)),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
+            error: (error, _) => ErrorRetry(
+              error: error,
+              title: 'Failed to load passengers',
+              onRetry: () => ref.invalidate(timeSlotPassengersProvider(query)),
             ),
           ),
         ),

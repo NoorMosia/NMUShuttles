@@ -69,7 +69,11 @@ class AppRouter {
       GoRoute(
         path: '/student/booking/new',
         name: 'newBooking',
-        builder: (context, state) => const NewBookingScreen(),
+        builder: (context, state) {
+          final stopIdParam = state.uri.queryParameters['stopId'];
+          final initialStopId = int.tryParse(stopIdParam ?? '');
+          return NewBookingScreen(initialStopId: initialStopId);
+        },
       ),
       GoRoute(
         path: '/student/booking/:id',

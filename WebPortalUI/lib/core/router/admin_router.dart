@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_admin/core/auth/admin_auth_service.dart';
 import 'package:nmu_shuttle_admin/features/auth/providers/admin_auth_providers.dart';
 import 'package:nmu_shuttle_admin/features/auth/screens/admin_login_screen.dart';
 import 'package:nmu_shuttle_admin/features/overview/screens/overview_screen.dart';
+import 'package:nmu_shuttle_admin/features/overview/screens/detailed_analytics_screen.dart';
 import 'package:nmu_shuttle_admin/features/reports/screens/reports_screen.dart';
 import 'package:nmu_shuttle_admin/features/schedule/screens/schedule_screen.dart';
 import 'package:nmu_shuttle_admin/features/schedule/screens/calendar_exceptions_screen.dart';
@@ -116,7 +115,7 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/analytics/detailed',
-            builder: (context, state) => const _DetailedAnalyticsPlaceholder(),
+            builder: (context, state) => const DetailedAnalyticsScreen(),
           ),
         ],
       ),
@@ -130,54 +129,3 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
 
   return router;
 });
-
-
-/// Placeholder for the Detailed Analytics page.
-class _DetailedAnalyticsPlaceholder extends StatelessWidget {
-  const _DetailedAnalyticsPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: () => context.go('/overview'),
-                icon: const Icon(Icons.arrow_back),
-                tooltip: 'Back to Overview',
-                color: const Color(0xFF132E51),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Detailed Analytics',
-                style: GoogleFonts.hankenGrotesk(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF132E51),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Detailed analytics view coming soon',
-            style: GoogleFonts.hankenGrotesk(
-              fontSize: 14,
-              color: const Color(0xFF5A6B7B),
-            ),
-          ),
-          const SizedBox(height: 32),
-          const Expanded(
-            child: Center(
-              child: Text('Detailed analytics content coming soon'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

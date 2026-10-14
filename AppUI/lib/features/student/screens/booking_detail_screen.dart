@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:nmu_shuttle_app/core/api/api_exception.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/core/ui/error_display.dart';
 import 'package:nmu_shuttle_app/features/student/models/booking_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
 import 'package:nmu_shuttle_app/features/student/providers/profile_providers.dart';
@@ -101,14 +103,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         );
         context.go('/student/home');
       }
+    } on ApiException catch (e) {
+      if (mounted) {
+        handleApiError(
+          context,
+          e,
+          conflictTitle: 'Cannot Cancel',
+        );
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to cancel: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackBar(context, 'Something went wrong. Please try again.');
       }
     } finally {
       if (mounted) setState(() => _isCancelling = false);
@@ -203,21 +208,10 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         children: [
           bookingAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 12),
-                  const Text('Failed to load booking details'),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () =>
-                        ref.invalidate(bookingDetailProvider(bookingId)),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
+            error: (error, _) => ErrorRetry(
+              error: error,
+              title: 'Failed to load booking details',
+              onRetry: () => ref.invalidate(bookingDetailProvider(bookingId)),
             ),
             data: (booking) => _buildContent(context, booking),
           ),

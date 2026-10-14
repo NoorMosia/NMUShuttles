@@ -104,49 +104,53 @@ public class LockoutGateService : BackgroundService
         var db = scope.ServiceProvider.GetRequiredService<ShuttleDbContext>();
         var waitlistService = scope.ServiceProvider.GetRequiredService<IWaitlistPromotionService>();
 
-        // Use SERIALIZABLE isolation level for concurrency safety
-        await using var transaction = await db.Database.BeginTransactionAsync(
-            System.Data.IsolationLevel.Serializable, stoppingToken);
-
-        try
+        // Wrap in execution strategy to support retrying + user-initiated transactions
+        var strategy = db.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
-            // Re-fetch the trip with tracking to verify it's still in Scheduling state
-            var trip = await db.TripInstances
-                .FirstOrDefaultAsync(ti => ti.TripInstanceId == tripInstanceId, stoppingToken);
+            await using var transaction = await db.Database.BeginTransactionAsync(
+                System.Data.IsolationLevel.Serializable, stoppingToken);
 
-            if (trip == null)
+            try
             {
-                _logger.LogWarning(
-                    "TripInstanceId={TripId} no longer exists. Skipping lockout.", tripInstanceId);
-                await transaction.RollbackAsync(stoppingToken);
-                return;
-            }
+                // Re-fetch the trip with tracking to verify it's still in Scheduling state
+                var trip = await db.TripInstances
+                    .FirstOrDefaultAsync(ti => ti.TripInstanceId == tripInstanceId, stoppingToken);
 
-            if (trip.Status != "Scheduling")
-            {
+                if (trip == null)
+                {
+                    _logger.LogWarning(
+                        "TripInstanceId={TripId} no longer exists. Skipping lockout.", tripInstanceId);
+                    await transaction.RollbackAsync(stoppingToken);
+                    return;
+                }
+
+                if (trip.Status != "Scheduling")
+                {
+                    _logger.LogInformation(
+                        "TripInstanceId={TripId} is no longer Scheduling (Status={Status}). Skipping lockout.",
+                        tripInstanceId, trip.Status);
+                    await transaction.RollbackAsync(stoppingToken);
+                    return;
+                }
+
+                // Lock the trip
+                trip.Status = "Locked";
+                trip.LockedAt = DateTime.UtcNow;
+
+                await db.SaveChangesAsync(stoppingToken);
+                await transaction.CommitAsync(stoppingToken);
+
                 _logger.LogInformation(
-                    "TripInstanceId={TripId} is no longer Scheduling (Status={Status}). Skipping lockout.",
-                    tripInstanceId, trip.Status);
-                await transaction.RollbackAsync(stoppingToken);
-                return;
+                    "TripInstanceId={TripId} locked at {LockedAt:u}.", tripInstanceId, trip.LockedAt);
             }
-
-            // Lock the trip
-            trip.Status = "Locked";
-            trip.LockedAt = DateTime.UtcNow;
-
-            await db.SaveChangesAsync(stoppingToken);
-            await transaction.CommitAsync(stoppingToken);
-
-            _logger.LogInformation(
-                "TripInstanceId={TripId} locked at {LockedAt:u}.", tripInstanceId, trip.LockedAt);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to lock TripInstanceId={TripId}. Rolling back.", tripInstanceId);
-            await transaction.RollbackAsync(stoppingToken);
-            throw;
-        }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to lock TripInstanceId={TripId}. Rolling back.", tripInstanceId);
+                await transaction.RollbackAsync(stoppingToken);
+                throw;
+            }
+        });
 
         // Run waitlist promotion after successful lock (outside the serializable transaction)
         try

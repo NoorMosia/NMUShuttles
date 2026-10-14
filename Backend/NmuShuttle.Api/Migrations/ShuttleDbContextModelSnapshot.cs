@@ -349,6 +349,62 @@ namespace NmuShuttle.Api.Migrations
                             Description = "Heritage Day",
                             ExceptionType = "PublicHoliday",
                             TargetDate = new DateOnly(2025, 9, 24)
+                        },
+                        new
+                        {
+                            CalendarExceptionId = 11,
+                            Description = "Human Rights Day",
+                            ExceptionType = "PublicHoliday",
+                            TargetDate = new DateOnly(2026, 3, 21)
+                        },
+                        new
+                        {
+                            CalendarExceptionId = 12,
+                            Description = "Good Friday",
+                            ExceptionType = "PublicHoliday",
+                            TargetDate = new DateOnly(2026, 4, 3)
+                        },
+                        new
+                        {
+                            CalendarExceptionId = 13,
+                            Description = "Family Day",
+                            ExceptionType = "PublicHoliday",
+                            TargetDate = new DateOnly(2026, 4, 6)
+                        },
+                        new
+                        {
+                            CalendarExceptionId = 14,
+                            Description = "Freedom Day",
+                            ExceptionType = "PublicHoliday",
+                            TargetDate = new DateOnly(2026, 4, 27)
+                        },
+                        new
+                        {
+                            CalendarExceptionId = 15,
+                            Description = "Workers Day",
+                            ExceptionType = "PublicHoliday",
+                            TargetDate = new DateOnly(2026, 5, 1)
+                        },
+                        new
+                        {
+                            CalendarExceptionId = 16,
+                            Description = "Youth Day",
+                            ExceptionType = "PublicHoliday",
+                            TargetDate = new DateOnly(2026, 6, 16)
+                        },
+                        new
+                        {
+                            CalendarExceptionId = 17,
+                            Description = "National Women's Day (observed)",
+                            ExceptionType = "PublicHoliday",
+                            TargetDate = new DateOnly(2026, 8, 10)
+                        },
+                        new
+                        {
+                            CalendarExceptionId = 18,
+                            Description = "Heritage Day",
+                            ExceptionType = "PublicHoliday",
+                            TargetDate = new DateOnly(2026, 9, 24)
                         });
                 });
 
@@ -443,6 +499,287 @@ namespace NmuShuttle.Api.Migrations
                             t.HasCheckConstraint("CK_DeviceRegistrations_OwnerType", "OwnerType IN ('Student','Marshal')");
 
                             t.HasCheckConstraint("CK_DeviceRegistrations_Platform", "Platform IN ('android','ios')");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            DeviceRegistrationId = 1,
+                            FcmToken = "fcm_token_student_1_a1b2c3d4e5",
+                            OwnerId = 1,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 2,
+                            FcmToken = "fcm_token_student_2_f6g7h8i9j0",
+                            OwnerId = 2,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 3,
+                            FcmToken = "fcm_token_student_3_k1l2m3n4o5",
+                            OwnerId = 3,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 4,
+                            FcmToken = "fcm_token_student_4_p6q7r8s9t0",
+                            OwnerId = 4,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 5,
+                            FcmToken = "fcm_token_student_5_u1v2w3x4y5",
+                            OwnerId = 5,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 6,
+                            FcmToken = "fcm_token_student_6_z6a7b8c9d0",
+                            OwnerId = 6,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 7,
+                            FcmToken = "fcm_token_student_7_e1f2g3h4i5",
+                            OwnerId = 7,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 8,
+                            FcmToken = "fcm_token_student_8_j6k7l8m9n0",
+                            OwnerId = 8,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 9,
+                            FcmToken = "fcm_token_student_9_o1p2q3r4s5",
+                            OwnerId = 9,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 10,
+                            FcmToken = "fcm_token_student_10_t6u7v8w9x0",
+                            OwnerId = 10,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 11,
+                            FcmToken = "fcm_token_student_13_y1z2a3b4c5",
+                            OwnerId = 13,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 12,
+                            FcmToken = "fcm_token_student_16_d6e7f8g9h0",
+                            OwnerId = 16,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 13,
+                            FcmToken = "fcm_token_student_20_i1j2k3l4m5",
+                            OwnerId = 20,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 14,
+                            FcmToken = "fcm_token_student_25_n6o7p8q9r0",
+                            OwnerId = 25,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 15,
+                            FcmToken = "fcm_token_student_30_s1t2u3v4w5",
+                            OwnerId = 30,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 16,
+                            FcmToken = "fcm_token_student_35_x6y7z8a9b0",
+                            OwnerId = 35,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 17,
+                            FcmToken = "fcm_token_student_40_c1d2e3f4g5",
+                            OwnerId = 40,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 18,
+                            FcmToken = "fcm_token_student_45_h6i7j8k9l0",
+                            OwnerId = 45,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 19,
+                            FcmToken = "fcm_token_student_50_m1n2o3p4q5",
+                            OwnerId = 50,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 20,
+                            FcmToken = "fcm_token_student_55_r6s7t8u9v0",
+                            OwnerId = 55,
+                            OwnerType = "Student",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 21,
+                            FcmToken = "fcm_token_marshal_1_w1x2y3z4a5",
+                            OwnerId = 1,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 22,
+                            FcmToken = "fcm_token_marshal_2_b6c7d8e9f0",
+                            OwnerId = 2,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 23,
+                            FcmToken = "fcm_token_marshal_3_g1h2i3j4k5",
+                            OwnerId = 3,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 24,
+                            FcmToken = "fcm_token_marshal_4_l6m7n8o9p0",
+                            OwnerId = 4,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 25,
+                            FcmToken = "fcm_token_marshal_5_q1r2s3t4u5",
+                            OwnerId = 5,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 26,
+                            FcmToken = "fcm_token_marshal_6_v6w7x8y9z0",
+                            OwnerId = 6,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 27,
+                            FcmToken = "fcm_token_marshal_7_a1b2c3d4e5",
+                            OwnerId = 7,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 28,
+                            FcmToken = "fcm_token_marshal_8_f6g7h8i9j0",
+                            OwnerId = 8,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 29,
+                            FcmToken = "fcm_token_marshal_9_k1l2m3n4o5",
+                            OwnerId = 9,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 30,
+                            FcmToken = "fcm_token_marshal_10_p6q7r8s9t0",
+                            OwnerId = 10,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            DeviceRegistrationId = 31,
+                            FcmToken = "fcm_token_marshal_11_u1v2w3x4y5",
+                            OwnerId = 11,
+                            OwnerType = "Marshal",
+                            Platform = "android",
+                            UpdatedAt = new DateTime(2026, 7, 20, 8, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
@@ -868,6 +1205,146 @@ namespace NmuShuttle.Api.Migrations
                             ScheduleTimeId = 63,
                             StopId = 4,
                             StudentId = 13
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 15,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Monday",
+                            IsActive = true,
+                            ScheduleTimeId = 39,
+                            StopId = 3,
+                            StudentId = 20
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 16,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Tuesday",
+                            IsActive = true,
+                            ScheduleTimeId = 39,
+                            StopId = 3,
+                            StudentId = 20
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 17,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Wednesday",
+                            IsActive = true,
+                            ScheduleTimeId = 39,
+                            StopId = 3,
+                            StudentId = 20
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 18,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Thursday",
+                            IsActive = true,
+                            ScheduleTimeId = 39,
+                            StopId = 3,
+                            StudentId = 20
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 19,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Monday",
+                            IsActive = true,
+                            ScheduleTimeId = 45,
+                            StopId = 3,
+                            StudentId = 20
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 20,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Tuesday",
+                            IsActive = true,
+                            ScheduleTimeId = 45,
+                            StopId = 3,
+                            StudentId = 20
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 21,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Wednesday",
+                            IsActive = true,
+                            ScheduleTimeId = 45,
+                            StopId = 3,
+                            StudentId = 20
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 22,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Thursday",
+                            IsActive = true,
+                            ScheduleTimeId = 45,
+                            StopId = 3,
+                            StudentId = 20
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 23,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Monday",
+                            IsActive = true,
+                            ScheduleTimeId = 77,
+                            StopId = 5,
+                            StudentId = 35
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 24,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Wednesday",
+                            IsActive = true,
+                            ScheduleTimeId = 77,
+                            StopId = 5,
+                            StudentId = 35
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 25,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Friday",
+                            IsActive = true,
+                            ScheduleTimeId = 77,
+                            StopId = 5,
+                            StudentId = 35
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 26,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Monday",
+                            IsActive = true,
+                            ScheduleTimeId = 83,
+                            StopId = 5,
+                            StudentId = 35
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 27,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Wednesday",
+                            IsActive = true,
+                            ScheduleTimeId = 83,
+                            StopId = 5,
+                            StudentId = 35
+                        },
+                        new
+                        {
+                            PriorityScheduleId = 28,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayOfWeek = "Friday",
+                            IsActive = true,
+                            ScheduleTimeId = 83,
+                            StopId = 5,
+                            StudentId = 35
                         });
                 });
 
@@ -2377,6 +2854,1072 @@ namespace NmuShuttle.Api.Migrations
                         .HasDatabaseName("UQ_ScheduleTimeCampuses_ScheduleTime_StopOrder");
 
                     b.ToTable("ScheduleTimeCampuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            ScheduleTimeCampusId = 1,
+                            CampusId = 1,
+                            ScheduleTimeId = 1,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 2,
+                            CampusId = 1,
+                            ScheduleTimeId = 2,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 3,
+                            CampusId = 1,
+                            ScheduleTimeId = 3,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 4,
+                            CampusId = 1,
+                            ScheduleTimeId = 4,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 5,
+                            CampusId = 1,
+                            ScheduleTimeId = 5,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 6,
+                            CampusId = 1,
+                            ScheduleTimeId = 6,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 7,
+                            CampusId = 1,
+                            ScheduleTimeId = 7,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 8,
+                            CampusId = 1,
+                            ScheduleTimeId = 8,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 9,
+                            CampusId = 1,
+                            ScheduleTimeId = 9,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 10,
+                            CampusId = 1,
+                            ScheduleTimeId = 10,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 11,
+                            CampusId = 1,
+                            ScheduleTimeId = 11,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 12,
+                            CampusId = 1,
+                            ScheduleTimeId = 12,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 13,
+                            CampusId = 1,
+                            ScheduleTimeId = 13,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 14,
+                            CampusId = 1,
+                            ScheduleTimeId = 14,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 15,
+                            CampusId = 1,
+                            ScheduleTimeId = 15,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 16,
+                            CampusId = 1,
+                            ScheduleTimeId = 16,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 17,
+                            CampusId = 1,
+                            ScheduleTimeId = 17,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 18,
+                            CampusId = 1,
+                            ScheduleTimeId = 18,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 19,
+                            CampusId = 1,
+                            ScheduleTimeId = 19,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 20,
+                            CampusId = 1,
+                            ScheduleTimeId = 20,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 21,
+                            CampusId = 1,
+                            ScheduleTimeId = 21,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 22,
+                            CampusId = 1,
+                            ScheduleTimeId = 22,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 23,
+                            CampusId = 1,
+                            ScheduleTimeId = 23,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 24,
+                            CampusId = 1,
+                            ScheduleTimeId = 24,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 25,
+                            CampusId = 1,
+                            ScheduleTimeId = 25,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 26,
+                            CampusId = 1,
+                            ScheduleTimeId = 26,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 27,
+                            CampusId = 1,
+                            ScheduleTimeId = 27,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 28,
+                            CampusId = 1,
+                            ScheduleTimeId = 28,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 29,
+                            CampusId = 1,
+                            ScheduleTimeId = 29,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 30,
+                            CampusId = 1,
+                            ScheduleTimeId = 30,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 31,
+                            CampusId = 1,
+                            ScheduleTimeId = 31,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 32,
+                            CampusId = 1,
+                            ScheduleTimeId = 32,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 33,
+                            CampusId = 1,
+                            ScheduleTimeId = 33,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 34,
+                            CampusId = 1,
+                            ScheduleTimeId = 34,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 35,
+                            CampusId = 1,
+                            ScheduleTimeId = 35,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 36,
+                            CampusId = 1,
+                            ScheduleTimeId = 36,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 37,
+                            CampusId = 1,
+                            ScheduleTimeId = 37,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 38,
+                            CampusId = 1,
+                            ScheduleTimeId = 38,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 39,
+                            CampusId = 1,
+                            ScheduleTimeId = 39,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 40,
+                            CampusId = 1,
+                            ScheduleTimeId = 40,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 41,
+                            CampusId = 1,
+                            ScheduleTimeId = 41,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 42,
+                            CampusId = 1,
+                            ScheduleTimeId = 42,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 43,
+                            CampusId = 1,
+                            ScheduleTimeId = 43,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 44,
+                            CampusId = 1,
+                            ScheduleTimeId = 44,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 45,
+                            CampusId = 1,
+                            ScheduleTimeId = 45,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 46,
+                            CampusId = 1,
+                            ScheduleTimeId = 46,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 47,
+                            CampusId = 1,
+                            ScheduleTimeId = 47,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 48,
+                            CampusId = 1,
+                            ScheduleTimeId = 48,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 49,
+                            CampusId = 1,
+                            ScheduleTimeId = 49,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 50,
+                            CampusId = 1,
+                            ScheduleTimeId = 50,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 51,
+                            CampusId = 1,
+                            ScheduleTimeId = 51,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 52,
+                            CampusId = 1,
+                            ScheduleTimeId = 52,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 53,
+                            CampusId = 1,
+                            ScheduleTimeId = 53,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 54,
+                            CampusId = 1,
+                            ScheduleTimeId = 54,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 55,
+                            CampusId = 1,
+                            ScheduleTimeId = 55,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 56,
+                            CampusId = 1,
+                            ScheduleTimeId = 56,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 57,
+                            CampusId = 1,
+                            ScheduleTimeId = 57,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 58,
+                            CampusId = 1,
+                            ScheduleTimeId = 58,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 59,
+                            CampusId = 1,
+                            ScheduleTimeId = 59,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 60,
+                            CampusId = 1,
+                            ScheduleTimeId = 60,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 61,
+                            CampusId = 1,
+                            ScheduleTimeId = 61,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 62,
+                            CampusId = 1,
+                            ScheduleTimeId = 62,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 63,
+                            CampusId = 1,
+                            ScheduleTimeId = 63,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 64,
+                            CampusId = 1,
+                            ScheduleTimeId = 64,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 65,
+                            CampusId = 1,
+                            ScheduleTimeId = 65,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 66,
+                            CampusId = 1,
+                            ScheduleTimeId = 66,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 67,
+                            CampusId = 1,
+                            ScheduleTimeId = 67,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 68,
+                            CampusId = 1,
+                            ScheduleTimeId = 68,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 69,
+                            CampusId = 1,
+                            ScheduleTimeId = 69,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 70,
+                            CampusId = 1,
+                            ScheduleTimeId = 70,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 71,
+                            CampusId = 1,
+                            ScheduleTimeId = 71,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 72,
+                            CampusId = 1,
+                            ScheduleTimeId = 72,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 73,
+                            CampusId = 1,
+                            ScheduleTimeId = 73,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 74,
+                            CampusId = 1,
+                            ScheduleTimeId = 74,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 75,
+                            CampusId = 1,
+                            ScheduleTimeId = 75,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 76,
+                            CampusId = 1,
+                            ScheduleTimeId = 76,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 77,
+                            CampusId = 1,
+                            ScheduleTimeId = 77,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 78,
+                            CampusId = 1,
+                            ScheduleTimeId = 78,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 79,
+                            CampusId = 1,
+                            ScheduleTimeId = 79,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 80,
+                            CampusId = 1,
+                            ScheduleTimeId = 80,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 81,
+                            CampusId = 1,
+                            ScheduleTimeId = 81,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 82,
+                            CampusId = 1,
+                            ScheduleTimeId = 82,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 83,
+                            CampusId = 1,
+                            ScheduleTimeId = 83,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 84,
+                            CampusId = 1,
+                            ScheduleTimeId = 84,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 85,
+                            CampusId = 1,
+                            ScheduleTimeId = 85,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 86,
+                            CampusId = 1,
+                            ScheduleTimeId = 86,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 87,
+                            CampusId = 1,
+                            ScheduleTimeId = 87,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 88,
+                            CampusId = 1,
+                            ScheduleTimeId = 88,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 89,
+                            CampusId = 1,
+                            ScheduleTimeId = 89,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 90,
+                            CampusId = 1,
+                            ScheduleTimeId = 90,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 91,
+                            CampusId = 1,
+                            ScheduleTimeId = 91,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 92,
+                            CampusId = 1,
+                            ScheduleTimeId = 92,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 93,
+                            CampusId = 1,
+                            ScheduleTimeId = 93,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 94,
+                            CampusId = 1,
+                            ScheduleTimeId = 94,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 95,
+                            CampusId = 1,
+                            ScheduleTimeId = 95,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 96,
+                            CampusId = 1,
+                            ScheduleTimeId = 96,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 97,
+                            CampusId = 1,
+                            ScheduleTimeId = 97,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 98,
+                            CampusId = 1,
+                            ScheduleTimeId = 98,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 99,
+                            CampusId = 1,
+                            ScheduleTimeId = 99,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 100,
+                            CampusId = 1,
+                            ScheduleTimeId = 100,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 101,
+                            CampusId = 1,
+                            ScheduleTimeId = 101,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 102,
+                            CampusId = 1,
+                            ScheduleTimeId = 102,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 103,
+                            CampusId = 1,
+                            ScheduleTimeId = 103,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 104,
+                            CampusId = 1,
+                            ScheduleTimeId = 104,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 105,
+                            CampusId = 1,
+                            ScheduleTimeId = 105,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 106,
+                            CampusId = 1,
+                            ScheduleTimeId = 106,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 107,
+                            CampusId = 1,
+                            ScheduleTimeId = 107,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 108,
+                            CampusId = 1,
+                            ScheduleTimeId = 108,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 109,
+                            CampusId = 1,
+                            ScheduleTimeId = 109,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 110,
+                            CampusId = 1,
+                            ScheduleTimeId = 110,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 111,
+                            CampusId = 1,
+                            ScheduleTimeId = 111,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 112,
+                            CampusId = 1,
+                            ScheduleTimeId = 112,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 113,
+                            CampusId = 1,
+                            ScheduleTimeId = 113,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 114,
+                            CampusId = 1,
+                            ScheduleTimeId = 114,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 115,
+                            CampusId = 1,
+                            ScheduleTimeId = 115,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 116,
+                            CampusId = 1,
+                            ScheduleTimeId = 116,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 117,
+                            CampusId = 1,
+                            ScheduleTimeId = 117,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 118,
+                            CampusId = 1,
+                            ScheduleTimeId = 118,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 119,
+                            CampusId = 1,
+                            ScheduleTimeId = 119,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 120,
+                            CampusId = 1,
+                            ScheduleTimeId = 120,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 121,
+                            CampusId = 1,
+                            ScheduleTimeId = 121,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 122,
+                            CampusId = 1,
+                            ScheduleTimeId = 122,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 123,
+                            CampusId = 1,
+                            ScheduleTimeId = 123,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 124,
+                            CampusId = 1,
+                            ScheduleTimeId = 124,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 125,
+                            CampusId = 1,
+                            ScheduleTimeId = 125,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 126,
+                            CampusId = 1,
+                            ScheduleTimeId = 126,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 127,
+                            CampusId = 1,
+                            ScheduleTimeId = 127,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 128,
+                            CampusId = 1,
+                            ScheduleTimeId = 128,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 129,
+                            CampusId = 1,
+                            ScheduleTimeId = 129,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 130,
+                            CampusId = 1,
+                            ScheduleTimeId = 130,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 131,
+                            CampusId = 1,
+                            ScheduleTimeId = 131,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 132,
+                            CampusId = 1,
+                            ScheduleTimeId = 132,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 133,
+                            CampusId = 1,
+                            ScheduleTimeId = 133,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 134,
+                            CampusId = 1,
+                            ScheduleTimeId = 134,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 135,
+                            CampusId = 1,
+                            ScheduleTimeId = 135,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 136,
+                            CampusId = 1,
+                            ScheduleTimeId = 136,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 137,
+                            CampusId = 1,
+                            ScheduleTimeId = 137,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 138,
+                            CampusId = 1,
+                            ScheduleTimeId = 138,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 139,
+                            CampusId = 1,
+                            ScheduleTimeId = 139,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 140,
+                            CampusId = 1,
+                            ScheduleTimeId = 140,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 141,
+                            CampusId = 1,
+                            ScheduleTimeId = 141,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 142,
+                            CampusId = 1,
+                            ScheduleTimeId = 142,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 143,
+                            CampusId = 1,
+                            ScheduleTimeId = 143,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 144,
+                            CampusId = 1,
+                            ScheduleTimeId = 144,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 145,
+                            CampusId = 1,
+                            ScheduleTimeId = 145,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 146,
+                            CampusId = 1,
+                            ScheduleTimeId = 146,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 147,
+                            CampusId = 1,
+                            ScheduleTimeId = 147,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 148,
+                            CampusId = 1,
+                            ScheduleTimeId = 148,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 149,
+                            CampusId = 1,
+                            ScheduleTimeId = 149,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 150,
+                            CampusId = 1,
+                            ScheduleTimeId = 150,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 151,
+                            CampusId = 1,
+                            ScheduleTimeId = 151,
+                            StopOrder = 1
+                        },
+                        new
+                        {
+                            ScheduleTimeCampusId = 152,
+                            CampusId = 1,
+                            ScheduleTimeId = 152,
+                            StopOrder = 1
+                        });
                 });
 
             modelBuilder.Entity("NmuShuttle.Api.Models.Shuttle", b =>
@@ -2542,6 +4085,105 @@ namespace NmuShuttle.Api.Migrations
                             IsAccessibleVehicle = false,
                             IsActive = true,
                             LicensePlate = "EC 217-864",
+                            VendorCompanyName = "Bay Transit Corp",
+                            VendorId = 1
+                        },
+                        new
+                        {
+                            ShuttleId = 11,
+                            Capacity = 35,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = false,
+                            IsActive = true,
+                            LicensePlate = "EC 331-058",
+                            VendorCompanyName = "Bay Transit Corp",
+                            VendorId = 1
+                        },
+                        new
+                        {
+                            ShuttleId = 12,
+                            Capacity = 22,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = false,
+                            IsActive = true,
+                            LicensePlate = "EC 445-912",
+                            VendorCompanyName = "Coastal Movers",
+                            VendorId = 2
+                        },
+                        new
+                        {
+                            ShuttleId = 13,
+                            Capacity = 28,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = false,
+                            IsActive = true,
+                            LicensePlate = "EC 552-376",
+                            VendorCompanyName = "Coastal Movers",
+                            VendorId = 2
+                        },
+                        new
+                        {
+                            ShuttleId = 14,
+                            Capacity = 35,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = false,
+                            IsActive = true,
+                            LicensePlate = "EC 668-741",
+                            VendorCompanyName = "Coastal Movers",
+                            VendorId = 2
+                        },
+                        new
+                        {
+                            ShuttleId = 15,
+                            Capacity = 22,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = false,
+                            IsActive = true,
+                            LicensePlate = "EC 774-285",
+                            VendorCompanyName = "Metro Link SA",
+                            VendorId = 3
+                        },
+                        new
+                        {
+                            ShuttleId = 16,
+                            Capacity = 28,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = false,
+                            IsActive = true,
+                            LicensePlate = "EC 889-639",
+                            VendorCompanyName = "Metro Link SA",
+                            VendorId = 3
+                        },
+                        new
+                        {
+                            ShuttleId = 17,
+                            Capacity = 35,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = false,
+                            IsActive = true,
+                            LicensePlate = "EC 993-104",
+                            VendorCompanyName = "Metro Link SA",
+                            VendorId = 3
+                        },
+                        new
+                        {
+                            ShuttleId = 18,
+                            Capacity = 22,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = false,
+                            IsActive = true,
+                            LicensePlate = "EC 107-528",
+                            VendorCompanyName = "Bay Transit Corp",
+                            VendorId = 1
+                        },
+                        new
+                        {
+                            ShuttleId = 19,
+                            Capacity = 28,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IsAccessibleVehicle = true,
+                            IsActive = true,
+                            LicensePlate = "EC 214-963",
                             VendorCompanyName = "Bay Transit Corp",
                             VendorId = 1
                         });
@@ -2726,6 +4368,160 @@ namespace NmuShuttle.Api.Migrations
                         .HasDatabaseName("UQ_StopShuttleDefaults_Stop_Shuttle");
 
                     b.ToTable("StopShuttleDefaults", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            StopShuttleDefaultId = 1,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 1,
+                            ShuttleId = 1,
+                            StopId = 1
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 2,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 2,
+                            ShuttleId = 2,
+                            StopId = 1
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 3,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 3,
+                            ShuttleId = 3,
+                            StopId = 1
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 4,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 1,
+                            ShuttleId = 4,
+                            StopId = 2
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 5,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 2,
+                            ShuttleId = 5,
+                            StopId = 2
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 6,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 3,
+                            ShuttleId = 6,
+                            StopId = 2
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 7,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 1,
+                            ShuttleId = 9,
+                            StopId = 3
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 8,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 2,
+                            ShuttleId = 7,
+                            StopId = 3
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 9,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 3,
+                            ShuttleId = 8,
+                            StopId = 3
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 10,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 1,
+                            ShuttleId = 19,
+                            StopId = 4
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 11,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 2,
+                            ShuttleId = 10,
+                            StopId = 4
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 12,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 1,
+                            ShuttleId = 11,
+                            StopId = 5
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 13,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 2,
+                            ShuttleId = 12,
+                            StopId = 5
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 14,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 1,
+                            ShuttleId = 13,
+                            StopId = 6
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 15,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 2,
+                            ShuttleId = 14,
+                            StopId = 6
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 16,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 1,
+                            ShuttleId = 15,
+                            StopId = 7
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 17,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 2,
+                            ShuttleId = 16,
+                            StopId = 7
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 18,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 1,
+                            ShuttleId = 17,
+                            StopId = 8
+                        },
+                        new
+                        {
+                            StopShuttleDefaultId = 19,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            OrderPosition = 2,
+                            ShuttleId = 18,
+                            StopId = 8
+                        });
                 });
 
             modelBuilder.Entity("NmuShuttle.Api.Models.Student", b =>
@@ -2953,6 +4749,501 @@ namespace NmuShuttle.Api.Migrations
                             LastName = "Molefe",
                             StudentNumber = "s323846190",
                             UniversityEmail = "s323846190@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 16,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Thabo",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Maseko",
+                            StudentNumber = "s314527896",
+                            UniversityEmail = "s314527896@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 17,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Amahle",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Nxumalo",
+                            StudentNumber = "s328193045",
+                            UniversityEmail = "s328193045@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 18,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Ethan",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "du Plessis",
+                            StudentNumber = "s311847290",
+                            UniversityEmail = "s311847290@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 19,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Naledi",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Tshabalala",
+                            StudentNumber = "s325604183",
+                            UniversityEmail = "s325604183@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 20,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Kwame",
+                            IsActive = true,
+                            IsPriorityUser = true,
+                            LastName = "Osei",
+                            StudentNumber = "s319438267",
+                            UniversityEmail = "s319438267@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 21,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Bianca",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Ferreira",
+                            StudentNumber = "s322785410",
+                            UniversityEmail = "s322785410@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 22,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Siyabonga",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Mhlongo",
+                            StudentNumber = "s316094358",
+                            UniversityEmail = "s316094358@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 23,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Megan",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Swanepoel",
+                            StudentNumber = "s329471023",
+                            UniversityEmail = "s329471023@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 24,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Thandolwethu",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Gumede",
+                            StudentNumber = "s313268947",
+                            UniversityEmail = "s313268947@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 25,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Ryan",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Cloete",
+                            StudentNumber = "s327815604",
+                            UniversityEmail = "s327815604@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 26,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Nompumelelo",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Zwane",
+                            StudentNumber = "s311542789",
+                            UniversityEmail = "s311542789@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 27,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Dylan",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Viljoen",
+                            StudentNumber = "s324896031",
+                            UniversityEmail = "s324896031@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 28,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Palesa",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Mokoena",
+                            StudentNumber = "s318623475",
+                            UniversityEmail = "s318623475@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 29,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Luca",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Naude",
+                            StudentNumber = "s326057184",
+                            UniversityEmail = "s326057184@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 30,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Zinhle",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Buthelezi",
+                            StudentNumber = "s312384956",
+                            UniversityEmail = "s312384956@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 31,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Joshua",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Erasmus",
+                            StudentNumber = "s329710438",
+                            UniversityEmail = "s329710438@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 32,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Busisiwe",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Mabaso",
+                            StudentNumber = "s315847291",
+                            UniversityEmail = "s315847291@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 33,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Luke",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Barnard",
+                            StudentNumber = "s323196804",
+                            UniversityEmail = "s323196804@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 34,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Nonhlanhla",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Nkabinde",
+                            StudentNumber = "s317429058",
+                            UniversityEmail = "s317429058@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 35,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Thato",
+                            IsActive = true,
+                            IsPriorityUser = true,
+                            LastName = "Letsoko",
+                            StudentNumber = "s321863742",
+                            UniversityEmail = "s321863742@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 36,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Hannah",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Muller",
+                            StudentNumber = "s314085267",
+                            UniversityEmail = "s314085267@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 37,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Lungelo",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Shabangu",
+                            StudentNumber = "s328574190",
+                            UniversityEmail = "s328574190@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 38,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Amber",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Joubert",
+                            StudentNumber = "s316238904",
+                            UniversityEmail = "s316238904@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 39,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Sbusiso",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Radebe",
+                            StudentNumber = "s322491637",
+                            UniversityEmail = "s322491637@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 40,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Tamsin",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Olivier",
+                            StudentNumber = "s319764082",
+                            UniversityEmail = "s319764082@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 41,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Buhle",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Mahlangu",
+                            StudentNumber = "s325138476",
+                            UniversityEmail = "s325138476@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 42,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Connor",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "le Roux",
+                            StudentNumber = "s313692815",
+                            UniversityEmail = "s313692815@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 43,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Sinethemba",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Majola",
+                            StudentNumber = "s327045963",
+                            UniversityEmail = "s327045963@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 44,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Kayla",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Steyn",
+                            StudentNumber = "s311928347",
+                            UniversityEmail = "s311928347@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 45,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Andile",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Dladla",
+                            StudentNumber = "s324581076",
+                            UniversityEmail = "s324581076@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 46,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Emma",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "van Wyk",
+                            StudentNumber = "s318305492",
+                            UniversityEmail = "s318305492@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 47,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Themba",
+                            IsActive = false,
+                            IsPriorityUser = false,
+                            LastName = "Vilakazi",
+                            StudentNumber = "s326742815",
+                            UniversityEmail = "s326742815@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 48,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Danielle",
+                            IsActive = false,
+                            IsPriorityUser = false,
+                            LastName = "Potgieter",
+                            StudentNumber = "s312059638",
+                            UniversityEmail = "s312059638@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 49,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Mthunzi",
+                            IsActive = false,
+                            IsPriorityUser = false,
+                            LastName = "Cele",
+                            StudentNumber = "s329384071",
+                            UniversityEmail = "s329384071@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 50,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Robyn",
+                            IsActive = false,
+                            IsPriorityUser = false,
+                            LastName = "Prinsloo",
+                            StudentNumber = "s315670284",
+                            UniversityEmail = "s315670284@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 51,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Anathi",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Magwaza",
+                            StudentNumber = "s323947158",
+                            UniversityEmail = "s323947158@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 52,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Jaden",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Booysen",
+                            StudentNumber = "s317283046",
+                            UniversityEmail = "s317283046@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 53,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Lindiwe",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Ngubane",
+                            StudentNumber = "s325816490",
+                            UniversityEmail = "s325816490@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 54,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Aiden",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Marais",
+                            StudentNumber = "s311475823",
+                            UniversityEmail = "s311475823@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 55,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Nandi",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Mthimkhulu",
+                            StudentNumber = "s328640175",
+                            UniversityEmail = "s328640175@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 56,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Caleb",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Bezuidenhout",
+                            StudentNumber = "s314903268",
+                            UniversityEmail = "s314903268@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 57,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Yonela",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Sifuba",
+                            StudentNumber = "s322167549",
+                            UniversityEmail = "s322167549@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 58,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Mia",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Hendriks",
+                            StudentNumber = "s316538291",
+                            UniversityEmail = "s316538291@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 59,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Khaya",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "Mkhwanazi",
+                            StudentNumber = "s329081467",
+                            UniversityEmail = "s329081467@mandela.ac.za"
+                        },
+                        new
+                        {
+                            StudentId = 60,
+                            CreatedAt = new DateTime(2025, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Jade",
+                            IsActive = true,
+                            IsPriorityUser = false,
+                            LastName = "van Rensburg",
+                            StudentNumber = "s313724850",
+                            UniversityEmail = "s313724850@mandela.ac.za"
                         });
                 });
 

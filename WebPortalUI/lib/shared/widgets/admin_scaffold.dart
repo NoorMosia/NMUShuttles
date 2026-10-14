@@ -23,7 +23,6 @@ class _AdminScaffoldState extends State<AdminScaffold>
     with SingleTickerProviderStateMixin {
   static const Color _navy = Color(0xFF132E51);
   static const Color _gold = Color(0xFFFFCC00);
-  static const Color _goldSoft = Color(0xFFFEF9C3);
   static const Color _border = Color(0xFFE8ECF0);
   static const Color _bg = Color(0xFFF8F9FB);
   static const Color _textSecondary = Color(0xFF5A6B7B);
@@ -260,7 +259,7 @@ class _AdminScaffoldState extends State<AdminScaffold>
               horizontal: showLabels ? 12 : 0,
             ),
             decoration: BoxDecoration(
-              color: isSelected ? _goldSoft : Colors.transparent,
+              color: isSelected ? _gold : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
             ),
             clipBehavior: Clip.hardEdge,
@@ -273,7 +272,7 @@ class _AdminScaffoldState extends State<AdminScaffold>
                     width: 3,
                     height: 20,
                     decoration: BoxDecoration(
-                      color: _gold,
+                      color: _navy,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),

@@ -736,6 +736,13 @@ class _UserFormDialogState extends State<_UserFormDialog> {
   late final TextEditingController _emailCtrl;
   bool _submitting = false;
 
+  /// Domain appended to the identifier to derive a default email.
+  static const _emailDomain = '@mandela.ac.za';
+
+  /// When true, the user enters a custom email via the text field.
+  /// When false, the email is auto-derived from the identifier.
+  bool _useCustomEmail = false;
+
   @override
   void initState() {
     super.initState();
@@ -748,6 +755,28 @@ class _UserFormDialogState extends State<_UserFormDialog> {
         TextEditingController(text: widget.initialFirstName ?? '');
     _lastNameCtrl = TextEditingController(text: widget.initialLastName ?? '');
     _emailCtrl = TextEditingController(text: widget.initialEmail ?? '');
+    // If an existing email is provided and it doesn't match the auto-derived
+    // default, open the dialog in custom-email mode so it's preserved/editable.
+    final initialEmail = (widget.initialEmail ?? '').trim();
+    final derived = _defaultEmailFor(widget.initialIdentifier ?? '');
+    _useCustomEmail = initialEmail.isNotEmpty && initialEmail != derived;
+  }
+
+  /// Builds the default email from the identifier (e.g. s312345678 ->
+  /// s312345678@mandela.ac.za). Returns empty when there's no identifier.
+  String _defaultEmailFor(String identifier) {
+    final id = identifier.trim();
+    if (id.isEmpty) return '';
+    return '$id$_emailDomain';
+  }
+
+  /// Keeps the auto-derived email preview in sync with the identifier while
+  /// custom email entry is disabled.
+  void _onIdentifierChanged(String value) {
+    if (_useCustomEmail) return;
+    setState(() {
+      _emailCtrl.text = _defaultEmailFor(value);
+    });
   }
 
   @override
@@ -764,12 +793,20 @@ class _UserFormDialogState extends State<_UserFormDialog> {
 
     setState(() => _submitting = true);
 
+    final identifier = _identifierCtrl.text.trim();
+    // Use the custom email when the toggle is on, otherwise derive it from
+    // the identifier.
+    final custom = _emailCtrl.text.trim();
+    final email = (_useCustomEmail && custom.isNotEmpty)
+        ? custom
+        : _defaultEmailFor(identifier);
+
     final success = await widget.onSubmit(
       _role,
-      _identifierCtrl.text.trim(),
+      identifier,
       _firstNameCtrl.text.trim(),
       _lastNameCtrl.text.trim(),
-      _emailCtrl.text.trim(),
+      email,
     );
 
     if (!mounted) return;
@@ -853,6 +890,7 @@ class _UserFormDialogState extends State<_UserFormDialog> {
                         ? 'e.g. s312345678'
                         : 'e.g. 1234567',
                   ),
+                  onChanged: _onIdentifierChanged,
                   validator: (v) => _validateIdentifier(v, _role),
                 ),
                 const SizedBox(height: 16),
@@ -879,22 +917,93 @@ class _UserFormDialogState extends State<_UserFormDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Email
-                TextFormField(
-                  controller: _emailCtrl,
-                  style: GoogleFonts.hankenGrotesk(fontSize: 14),
-                  decoration: _inputDecoration('Email'),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return 'Email is required';
-                    }
-                    if (!v.contains('@') || !v.contains('.')) {
-                      return 'Enter a valid email address';
-                    }
-                    return null;
+                // Email — auto-derived from identifier, with a toggle to
+                // enter a custom email instead.
+                SwitchListTile(
+                  value: _useCustomEmail,
+                  onChanged: (value) {
+                    setState(() {
+                      _useCustomEmail = value;
+                      if (!value) {
+                        // Reverting to auto: derive from the identifier.
+                        _emailCtrl.text =
+                            _defaultEmailFor(_identifierCtrl.text);
+                      }
+                    });
                   },
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  activeColor: _navy,
+                  title: Text(
+                    'Use custom email',
+                    style: GoogleFonts.hankenGrotesk(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: _navy,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Off: defaults to identifier$_emailDomain',
+                    style: GoogleFonts.hankenGrotesk(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
                 ),
+                const SizedBox(height: 8),
+
+                if (_useCustomEmail)
+                  TextFormField(
+                    controller: _emailCtrl,
+                    style: GoogleFonts.hankenGrotesk(fontSize: 14),
+                    decoration: _inputDecoration('Email'),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) {
+                      if (!_useCustomEmail) return null;
+                      if (v == null || v.trim().isEmpty) {
+                        return 'Email is required';
+                      }
+                      if (!v.contains('@') || !v.contains('.')) {
+                        return 'Enter a valid email address';
+                      }
+                      return null;
+                    },
+                  )
+                else
+                  // Read-only preview of the auto-derived email.
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.email_outlined,
+                            size: 18, color: Colors.grey.shade600),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _defaultEmailFor(_identifierCtrl.text).isEmpty
+                                ? 'Enter an identifier to generate email'
+                                : _defaultEmailFor(_identifierCtrl.text),
+                            style: GoogleFonts.hankenGrotesk(
+                              fontSize: 14,
+                              color:
+                                  _defaultEmailFor(_identifierCtrl.text).isEmpty
+                                      ? Colors.grey.shade500
+                                      : Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/core/ui/error_display.dart';
 import 'package:nmu_shuttle_app/features/student/providers/booking_providers.dart';
 import 'package:nmu_shuttle_app/features/student/utils/booking_date_helpers.dart';
 import 'package:nmu_shuttle_app/features/student/widgets/booking_card.dart';
@@ -174,23 +175,10 @@ class _UpcomingBookingsTab extends ConsumerWidget {
 
     return upcomingAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 12),
-            Text(
-              'Failed to load bookings',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => ref.invalidate(upcomingBookingsProvider),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      error: (error, _) => ErrorRetry(
+        error: error,
+        title: 'Failed to load bookings',
+        onRetry: () => ref.invalidate(upcomingBookingsProvider),
       ),
       data: (bookings) {
         if (bookings.isEmpty) {
@@ -272,23 +260,10 @@ class _PastBookingsTab extends ConsumerWidget {
 
     return pastAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 12),
-            Text(
-              'Failed to load bookings',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => ref.invalidate(pastBookingsProvider),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      error: (error, _) => ErrorRetry(
+        error: error,
+        title: 'Failed to load bookings',
+        onRetry: () => ref.invalidate(pastBookingsProvider),
       ),
       data: (bookings) {
         if (bookings.isEmpty) {

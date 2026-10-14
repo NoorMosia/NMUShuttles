@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 import 'package:nmu_shuttle_app/shared/widgets/app_drawer.dart';
 
@@ -63,12 +64,16 @@ class StudentShell extends ConsumerWidget {
           NavigationDestination(
             icon: unreadCount > 0
                 ? Badge(
+                    backgroundColor: AppTheme.primaryGold,
+                    textColor: AppTheme.navy,
                     label: Text('$unreadCount'),
                     child: const Icon(Icons.notifications_outlined),
                   )
                 : const Icon(Icons.notifications_outlined),
             selectedIcon: unreadCount > 0
                 ? Badge(
+                    backgroundColor: AppTheme.primaryGold,
+                    textColor: AppTheme.navy,
                     label: Text('$unreadCount'),
                     child: const Icon(Icons.notifications),
                   )

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
+import 'package:nmu_shuttle_app/core/ui/error_display.dart';
 import 'package:nmu_shuttle_app/features/student/models/notification_model.dart';
 import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 import 'package:nmu_shuttle_app/features/student/screens/alert_detail_screen.dart';
+import 'package:nmu_shuttle_app/features/student/widgets/date_separator.dart';
 import 'package:nmu_shuttle_app/shared/widgets/student_shell.dart';
 
 /// Alerts screen listing all notifications ordered by CreatedAt DESC.
@@ -27,13 +30,17 @@ class AlertsScreen extends ConsumerWidget {
                 child: notificationsAsync.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => _ErrorState(
+                  error: (error, _) => ErrorRetry(
+                    error: error,
+                    title: 'Failed to load notifications',
                     onRetry: () => ref.invalidate(notificationsProvider),
                   ),
                   data: (notifications) {
                     if (notifications.isEmpty) {
                       return const _EmptyState();
                     }
+                    final grouped = _groupNotificationsByDate(notifications);
+                    final dateKeys = grouped.keys.toList();
                     return RefreshIndicator(
                       onRefresh: () async {
                         ref.invalidate(notificationsProvider);
@@ -42,10 +49,20 @@ class AlertsScreen extends ConsumerWidget {
                       },
                       child: ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: notifications.length,
-                        itemBuilder: (context, index) => _NotificationCard(
-                          notification: notifications[index],
-                        ),
+                        itemCount: dateKeys.length,
+                        itemBuilder: (context, dateIndex) {
+                          final date = dateKeys[dateIndex];
+                          final dayNotifications = grouped[date]!;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              DateSeparator(label: _formatDateLabel(date)),
+                              ...dayNotifications.map(
+                                (n) => _NotificationCard(notification: n),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     );
                   },
@@ -111,6 +128,31 @@ class AlertsScreen extends ConsumerWidget {
   }
 }
 
+/// Groups notifications by their [createdAt] date (date only, local time),
+/// preserving the input order (newest first as returned by the API).
+Map<DateTime, List<NotificationModel>> _groupNotificationsByDate(
+    List<NotificationModel> notifications) {
+  final Map<DateTime, List<NotificationModel>> grouped = {};
+  for (final n in notifications) {
+    final local = n.createdAt.toLocal();
+    final dateKey = DateTime(local.year, local.month, local.day);
+    grouped.putIfAbsent(dateKey, () => []).add(n);
+  }
+  return grouped;
+}
+
+/// Human-friendly label for a notification day group.
+String _formatDateLabel(DateTime date) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final dateOnly = DateTime(date.year, date.month, date.day);
+  final difference = dateOnly.difference(today).inDays;
+
+  if (difference == 0) return 'Today';
+  if (difference == -1) return 'Yesterday';
+  return DateFormat('dd/MM').format(date);
+}
+
 /// A single notification card with unread indicator.
 class _NotificationCard extends ConsumerWidget {
   const _NotificationCard({required this.notification});
@@ -125,7 +167,7 @@ class _NotificationCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
-        color: isUnread ? AppTheme.primaryGold.withValues(alpha: 0.05) : Colors.white,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         elevation: 0,
         child: InkWell(
@@ -134,30 +176,19 @@ class _NotificationCard extends ConsumerWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border(
-                left: BorderSide(
-                  color: isUnread ? AppTheme.primaryGold : Colors.grey.shade300,
-                  width: isUnread ? 4 : 2,
-                ),
-              ),
+              border: isUnread
+                  ? const Border(
+                      left: BorderSide(
+                        color: AppTheme.primaryGold,
+                        width: 4,
+                      ),
+                    )
+                  : null,
             ),
             padding: const EdgeInsets.all(16),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Unread indicator dot
-                if (isUnread)
-                  Container(
-                    margin: const EdgeInsets.only(top: 4, right: 12),
-                    width: 10,
-                    height: 10,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryGold,
-                      shape: BoxShape.circle,
-                    ),
-                  )
-                else
-                  const SizedBox(width: 22),
                 // Content
                 Expanded(
                   child: Column(
@@ -167,10 +198,8 @@ class _NotificationCard extends ConsumerWidget {
                         notification.title,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight:
-                              isUnread ? FontWeight.bold : FontWeight.w500,
-                          color: isUnread
-                              ? AppTheme.navy
-                              : Colors.grey.shade700,
+                              isUnread ? FontWeight.bold : FontWeight.w600,
+                          color: AppTheme.navy,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -179,9 +208,7 @@ class _NotificationCard extends ConsumerWidget {
                       Text(
                         notification.message,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: isUnread
-                              ? Colors.grey.shade700
-                              : Colors.grey.shade500,
+                          color: AppTheme.navy,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -273,31 +300,3 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-/// Error state widget with retry button.
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 48, color: Colors.red),
-          const SizedBox(height: 12),
-          Text(
-            'Failed to load notifications',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: onRetry,
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-}

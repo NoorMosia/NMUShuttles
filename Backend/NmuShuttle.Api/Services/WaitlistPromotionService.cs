@@ -41,6 +41,9 @@ public class WaitlistPromotionService : IWaitlistPromotionService
         {
             _logger.LogInformation(
                 "No available slots for TripInstanceId={TripInstanceId}. Skipping promotion.", tripInstanceId);
+
+            // Still notify unpromoted waitlisted students
+            await NotifyUnpromotedAsync(tripInstanceId);
             return;
         }
 
@@ -83,5 +86,38 @@ public class WaitlistPromotionService : IWaitlistPromotionService
         _logger.LogInformation(
             "WaitlistPromotionService completed. Promoted {Count} bookings for TripInstanceId={TripInstanceId}.",
             waitlistedBookings.Count, tripInstanceId);
+
+        // Notify students who remain on the waitlist (not promoted)
+        await NotifyUnpromotedAsync(tripInstanceId);
+    }
+
+    /// <summary>
+    /// Cancels remaining waitlisted bookings and notifies those students that they didn't get a seat.
+    /// </summary>
+    private async Task NotifyUnpromotedAsync(int tripInstanceId)
+    {
+        var remainingWaitlisted = await _db.Bookings
+            .Where(b => b.TripInstanceId == tripInstanceId && b.BookingStatus == "WaitingList")
+            .ToListAsync();
+
+        if (remainingWaitlisted.Count == 0)
+            return;
+
+        _logger.LogInformation(
+            "Notifying {Count} unpromoted waitlisted students for TripInstanceId={TripInstanceId}.",
+            remainingWaitlisted.Count, tripInstanceId);
+
+        foreach (var booking in remainingWaitlisted)
+        {
+            booking.BookingStatus = "Cancelled";
+
+            await _notificationService.DispatchAsync(
+                booking.StudentId,
+                "Waitlist Removed",
+                "Unfortunately, no seat became available for your waitlisted trip. Your booking has been removed from the waitlist.",
+                tripInstanceId);
+        }
+
+        await _db.SaveChangesAsync();
     }
 }

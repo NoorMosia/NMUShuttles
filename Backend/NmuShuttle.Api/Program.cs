@@ -99,7 +99,14 @@ builder.Services.AddSingleton<IFcmSender, FcmNotificationSender>();
 // ──────────────────────────────────────────────────────────────────
 // Firebase initialization (optional — graceful if not configured)
 // ──────────────────────────────────────────────────────────────────
+// Accept either the config-section form (Firebase:ServiceAccountPath) or the
+// documented environment variable (FCM_SERVICE_ACCOUNT_PATH). The first
+// non-empty value wins, so existing deployments keep working.
 var fcmPath = builder.Configuration["Firebase:ServiceAccountPath"];
+if (string.IsNullOrEmpty(fcmPath))
+{
+    fcmPath = builder.Configuration["FCM_SERVICE_ACCOUNT_PATH"];
+}
 if (!string.IsNullOrEmpty(fcmPath) && File.Exists(fcmPath))
 {
     FirebaseApp.Create(new AppOptions { Credential = GoogleCredential.FromFile(fcmPath) });

@@ -9,5 +9,13 @@ public interface IFcmSender
     /// Send a push notification to the given FCM device tokens.
     /// Partial failures are logged but never abort the dispatch.
     /// </summary>
-    Task SendToTokensAsync(IEnumerable<string> fcmTokens, string title, string message);
+    /// <param name="data">
+    /// Optional key/value payload delivered alongside the notification. Used by
+    /// the client to deep-link on tap (e.g. "tripInstanceId", "type").
+    /// </param>
+    Task SendToTokensAsync(
+        IEnumerable<string> fcmTokens,
+        string title,
+        string message,
+        IReadOnlyDictionary<string, string>? data = null);
 }

@@ -96,7 +96,19 @@ public class NotificationService : INotificationService
 
         if (tokens.Count > 0)
         {
-            await _fcmSender.SendToTokensAsync(tokens, title, message);
+            // Carry routing hints so the app can deep-link when the user taps
+            // the notification. Values must be strings for FCM.
+            var data = new Dictionary<string, string>
+            {
+                ["notificationId"] = notification.NotificationId.ToString(),
+                ["ownerType"] = ownerType,
+            };
+            if (tripInstanceId.HasValue)
+            {
+                data["tripInstanceId"] = tripInstanceId.Value.ToString();
+            }
+
+            await _fcmSender.SendToTokensAsync(tokens, title, message, data);
         }
         else
         {

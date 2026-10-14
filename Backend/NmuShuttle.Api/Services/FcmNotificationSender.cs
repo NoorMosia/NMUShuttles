@@ -16,7 +16,11 @@ public class FcmNotificationSender : IFcmSender
         _logger = logger;
     }
 
-    public async Task SendToTokensAsync(IEnumerable<string> fcmTokens, string title, string message)
+    public async Task SendToTokensAsync(
+        IEnumerable<string> fcmTokens,
+        string title,
+        string message,
+        IReadOnlyDictionary<string, string>? data = null)
     {
         var tokens = fcmTokens.ToList();
         if (tokens.Count == 0)
@@ -38,6 +42,24 @@ public class FcmNotificationSender : IFcmSender
             {
                 Title = title,
                 Body = message
+            },
+            // Data payload travels with the notification so the client can
+            // deep-link when the user taps it (foreground, background, or
+            // cold-start). FCM requires all data values to be strings.
+            Data = data?.ToDictionary(kv => kv.Key, kv => kv.Value),
+            // Android-specific delivery config. Without high priority and an
+            // explicit channel id, Android 8+ delivers the notification at
+            // normal priority and it lands silently in the drawer instead of
+            // appearing as a heads-up banner. The channel id must match the one
+            // created in the Flutter PushNotificationService (and the
+            // default_notification_channel_id in AndroidManifest.xml).
+            Android = new AndroidConfig
+            {
+                Priority = Priority.High,
+                Notification = new AndroidNotification
+                {
+                    ChannelId = "nmu_shuttle_default"
+                }
             }
         };
 

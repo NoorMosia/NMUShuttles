@@ -48,6 +48,15 @@ class _NmuShuttleAppState extends ConsumerState<NmuShuttleApp> {
     super.initState();
     _appRouter = AppRouter();
     FlutterNativeSplash.remove();
+
+    // Route notification taps (foreground, background, or cold-start) to the
+    // relevant alerts screen. The data payload is set by the backend.
+    PushNotificationService.instance.setNotificationTapHandler((data) {
+      final ownerType = data['ownerType']?.toString();
+      final location =
+          ownerType == 'Marshal' ? '/marshal/alerts' : '/student/alerts';
+      _appRouter.router.go(location);
+    });
   }
 
   @override

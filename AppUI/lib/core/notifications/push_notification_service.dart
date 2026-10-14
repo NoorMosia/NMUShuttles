@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -35,6 +37,38 @@ class PushNotificationService {
 
   bool _initialised = false;
 
+  /// Invoked when the user taps a notification (foreground, background, or
+  /// cold-start). Receives the message's `data` payload so the app can
+  /// deep-link. Set by the app layer via [setNotificationTapHandler]; kept as
+  /// a callback so this service stays decoupled from the router.
+  void Function(Map<String, dynamic> data)? _onNotificationTap;
+
+  /// If a notification launched the app from a terminated state before the tap
+  /// handler was registered, its data is held here and replayed once a handler
+  /// is set.
+  Map<String, dynamic>? _pendingTapData;
+
+  /// Registers the handler used to route notification taps. Any tap captured
+  /// before this was set (e.g. cold start) is replayed immediately.
+  void setNotificationTapHandler(void Function(Map<String, dynamic> data) handler) {
+    _onNotificationTap = handler;
+    final pending = _pendingTapData;
+    if (pending != null) {
+      _pendingTapData = null;
+      handler(pending);
+    }
+  }
+
+  void _dispatchTap(Map<String, dynamic> data) {
+    final handler = _onNotificationTap;
+    if (handler != null) {
+      handler(data);
+    } else {
+      // No handler yet (cold start before the router is ready) — hold it.
+      _pendingTapData = data;
+    }
+  }
+
   /// True once Firebase + FCM have been initialised successfully. When false,
   /// all messaging accessors below are no-ops so a Firebase failure can never
   /// crash the UI (e.g. missing/stale native config in a dev build).
@@ -71,6 +105,17 @@ class PushNotificationService {
     // Foreground messages: Android does not show them automatically, so we
     // render a heads-up local notification ourselves.
     FirebaseMessaging.onMessage.listen(_showForegroundNotification);
+
+    // Tap on a notification while the app is backgrounded (but alive).
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      _dispatchTap(message.data);
+    });
+
+    // App launched from a terminated state by tapping a notification.
+    final initialMessage = await _messaging.getInitialMessage();
+    if (initialMessage != null) {
+      _dispatchTap(initialMessage.data);
+    }
 
     // Only mark available once Firebase + FCM wiring succeeded.
     _initialised = true;
@@ -117,7 +162,21 @@ class PushNotificationService {
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidInit);
 
-    await _localNotifications.initialize(initSettings);
+    await _localNotifications.initialize(
+      initSettings,
+      // Tap on a foreground notification we rendered ourselves. The FCM data
+      // payload is JSON-encoded into the notification payload below.
+      onDidReceiveNotificationResponse: (response) {
+        final payload = response.payload;
+        if (payload == null || payload.isEmpty) return;
+        try {
+          final decoded = jsonDecode(payload) as Map<String, dynamic>;
+          _dispatchTap(decoded);
+        } catch (e) {
+          debugPrint('[FCM] Failed to decode notification payload: $e');
+        }
+      },
+    );
 
     await _localNotifications
         .resolvePlatformSpecificImplementation<
@@ -143,6 +202,9 @@ class PushNotificationService {
           icon: '@mipmap/ic_launcher',
         ),
       ),
+      // Carry the FCM data payload so a tap can deep-link, matching the
+      // background/cold-start paths handled via FirebaseMessaging streams.
+      payload: message.data.isEmpty ? null : jsonEncode(message.data),
     );
   }
 }

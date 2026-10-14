@@ -14,4 +14,15 @@ public interface INotificationService
     /// Send a notification to ALL students with confirmed bookings on a trip.
     /// </summary>
     Task DispatchToTripPassengersAsync(int tripInstanceId, string title, string message);
+
+    /// <summary>
+    /// Send a notification to a single marshal (creates DB record + dispatches FCM).
+    /// </summary>
+    Task DispatchToMarshalAsync(int marshalId, string title, string message, int? tripInstanceId = null);
+
+    /// <summary>
+    /// Send a notification to ALL active marshals (creates DB records + dispatches FCM).
+    /// Used for broadcast events such as a new calendar exception.
+    /// </summary>
+    Task DispatchToAllMarshalsAsync(string title, string message, int? tripInstanceId = null);
 }

@@ -5,11 +5,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <!-- Internet for Google Maps tiles -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Runtime notification permission required on Android 13+ (API 33) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:label="LATT"
         android:name="${applicationName}"
-        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -42,6 +43,12 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA51uPs7hqf16hBT1BHICvJR-z7_azh4pk" />
+
+        <!-- FCM: default channel for notifications received while backgrounded.
+             Must match the channel id created in PushNotificationService. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="nmu_shuttle_default" />
 
     </application>
     <!-- Required to query activities that can process text, see:

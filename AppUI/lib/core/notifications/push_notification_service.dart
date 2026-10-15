@@ -69,6 +69,17 @@ class PushNotificationService {
     }
   }
 
+  /// Invoked whenever a push arrives while the app is in the foreground, so the
+  /// app layer can refetch the affected lists (e.g. invalidate the notifications
+  /// provider) and keep the alerts screen in sync without a manual pull-to-
+  /// refresh. Kept as a callback so this service stays decoupled from Riverpod.
+  void Function()? _onMessageReceived;
+
+  /// Registers the handler called when a foreground push arrives.
+  void setMessageReceivedHandler(void Function() handler) {
+    _onMessageReceived = handler;
+  }
+
   /// True once Firebase + FCM have been initialised successfully. When false,
   /// all messaging accessors below are no-ops so a Firebase failure can never
   /// crash the UI (e.g. missing/stale native config in a dev build).
@@ -103,8 +114,12 @@ class PushNotificationService {
     await requestPermission();
 
     // Foreground messages: Android does not show them automatically, so we
-    // render a heads-up local notification ourselves.
-    FirebaseMessaging.onMessage.listen(_showForegroundNotification);
+    // render a heads-up local notification ourselves, then let the app layer
+    // refresh the notifications list so it stays in sync.
+    FirebaseMessaging.onMessage.listen((message) {
+      _showForegroundNotification(message);
+      _onMessageReceived?.call();
+    });
 
     // Tap on a notification while the app is backgrounded (but alive).
     FirebaseMessaging.onMessageOpenedApp.listen((message) {

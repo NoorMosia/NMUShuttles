@@ -6,6 +6,7 @@ import 'package:nmu_shuttle_app/core/notifications/push_notification_service.dar
 import 'package:nmu_shuttle_app/core/router/app_router.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 import 'package:nmu_shuttle_app/features/auth/providers/auth_providers.dart';
+import 'package:nmu_shuttle_app/features/student/providers/notification_providers.dart';
 
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -50,12 +51,20 @@ class _NmuShuttleAppState extends ConsumerState<NmuShuttleApp> {
     FlutterNativeSplash.remove();
 
     // Route notification taps (foreground, background, or cold-start) to the
-    // relevant alerts screen. The data payload is set by the backend.
+    // relevant alerts screen, refreshing the list first so it reflects the new
+    // notification. The data payload is set by the backend.
     PushNotificationService.instance.setNotificationTapHandler((data) {
+      ref.invalidate(notificationsProvider);
       final ownerType = data['ownerType']?.toString();
       final location =
           ownerType == 'Marshal' ? '/marshal/alerts' : '/student/alerts';
       _appRouter.router.go(location);
+    });
+
+    // Refresh the notifications list whenever a push arrives in the foreground,
+    // so the alerts screen updates live instead of needing a pull-to-refresh.
+    PushNotificationService.instance.setMessageReceivedHandler(() {
+      ref.invalidate(notificationsProvider);
     });
   }
 

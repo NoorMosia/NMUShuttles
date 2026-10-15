@@ -3993,18 +3993,18 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = true,
                             IsActive = true,
-                            LicensePlate = "EC 142-837",
+                            LicensePlate = "EC 101-001",
                             VendorCompanyName = "Bay Transit Corp",
                             VendorId = 1
                         },
                         new
                         {
                             ShuttleId = 2,
-                            Capacity = 35,
+                            Capacity = 2,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
+                            IsAccessibleVehicle = true,
                             IsActive = true,
-                            LicensePlate = "EC 256-491",
+                            LicensePlate = "EC 102-002",
                             VendorCompanyName = "Bay Transit Corp",
                             VendorId = 1
                         },
@@ -4013,11 +4013,11 @@ namespace NmuShuttle.Api.Migrations
                             ShuttleId = 3,
                             Capacity = 22,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
+                            IsAccessibleVehicle = true,
                             IsActive = true,
-                            LicensePlate = "EC 389-720",
-                            VendorCompanyName = "Bay Transit Corp",
-                            VendorId = 1
+                            LicensePlate = "EC 103-003",
+                            VendorCompanyName = "Coastal Movers",
+                            VendorId = 2
                         },
                         new
                         {
@@ -4026,29 +4026,29 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = true,
                             IsActive = true,
-                            LicensePlate = "EC 501-163",
-                            VendorCompanyName = "Coastal Movers",
-                            VendorId = 2
+                            LicensePlate = "EC 104-004",
+                            VendorCompanyName = "Metro Link SA",
+                            VendorId = 3
                         },
                         new
                         {
                             ShuttleId = 5,
-                            Capacity = 35,
+                            Capacity = 22,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
+                            IsAccessibleVehicle = true,
                             IsActive = true,
-                            LicensePlate = "EC 628-945",
-                            VendorCompanyName = "Coastal Movers",
-                            VendorId = 2
+                            LicensePlate = "EC 105-005",
+                            VendorCompanyName = "Bay Transit Corp",
+                            VendorId = 1
                         },
                         new
                         {
                             ShuttleId = 6,
-                            Capacity = 22,
+                            Capacity = 35,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             IsActive = true,
-                            LicensePlate = "EC 714-382",
+                            LicensePlate = "EC 106-006",
                             VendorCompanyName = "Coastal Movers",
                             VendorId = 2
                         },
@@ -4059,7 +4059,7 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             IsActive = true,
-                            LicensePlate = "EC 837-256",
+                            LicensePlate = "EC 107-007",
                             VendorCompanyName = "Metro Link SA",
                             VendorId = 3
                         },
@@ -4070,130 +4070,20 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             IsActive = true,
-                            LicensePlate = "EC 948-617",
-                            VendorCompanyName = "Metro Link SA",
-                            VendorId = 3
+                            LicensePlate = "EC 108-008",
+                            VendorCompanyName = "Bay Transit Corp",
+                            VendorId = 1
                         },
                         new
                         {
                             ShuttleId = 9,
-                            Capacity = 22,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = true,
-                            IsActive = true,
-                            LicensePlate = "EC 103-475",
-                            VendorCompanyName = "Metro Link SA",
-                            VendorId = 3
-                        },
-                        new
-                        {
-                            ShuttleId = 10,
                             Capacity = 28,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsAccessibleVehicle = false,
                             IsActive = true,
-                            LicensePlate = "EC 217-864",
-                            VendorCompanyName = "Bay Transit Corp",
-                            VendorId = 1
-                        },
-                        new
-                        {
-                            ShuttleId = 11,
-                            Capacity = 35,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
-                            IsActive = true,
-                            LicensePlate = "EC 331-058",
-                            VendorCompanyName = "Bay Transit Corp",
-                            VendorId = 1
-                        },
-                        new
-                        {
-                            ShuttleId = 12,
-                            Capacity = 22,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
-                            IsActive = true,
-                            LicensePlate = "EC 445-912",
+                            LicensePlate = "EC 109-009",
                             VendorCompanyName = "Coastal Movers",
                             VendorId = 2
-                        },
-                        new
-                        {
-                            ShuttleId = 13,
-                            Capacity = 28,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
-                            IsActive = true,
-                            LicensePlate = "EC 552-376",
-                            VendorCompanyName = "Coastal Movers",
-                            VendorId = 2
-                        },
-                        new
-                        {
-                            ShuttleId = 14,
-                            Capacity = 35,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
-                            IsActive = true,
-                            LicensePlate = "EC 668-741",
-                            VendorCompanyName = "Coastal Movers",
-                            VendorId = 2
-                        },
-                        new
-                        {
-                            ShuttleId = 15,
-                            Capacity = 22,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
-                            IsActive = true,
-                            LicensePlate = "EC 774-285",
-                            VendorCompanyName = "Metro Link SA",
-                            VendorId = 3
-                        },
-                        new
-                        {
-                            ShuttleId = 16,
-                            Capacity = 28,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
-                            IsActive = true,
-                            LicensePlate = "EC 889-639",
-                            VendorCompanyName = "Metro Link SA",
-                            VendorId = 3
-                        },
-                        new
-                        {
-                            ShuttleId = 17,
-                            Capacity = 35,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
-                            IsActive = true,
-                            LicensePlate = "EC 993-104",
-                            VendorCompanyName = "Metro Link SA",
-                            VendorId = 3
-                        },
-                        new
-                        {
-                            ShuttleId = 18,
-                            Capacity = 22,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = false,
-                            IsActive = true,
-                            LicensePlate = "EC 107-528",
-                            VendorCompanyName = "Bay Transit Corp",
-                            VendorId = 1
-                        },
-                        new
-                        {
-                            ShuttleId = 19,
-                            Capacity = 28,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsAccessibleVehicle = true,
-                            IsActive = true,
-                            LicensePlate = "EC 214-963",
-                            VendorCompanyName = "Bay Transit Corp",
-                            VendorId = 1
                         });
                 });
 
@@ -4390,17 +4280,17 @@ namespace NmuShuttle.Api.Migrations
                         {
                             StopShuttleDefaultId = 2,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 2,
+                            OrderPosition = 1,
                             ShuttleId = 2,
-                            StopId = 1
+                            StopId = 2
                         },
                         new
                         {
                             StopShuttleDefaultId = 3,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 3,
+                            OrderPosition = 1,
                             ShuttleId = 3,
-                            StopId = 1
+                            StopId = 3
                         },
                         new
                         {
@@ -4408,126 +4298,38 @@ namespace NmuShuttle.Api.Migrations
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             OrderPosition = 1,
                             ShuttleId = 4,
-                            StopId = 2
+                            StopId = 4
                         },
                         new
                         {
                             StopShuttleDefaultId = 5,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 2,
+                            OrderPosition = 1,
                             ShuttleId = 5,
-                            StopId = 2
+                            StopId = 5
                         },
                         new
                         {
                             StopShuttleDefaultId = 6,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 3,
+                            OrderPosition = 1,
                             ShuttleId = 6,
-                            StopId = 2
+                            StopId = 6
                         },
                         new
                         {
                             StopShuttleDefaultId = 7,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
                             OrderPosition = 1,
-                            ShuttleId = 9,
-                            StopId = 3
+                            ShuttleId = 7,
+                            StopId = 7
                         },
                         new
                         {
                             StopShuttleDefaultId = 8,
                             CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 2,
-                            ShuttleId = 7,
-                            StopId = 3
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 9,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 3,
+                            OrderPosition = 1,
                             ShuttleId = 8,
-                            StopId = 3
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 10,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 1,
-                            ShuttleId = 19,
-                            StopId = 4
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 11,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 2,
-                            ShuttleId = 10,
-                            StopId = 4
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 12,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 1,
-                            ShuttleId = 11,
-                            StopId = 5
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 13,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 2,
-                            ShuttleId = 12,
-                            StopId = 5
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 14,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 1,
-                            ShuttleId = 13,
-                            StopId = 6
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 15,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 2,
-                            ShuttleId = 14,
-                            StopId = 6
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 16,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 1,
-                            ShuttleId = 15,
-                            StopId = 7
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 17,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 2,
-                            ShuttleId = 16,
-                            StopId = 7
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 18,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 1,
-                            ShuttleId = 17,
-                            StopId = 8
-                        },
-                        new
-                        {
-                            StopShuttleDefaultId = 19,
-                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            OrderPosition = 2,
-                            ShuttleId = 18,
                             StopId = 8
                         });
                 });

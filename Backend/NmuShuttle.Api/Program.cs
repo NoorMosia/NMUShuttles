@@ -129,6 +129,8 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 // ──────────────────────────────────────────────────────────────────
 // Check-In Service
 // ──────────────────────────────────────────────────────────────────
+builder.Services.Configure<ScanWindowOptions>(
+    builder.Configuration.GetSection(ScanWindowOptions.SectionName));
 builder.Services.AddScoped<ICheckInService, CheckInService>();
 
 // ──────────────────────────────────────────────────────────────────

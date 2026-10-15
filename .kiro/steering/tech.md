@@ -95,3 +95,11 @@ dotnet test
 | Email__Resend__FromName | Sender display name (default: `NMU Shuttle`) |
 
 > Config binds via the standard .NET `Email:Resend:*` section. As environment variables use the double-underscore form (`Email__Resend__ApiKey`). For local dev, prefer user-secrets: `dotnet user-secrets set "Email:Resend:ApiKey" "<key>"` in the `NmuShuttle.Api` project. Never commit the key.
+
+## Feature / Test Flags
+
+| Config key | Purpose |
+|------------|---------|
+| `ScanWindow:OpenAllTodayTrips` | **TEST-ONLY.** When `true`, every one of *today's* not-yet-departed trips is open to QR scanning, bypassing the 35-minute pre-departure window (tomorrow-onward trips keep the normal rule). Set to `false` for production to enforce the strict 35-min window. Bound at startup via `IOptions<ScanWindowOptions>`, so an API restart is required after changing it. |
+
+> ⚠️ `ScanWindow:OpenAllTodayTrips` must be `false` in production — it intentionally loosens who can be checked in early. Full reference and code touchpoints: `scanner.md` in the repo root.

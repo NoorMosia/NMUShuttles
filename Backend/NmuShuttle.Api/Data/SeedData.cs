@@ -81,59 +81,40 @@ public static class SeedData
 
     private static void SeedShuttles(ModelBuilder modelBuilder)
     {
+        // Lean demo fleet: one shuttle per stop (ShuttleId == StopId for 1-8),
+        // plus one spare (ShuttleId 9) used as the breakdown-replacement vehicle.
+        //
+        // Stops 1-5 carry priority (disability-cleared) students, so their single
+        // shuttle must be accessible — priority bookings are pre-assigned to the
+        // accessible front shuttle. Humewood (Stop 2) is intentionally a 2-seater
+        // to demonstrate the waiting-list flow (fills after 2 bookings).
         modelBuilder.Entity<Shuttle>().HasData(
-            new Shuttle { ShuttleId = 1, LicensePlate = "EC 142-837", Capacity = 22, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 2, LicensePlate = "EC 256-491", Capacity = 35, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 3, LicensePlate = "EC 389-720", Capacity = 22, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 4, LicensePlate = "EC 501-163", Capacity = 28, VendorId = 2, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 5, LicensePlate = "EC 628-945", Capacity = 35, VendorId = 2, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 6, LicensePlate = "EC 714-382", Capacity = 22, VendorId = 2, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 7, LicensePlate = "EC 837-256", Capacity = 28, VendorId = 3, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 8, LicensePlate = "EC 948-617", Capacity = 35, VendorId = 3, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 9, LicensePlate = "EC 103-475", Capacity = 22, VendorId = 3, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 10, LicensePlate = "EC 217-864", Capacity = 28, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 11, LicensePlate = "EC 331-058", Capacity = 35, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 12, LicensePlate = "EC 445-912", Capacity = 22, VendorId = 2, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 13, LicensePlate = "EC 552-376", Capacity = 28, VendorId = 2, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 14, LicensePlate = "EC 668-741", Capacity = 35, VendorId = 2, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 15, LicensePlate = "EC 774-285", Capacity = 22, VendorId = 3, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 16, LicensePlate = "EC 889-639", Capacity = 28, VendorId = 3, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 17, LicensePlate = "EC 993-104", Capacity = 35, VendorId = 3, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 18, LicensePlate = "EC 107-528", Capacity = 22, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
-            new Shuttle { ShuttleId = 19, LicensePlate = "EC 214-963", Capacity = 28, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate }
+            new Shuttle { ShuttleId = 1, LicensePlate = "EC 101-001", Capacity = 22, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 2, LicensePlate = "EC 102-002", Capacity = 2, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 3, LicensePlate = "EC 103-003", Capacity = 22, VendorId = 2, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 4, LicensePlate = "EC 104-004", Capacity = 28, VendorId = 3, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 5, LicensePlate = "EC 105-005", Capacity = 22, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = true, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 6, LicensePlate = "EC 106-006", Capacity = 35, VendorId = 2, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 7, LicensePlate = "EC 107-007", Capacity = 28, VendorId = 3, VendorCompanyName = "Metro Link SA", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
+            new Shuttle { ShuttleId = 8, LicensePlate = "EC 108-008", Capacity = 35, VendorId = 1, VendorCompanyName = "Bay Transit Corp", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate },
+            // Spare — not a stop default; dispatched as the replacement in the breakdown demo.
+            new Shuttle { ShuttleId = 9, LicensePlate = "EC 109-009", Capacity = 28, VendorId = 2, VendorCompanyName = "Coastal Movers", IsAccessibleVehicle = false, IsActive = true, CreatedAt = SeedDate }
         );
     }
 
     private static void SeedStopShuttleDefaults(ModelBuilder modelBuilder)
     {
+        // Each stop has exactly one default shuttle at the front (OrderPosition 1).
+        // ShuttleId mirrors StopId for 1-8. Humewood (Stop 2) is the 2-seater.
         modelBuilder.Entity<StopShuttleDefault>().HasData(
-            // Stop 1 (Summerstrand) — 3 shuttles, accessible S1 front
             new StopShuttleDefault { StopShuttleDefaultId = 1, StopId = 1, ShuttleId = 1, OrderPosition = 1, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 2, StopId = 1, ShuttleId = 2, OrderPosition = 2, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 3, StopId = 1, ShuttleId = 3, OrderPosition = 3, CreatedAt = SeedDate },
-            // Stop 2 (Humewood) — 3 shuttles, accessible S4 front
-            new StopShuttleDefault { StopShuttleDefaultId = 4, StopId = 2, ShuttleId = 4, OrderPosition = 1, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 5, StopId = 2, ShuttleId = 5, OrderPosition = 2, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 6, StopId = 2, ShuttleId = 6, OrderPosition = 3, CreatedAt = SeedDate },
-            // Stop 3 (Newton Park) — 3 shuttles, accessible S9 front
-            new StopShuttleDefault { StopShuttleDefaultId = 7, StopId = 3, ShuttleId = 9, OrderPosition = 1, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 8, StopId = 3, ShuttleId = 7, OrderPosition = 2, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 9, StopId = 3, ShuttleId = 8, OrderPosition = 3, CreatedAt = SeedDate },
-            // Stop 4 (Walmer Heights) — 2 shuttles, accessible S19 front
-            new StopShuttleDefault { StopShuttleDefaultId = 10, StopId = 4, ShuttleId = 19, OrderPosition = 1, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 11, StopId = 4, ShuttleId = 10, OrderPosition = 2, CreatedAt = SeedDate },
-            // Stop 5 (Lorraine) — 2 shuttles
-            new StopShuttleDefault { StopShuttleDefaultId = 12, StopId = 5, ShuttleId = 11, OrderPosition = 1, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 13, StopId = 5, ShuttleId = 12, OrderPosition = 2, CreatedAt = SeedDate },
-            // Stop 6 (Bluewater Bay) — 2 shuttles
-            new StopShuttleDefault { StopShuttleDefaultId = 14, StopId = 6, ShuttleId = 13, OrderPosition = 1, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 15, StopId = 6, ShuttleId = 14, OrderPosition = 2, CreatedAt = SeedDate },
-            // Stop 7 (Framesby) — 2 shuttles
-            new StopShuttleDefault { StopShuttleDefaultId = 16, StopId = 7, ShuttleId = 15, OrderPosition = 1, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 17, StopId = 7, ShuttleId = 16, OrderPosition = 2, CreatedAt = SeedDate },
-            // Stop 8 (Greenacres) — 2 shuttles
-            new StopShuttleDefault { StopShuttleDefaultId = 18, StopId = 8, ShuttleId = 17, OrderPosition = 1, CreatedAt = SeedDate },
-            new StopShuttleDefault { StopShuttleDefaultId = 19, StopId = 8, ShuttleId = 18, OrderPosition = 2, CreatedAt = SeedDate }
+            new StopShuttleDefault { StopShuttleDefaultId = 2, StopId = 2, ShuttleId = 2, OrderPosition = 1, CreatedAt = SeedDate },
+            new StopShuttleDefault { StopShuttleDefaultId = 3, StopId = 3, ShuttleId = 3, OrderPosition = 1, CreatedAt = SeedDate },
+            new StopShuttleDefault { StopShuttleDefaultId = 4, StopId = 4, ShuttleId = 4, OrderPosition = 1, CreatedAt = SeedDate },
+            new StopShuttleDefault { StopShuttleDefaultId = 5, StopId = 5, ShuttleId = 5, OrderPosition = 1, CreatedAt = SeedDate },
+            new StopShuttleDefault { StopShuttleDefaultId = 6, StopId = 6, ShuttleId = 6, OrderPosition = 1, CreatedAt = SeedDate },
+            new StopShuttleDefault { StopShuttleDefaultId = 7, StopId = 7, ShuttleId = 7, OrderPosition = 1, CreatedAt = SeedDate },
+            new StopShuttleDefault { StopShuttleDefaultId = 8, StopId = 8, ShuttleId = 8, OrderPosition = 1, CreatedAt = SeedDate }
         );
     }
 

@@ -21,6 +21,10 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
   int? _selectedStopId;
   int? _expandedTripId;
 
+  /// Departure-time groups that are currently expanded. Groups default to
+  /// collapsed, so a key only appears here once the user expands it.
+  final Set<String> _expandedGroups = {};
+
   static const List<String> _statusOptions = [
     'Scheduling',
     'Locked',
@@ -291,7 +295,22 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
     );
   }
 
+  /// Groups trips by departure time, returning entries sorted chronologically.
+  List<MapEntry<String, List<TripInstance>>> _groupTripsByDeparture(
+    List<TripInstance> trips,
+  ) {
+    final grouped = <String, List<TripInstance>>{};
+    for (final trip in trips) {
+      grouped.putIfAbsent(trip.departureTime, () => []).add(trip);
+    }
+    final entries = grouped.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    return entries;
+  }
+
   Widget _buildTripTable(List<TripInstance> trips) {
+    final groups = _groupTripsByDeparture(trips);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -327,10 +346,77 @@ class _TripsScreenState extends ConsumerState<TripsScreen> {
                 ),
               ),
               const Divider(height: 1),
-              // Table rows
-              ...trips.map((trip) => _buildTripRow(trip)),
+              // Grouped rows: a section header per departure time, then its
+              // trips (hidden while the group is collapsed).
+              ...groups.expand(
+                (group) => [
+                  _buildGroupHeader(group.key, group.value.length),
+                  if (_expandedGroups.contains(group.key))
+                    ...group.value.map((trip) => _buildTripRow(trip)),
+                ],
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupHeader(String departureTime, int count) {
+    final isExpanded = _expandedGroups.contains(departureTime);
+    return InkWell(
+      onTap: () {
+        setState(() {
+          if (isExpanded) {
+            _expandedGroups.remove(departureTime);
+          } else {
+            _expandedGroups.add(departureTime);
+          }
+        });
+      },
+      child: Container(
+        width: double.infinity,
+        color: _navy.withValues(alpha: 0.04),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        child: Row(
+          children: [
+            AnimatedRotation(
+              turns: isExpanded ? 0 : -0.25,
+              duration: const Duration(milliseconds: 150),
+              child: const Icon(
+                Icons.expand_more,
+                size: 20,
+                color: _navy,
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(Icons.schedule, size: 16, color: _navy),
+            const SizedBox(width: 8),
+            Text(
+              departureTime,
+              style: GoogleFonts.hankenGrotesk(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: _navy,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: _navy.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count ${count == 1 ? 'trip' : 'trips'}',
+                style: GoogleFonts.hankenGrotesk(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: _navy,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

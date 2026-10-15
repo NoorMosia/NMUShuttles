@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.Infrastructure;
 using NmuShuttle.Api.Models;
@@ -12,11 +13,13 @@ namespace NmuShuttle.Api.Services;
 public class CheckInService : ICheckInService
 {
     private readonly ShuttleDbContext _db;
+    private readonly ScanWindowOptions _scanWindowOptions;
     private static readonly TimeSpan ScanWindowMinutes = TimeSpan.FromMinutes(35);
 
-    public CheckInService(ShuttleDbContext db)
+    public CheckInService(ShuttleDbContext db, IOptions<ScanWindowOptions> scanWindowOptions)
     {
         _db = db;
+        _scanWindowOptions = scanWindowOptions.Value;
     }
 
     public async Task<Booking> CheckInAsync(string qrCodeToken, int marshalId)
@@ -325,6 +328,14 @@ public class CheckInService : ICheckInService
             throw new CheckInException(
                 "Scanning is closed — this trip has already departed.",
                 StatusCodes.Status422UnprocessableEntity);
+        }
+
+        // Testing convenience: when OpenAllTodayTrips is enabled, every one of today's
+        // not-yet-departed trips is open to scanning. Tomorrow-onward trips still follow
+        // the normal next-trip / 35-minute rule below.
+        if (_scanWindowOptions.OpenAllTodayTrips && tripInstance.TripDate == SastClock.Today)
+        {
+            return;
         }
 
         // The very next trip is open at any point. All other future trips are gated to

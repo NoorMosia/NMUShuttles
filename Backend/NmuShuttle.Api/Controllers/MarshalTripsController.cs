@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.DTOs;
 using NmuShuttle.Api.Infrastructure;
@@ -20,11 +21,13 @@ namespace NmuShuttle.Api.Controllers;
 public class MarshalTripsController : ControllerBase
 {
     private readonly ShuttleDbContext _dbContext;
+    private readonly ScanWindowOptions _scanWindowOptions;
     private static readonly TimeSpan ScanWindowMinutes = TimeSpan.FromMinutes(35);
 
-    public MarshalTripsController(ShuttleDbContext dbContext)
+    public MarshalTripsController(ShuttleDbContext dbContext, IOptions<ScanWindowOptions> scanWindowOptions)
     {
         _dbContext = dbContext;
+        _scanWindowOptions = scanWindowOptions.Value;
     }
 
     /// <summary>
@@ -165,9 +168,13 @@ public class MarshalTripsController : ControllerBase
 
                 // The very next upcoming trip overall is open at any time until it departs.
                 // Every other future trip is gated to the 35-minute pre-departure window.
+                // Testing convenience: when OpenAllTodayTrips is enabled, every one of
+                // today's not-yet-departed slots is open. These slots are always today's
+                // (the query filters TripDate == today), so the flag opens them all.
+                // This mirrors CheckInService.ValidateScanWindowAsync.
                 var isNextTrip = nextDeparture.HasValue && utcDeparture == nextDeparture.Value;
                 var isScanningOpen = now <= utcDeparture
-                    && (isNextTrip || now >= scanWindowStart);
+                    && (_scanWindowOptions.OpenAllTodayTrips || isNextTrip || now >= scanWindowStart);
 
                 return new MarshalTimeSlotDto
                 {

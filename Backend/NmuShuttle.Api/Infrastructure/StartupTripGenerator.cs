@@ -149,12 +149,38 @@ public static class StartupTripGenerator
     }
 
     /// <summary>
-    /// Allocates a shuttle to a newly created trip using round-robin from available shuttles.
-    /// Prefers accessible vehicles at OrderPosition 1.
+    /// Allocates the stop's standing convoy (its StopShuttleDefault roster) to a
+    /// newly created trip, preserving convoy order. This is what makes each stop
+    /// run its own vehicle(s) — e.g. Humewood's 2-seater — instead of a single
+    /// shared shuttle. Falls back to an accessible shuttle only if the stop has
+    /// no configured defaults.
     /// </summary>
     private static async Task AllocateShuttleAsync(ShuttleDbContext db, TripInstance trip)
     {
-        // Pick an accessible shuttle first, then any shuttle
+        var defaults = await db.StopShuttleDefaults
+            .Where(d => d.StopId == trip.StopId)
+            .OrderBy(d => d.OrderPosition)
+            .ToListAsync();
+
+        if (defaults.Count > 0)
+        {
+            foreach (var d in defaults)
+            {
+                db.TripShuttleAllocations.Add(new TripShuttleAllocation
+                {
+                    TripInstanceId = trip.TripInstanceId,
+                    ShuttleId = d.ShuttleId,
+                    OrderPosition = d.OrderPosition,
+                    IsOperational = true,
+                    AssignedAt = DateTime.UtcNow
+                });
+            }
+
+            await db.SaveChangesAsync();
+            return;
+        }
+
+        // Fallback: stop has no configured convoy — assign one accessible shuttle.
         var shuttle = await db.Shuttles
             .OrderByDescending(s => s.IsAccessibleVehicle)
             .ThenBy(s => s.ShuttleId)
@@ -162,21 +188,20 @@ public static class StartupTripGenerator
 
         if (shuttle == null) return;
 
-        var allocation = new TripShuttleAllocation
+        db.TripShuttleAllocations.Add(new TripShuttleAllocation
         {
             TripInstanceId = trip.TripInstanceId,
             ShuttleId = shuttle.ShuttleId,
             OrderPosition = 1,
             IsOperational = true,
             AssignedAt = DateTime.UtcNow
-        };
-
-        db.TripShuttleAllocations.Add(allocation);
+        });
         await db.SaveChangesAsync();
     }
 
     /// <summary>
-    /// Backfills shuttle allocations for trips on a given date that have no shuttles assigned.
+    /// Backfills convoy allocations for trips on a given date that have no shuttles
+    /// assigned, using each trip's stop convoy (StopShuttleDefault).
     /// </summary>
     private static async Task BackfillShuttleAllocationsAsync(ShuttleDbContext db, DateOnly targetDate)
     {
@@ -185,29 +210,11 @@ public static class StartupTripGenerator
                         !db.TripShuttleAllocations.Any(a => a.TripInstanceId == t.TripInstanceId))
             .ToListAsync();
 
-        if (!tripsWithoutShuttles.Any()) return;
-
-        var shuttle = await db.Shuttles
-            .OrderByDescending(s => s.IsAccessibleVehicle)
-            .ThenBy(s => s.ShuttleId)
-            .FirstOrDefaultAsync();
-
-        if (shuttle == null) return;
+        if (tripsWithoutShuttles.Count == 0) return;
 
         foreach (var trip in tripsWithoutShuttles)
         {
-            var allocation = new TripShuttleAllocation
-            {
-                TripInstanceId = trip.TripInstanceId,
-                ShuttleId = shuttle.ShuttleId,
-                OrderPosition = 1,
-                IsOperational = true,
-                AssignedAt = DateTime.UtcNow
-            };
-
-            db.TripShuttleAllocations.Add(allocation);
+            await AllocateShuttleAsync(db, trip);
         }
-
-        await db.SaveChangesAsync();
     }
 }

@@ -28,6 +28,17 @@ class MarshalHomeScreen extends ConsumerWidget {
                   ref.read(marshalHomeProvider.notifier).refresh(),
               child: _buildBody(scaffoldContext, state),
             ),
+            // Solid top strip so scrolled content doesn't show through
+            // behind the floating hamburger + label.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: MediaQuery.of(scaffoldContext).padding.top + 56,
+                color: Theme.of(scaffoldContext).scaffoldBackgroundColor,
+              ),
+            ),
             // Floating hamburger + Dashboard label
             Positioned(
               top: MediaQuery.of(scaffoldContext).padding.top + 12,

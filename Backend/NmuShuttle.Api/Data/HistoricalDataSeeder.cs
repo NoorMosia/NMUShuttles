@@ -5,11 +5,20 @@ using NmuShuttle.Api.Models;
 namespace NmuShuttle.Api.Data;
 
 /// <summary>
-/// Programmatic seeder for historical runtime data as defined in seed.md.
-/// Generates TripInstances, TripShuttleAllocations, Bookings, BreakdownLogs,
-/// TripNotes, Notifications, and Reports.
-/// 
-/// Only runs in Development if the TripInstances table is empty.
+/// Lean demo seeder for historical (past) runtime data.
+///
+/// Instead of thousands of trips, this builds a small, hand-shaped dataset over
+/// the last few operational days so a demo can show:
+///   • Past bookings per student (Boarded / No-Show / Cancelled)
+///   • Vendor/shuttle reliability analytics (one breakdown-replaced + one
+///     breakdown-cancelled, tallied against shuttle and vendor)
+///   • Student reports in various states (Submitted / Under Review / Resolved)
+///   • A notification history (read + unread)
+///
+/// Dates are computed relative to "today" (SAST) so the data always looks recent
+/// on demo day. All IDs are explicit and inserted with IDENTITY_INSERT.
+///
+/// Only runs in Development, and only if the TripInstances table is empty.
 /// Uses a fixed Random seed (42) for reproducible output.
 /// </summary>
 public class HistoricalDataSeeder
@@ -17,95 +26,50 @@ public class HistoricalDataSeeder
     private readonly ShuttleDbContext _context;
     private readonly Random _rng = new(42);
 
-    // Operational days from seed.md (Jul 28 – Aug 12, 2026)
-    private static readonly (DateOnly Date, bool IsSaturday)[] OperationalDays =
-    {
-        (new DateOnly(2026, 7, 28), false),  // Day 1 Tue
-        (new DateOnly(2026, 7, 29), false),  // Day 2 Wed
-        (new DateOnly(2026, 7, 30), false),  // Day 3 Thu
-        (new DateOnly(2026, 7, 31), false),  // Day 4 Fri
-        (new DateOnly(2026, 8, 1), true),    // Day 5 Sat
-        (new DateOnly(2026, 8, 3), false),   // Day 6 Mon
-        (new DateOnly(2026, 8, 4), false),   // Day 7 Tue
-        (new DateOnly(2026, 8, 5), false),   // Day 8 Wed
-        (new DateOnly(2026, 8, 6), false),   // Day 9 Thu
-        (new DateOnly(2026, 8, 7), false),   // Day 10 Fri
-        (new DateOnly(2026, 8, 8), true),    // Day 11 Sat
-        (new DateOnly(2026, 8, 11), false),  // Day 12 Tue
-        (new DateOnly(2026, 8, 12), false),  // Day 13 Wed
-    };
-
-    // Weekday timeslots (DepartureTime SAST, offset within stop's ScheduleTimeId range: 0-based)
-    private static readonly TimeOnly[] WeekdayTimes =
-    {
-        new(6, 45), new(7, 45), new(8, 45), new(9, 45),        // ToCampus 0-3
-        new(12, 30), new(14, 30), new(16, 0), new(17, 30),     // FromCampus 4-7
-        new(18, 30), new(20, 30), new(22, 0)                    // FromCampus 8-10
-    };
-
-    // Saturday timeslots (offset 11-18 within stop's range, but we index 0-based here)
-    private static readonly TimeOnly[] SaturdayTimes =
-    {
-        new(6, 45), new(7, 45), new(8, 45), new(9, 45),        // ToCampus 0-3
-        new(12, 30), new(14, 30), new(16, 0), new(17, 30)      // FromCampus 4-7
-    };
-
-    // Load percentages by timeslot index (weekday). Index matches WeekdayTimes.
-    private static readonly double[] WeekdayLoadPercent =
-        { 0.90, 0.75, 0.55, 0.35, 0.45, 0.60, 0.85, 0.75, 0.50, 0.30, 0.17 };
-
-    // Stop convoy configuration: StopId -> (ShuttleIds in order, TotalCapacity)
-    private static readonly Dictionary<int, (int[] ShuttleIds, int Capacity)> ConvoyConfig = new()
-    {
-        { 1, (new[] { 1, 2, 3 }, 79) },
-        { 2, (new[] { 4, 5, 6 }, 85) },
-        { 3, (new[] { 9, 7, 8 }, 85) },
-        { 4, (new[] { 19, 10 }, 56) },
-        { 5, (new[] { 11, 12 }, 57) },
-        { 6, (new[] { 13, 14 }, 63) },
-        { 7, (new[] { 15, 16 }, 50) },
-        { 8, (new[] { 17, 18 }, 57) },
-    };
-
-    // Shuttle capacities
+    // ── Lean fleet (mirrors SeedData) ────────────────────────────────────────
+    // ShuttleId == StopId for 1-8; shuttle 2 (Humewood) is the 2-seater; 9 is the spare.
     private static readonly Dictionary<int, int> ShuttleCapacity = new()
     {
-        {1,22},{2,35},{3,22},{4,28},{5,35},{6,22},{7,28},{8,35},{9,22},
-        {10,28},{11,35},{12,22},{13,28},{14,35},{15,22},{16,28},{17,35},{18,22},{19,28}
+        { 1, 22 }, { 2, 2 }, { 3, 22 }, { 4, 28 }, { 5, 22 },
+        { 6, 35 }, { 7, 28 }, { 8, 35 }, { 9, 28 }
     };
 
-    // Student-to-Stop affinity (active students only, StudentIds 47-50 excluded)
+    private static readonly Dictionary<int, string> ShuttlePlate = new()
+    {
+        { 1, "EC 101-001" }, { 2, "EC 102-002" }, { 3, "EC 103-003" }, { 4, "EC 104-004" },
+        { 5, "EC 105-005" }, { 6, "EC 106-006" }, { 7, "EC 107-007" }, { 8, "EC 108-008" },
+        { 9, "EC 109-009" }
+    };
+
+    private static readonly Dictionary<int, string> ShuttleVendor = new()
+    {
+        { 1, "Bay Transit Corp" }, { 2, "Bay Transit Corp" }, { 3, "Coastal Movers" },
+        { 4, "Metro Link SA" }, { 5, "Bay Transit Corp" }, { 6, "Coastal Movers" },
+        { 7, "Metro Link SA" }, { 8, "Bay Transit Corp" }, { 9, "Coastal Movers" }
+    };
+
+    // Each stop runs its single default shuttle (ShuttleId == StopId).
+    private static int StopShuttle(int stopId) => stopId;
+
+    // A few active students per stop, used to populate past bookings believably.
+    // All IDs exist in SeedData (documented 1-15 + extended 16-60).
     private static readonly Dictionary<int, int[]> StopStudents = new()
     {
-        { 1, new[] { 1, 2, 3, 16, 17, 18, 51, 52 } },
-        { 2, new[] { 4, 5, 6, 19, 20, 21, 53, 54 } },
-        { 3, new[] { 7, 8, 9, 22, 23, 24, 55, 56 } },
-        { 4, new[] { 10, 11, 13, 25, 26, 27, 57 } },
-        { 5, new[] { 12, 14, 35, 28, 29, 30, 58 } },
-        { 6, new[] { 15, 31, 32, 33, 59 } },
-        { 7, new[] { 34, 36, 37, 38, 60 } },
-        { 8, new[] { 39, 40, 41, 42, 43, 44, 45, 46 } },
+        { 1, new[] { 1, 2, 3, 16, 51 } },
+        { 2, new[] { 4, 5, 6, 19, 53 } },
+        { 3, new[] { 7, 8, 9, 22, 55 } },
+        { 4, new[] { 10, 11, 13, 25, 57 } },
+        { 5, new[] { 12, 14, 35, 28, 58 } },
+        { 6, new[] { 15, 31, 32, 59 } },
+        { 7, new[] { 34, 36, 37, 60 } },
+        { 8, new[] { 39, 40, 41, 42 } },
     };
 
-    // Priority schedules: (StudentId, StopId, ScheduleTimeId, DaysOfWeek[])
-    private static readonly (int StudentId, int StopId, int ScheduleTimeId, DayOfWeek[] Days)[] PriorityBookingRules =
-    {
-        (3, 1, 1, new[] { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }),
-        (3, 1, 7, new[] { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }),
-        (6, 2, 20, new[] { DayOfWeek.Tuesday, DayOfWeek.Thursday }),
-        (6, 2, 26, new[] { DayOfWeek.Tuesday, DayOfWeek.Thursday }),
-        (13, 4, 58, new[] { DayOfWeek.Monday, DayOfWeek.Wednesday }),
-        (13, 4, 63, new[] { DayOfWeek.Monday, DayOfWeek.Wednesday }),
-        (20, 3, 39, new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }),
-        (20, 3, 45, new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday }),
-        (35, 5, 77, new[] { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }),
-        (35, 5, 83, new[] { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }),
-    };
-
-    // Scenario trip IDs
-    private const int BreakdownReplacedTripId = 505;
-    private const int WaitlistOverflowTripId = 593;
-    private const int BreakdownCancelledTripId = 769;
+    // ── Running ID counters (IDENTITY_INSERT) ────────────────────────────────
+    private int _tripId = 1;
+    private int _allocId = 1;
+    private int _bookingId = 1;
+    private int _notifId = 1;
 
     public HistoricalDataSeeder(ShuttleDbContext context)
     {
@@ -117,16 +81,80 @@ public class HistoricalDataSeeder
         if (await _context.TripInstances.AnyAsync())
             return; // Already seeded
 
-        var trips = GenerateTrips();
-        var allocations = GenerateAllocations(trips);
-        var bookings = GenerateBookings(trips);
-        var (breakdownLogs, tripNotes) = GenerateBreakdownsAndNotes();
-        var notifications = GenerateNotifications(trips, bookings);
-        var reports = GenerateReports();
+        var trips = new List<TripInstance>();
+        var allocations = new List<TripShuttleAllocation>();
+        var bookings = new List<Booking>();
+        var breakdownLogs = new List<BreakdownLog>();
+        var tripNotes = new List<TripNote>();
+        var notifications = new List<Notification>();
+        var reports = new List<Report>();
 
-        // Insert each entity set with IDENTITY_INSERT toggled.
-        // No wrapping transaction — execution strategy doesn't support user transactions.
-        // Order matters for FK constraints.
+        // Build 5 past operational weekdays (skipping Sundays), ending yesterday.
+        var pastDays = BuildPastWeekdays(5);
+
+        // Scenario markers filled in while generating trips.
+        int? breakdownReplacedTripId = null;
+        int? breakdownCancelledTripId = null;
+
+        for (var dayIndex = 0; dayIndex < pastDays.Count; dayIndex++)
+        {
+            var date = pastDays[dayIndex];
+
+            // Keep it lean: 2 timeslots per stop per day (a morning ToCampus and an
+            // afternoon FromCampus), across all 8 stops.
+            for (var stopId = 1; stopId <= 8; stopId++)
+            {
+                foreach (var slot in new[] { TripSlot.MorningToCampus, TripSlot.AfternoonFromCampus })
+                {
+                    var scheduleTimeId = ResolveScheduleTimeId(stopId, slot);
+                    var departure = slot == TripSlot.MorningToCampus
+                        ? new TimeOnly(6, 45)
+                        : new TimeOnly(16, 0);
+
+                    var trip = BuildTrip(stopId, scheduleTimeId, date, departure);
+                    trips.Add(trip);
+
+                    // Decide if this trip is a breakdown scenario.
+                    // Replaced: Walmer Heights (Stop 4) morning on the 2nd-oldest day.
+                    // Cancelled: Framesby (Stop 7) morning on the 3rd-oldest day.
+                    var isReplaced = breakdownReplacedTripId == null &&
+                                     stopId == 4 && slot == TripSlot.MorningToCampus && dayIndex == 1;
+                    var isCancelled = breakdownCancelledTripId == null &&
+                                      stopId == 7 && slot == TripSlot.MorningToCampus && dayIndex == 2;
+
+                    if (isReplaced) breakdownReplacedTripId = trip.TripInstanceId;
+                    if (isCancelled) breakdownCancelledTripId = trip.TripInstanceId;
+
+                    allocations.AddRange(BuildAllocations(trip, isReplaced, isCancelled));
+                    bookings.AddRange(BuildBookings(trip, slot, isReplaced, isCancelled));
+                }
+            }
+        }
+
+        // Breakdown logs, trip notes and passenger notifications for the two scenarios.
+        if (breakdownReplacedTripId is int replacedId)
+        {
+            var trip = trips.First(t => t.TripInstanceId == replacedId);
+            breakdownLogs.Add(BuildReplacedBreakdownLog(trip));
+            tripNotes.AddRange(BuildReplacedNotes(trip));
+            notifications.AddRange(BuildBreakdownNotifications(trip, bookings, replaced: true));
+        }
+
+        if (breakdownCancelledTripId is int cancelledId)
+        {
+            var trip = trips.First(t => t.TripInstanceId == cancelledId);
+            breakdownLogs.Add(BuildCancelledBreakdownLog(trip));
+            tripNotes.AddRange(BuildCancelledNotes(trip));
+            notifications.AddRange(BuildBreakdownNotifications(trip, bookings, replaced: false));
+        }
+
+        // A handful of generic "Trip Completed" notifications (read) for students 1 & 2
+        // (they have DeviceRegistrations seeded) so the notification list isn't empty.
+        notifications.AddRange(BuildHistoryNotifications(trips));
+
+        reports.AddRange(BuildReports(trips));
+
+        // Insert in FK-safe order with IDENTITY_INSERT.
         await InsertWithIdentity("TripInstances", trips);
         await InsertWithIdentity("TripShuttleAllocations", allocations);
         await InsertWithIdentity("Bookings", bookings);
@@ -135,6 +163,413 @@ public class HistoricalDataSeeder
         await InsertWithIdentity("Notifications", notifications);
         await InsertWithIdentity("Reports", reports);
     }
+
+    private enum TripSlot
+    {
+        MorningToCampus,
+        AfternoonFromCampus
+    }
+
+    // ── Date helpers ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Returns the <paramref name="count"/> most recent operational weekdays before
+    /// today (SAST), oldest first. Skips Sundays (keeps it simple — matches the
+    /// generator's primary skip rule for a lean demo).
+    /// </summary>
+    private static List<DateOnly> BuildPastWeekdays(int count)
+    {
+        var days = new List<DateOnly>();
+        var cursor = SastClock.Today.AddDays(-1);
+
+        while (days.Count < count)
+        {
+            if (cursor.DayOfWeek != DayOfWeek.Sunday)
+                days.Add(cursor);
+            cursor = cursor.AddDays(-1);
+        }
+
+        days.Reverse(); // oldest first
+        return days;
+    }
+
+    /// <summary>
+    /// Resolves the seeded ScheduleTimeId for a stop + slot. ScheduleTimes are seeded
+    /// in blocks of 19 per stop: weekday ToCampus 06:45 is offset 0, weekday FromCampus
+    /// 16:00 is offset 6 (ToCampus 06:45/07:45/08:45/09:45 then FromCampus
+    /// 12:30/14:30/16:00/...).
+    /// </summary>
+    private static int ResolveScheduleTimeId(int stopId, TripSlot slot)
+    {
+        var baseId = (stopId - 1) * 19 + 1;
+        return slot == TripSlot.MorningToCampus ? baseId + 0 : baseId + 6;
+    }
+
+    // ── Trip / allocation / booking builders ───────────────────────────────────
+
+    private TripInstance BuildTrip(int stopId, int scheduleTimeId, DateOnly date, TimeOnly departure)
+    {
+        var departureUtc = DateTime.SpecifyKind(SastClock.ToUtc(date, departure), DateTimeKind.Utc);
+        return new TripInstance
+        {
+            TripInstanceId = _tripId++,
+            ScheduleTimeId = scheduleTimeId,
+            StopId = stopId,
+            TripDate = date,
+            Status = "Completed",
+            LockedAt = departureUtc.AddHours(-1),
+            InTransitAt = departureUtc,
+            CompletedAt = departureUtc.AddMinutes(45)
+        };
+    }
+
+    private IEnumerable<TripShuttleAllocation> BuildAllocations(TripInstance trip, bool isReplaced, bool isCancelled)
+    {
+        var frontShuttle = StopShuttle(trip.StopId);
+        var result = new List<TripShuttleAllocation>
+        {
+            new()
+            {
+                AllocationId = _allocId++,
+                TripInstanceId = trip.TripInstanceId,
+                ShuttleId = frontShuttle,
+                OrderPosition = 1,
+                // Replaced/Cancelled: the stop's own shuttle broke down → not operational.
+                IsOperational = !(isReplaced || isCancelled),
+                AssignedAt = trip.LockedAt!.Value
+            }
+        };
+
+        if (isReplaced)
+        {
+            // Spare shuttle 9 is dispatched as the replacement, ~20 min after the flag.
+            result.Add(new TripShuttleAllocation
+            {
+                AllocationId = _allocId++,
+                TripInstanceId = trip.TripInstanceId,
+                ShuttleId = 9,
+                OrderPosition = 2,
+                IsOperational = true,
+                AssignedAt = trip.LockedAt!.Value.AddMinutes(40)
+            });
+        }
+
+        return result;
+    }
+
+    private IEnumerable<Booking> BuildBookings(TripInstance trip, TripSlot slot, bool isReplaced, bool isCancelled)
+    {
+        var frontShuttle = StopShuttle(trip.StopId);
+        var capacity = ShuttleCapacity[frontShuttle] + (isReplaced ? ShuttleCapacity[9] : 0);
+
+        // For the 2-seat Humewood stop, cap demand so it stays believable.
+        var pool = StopStudents[trip.StopId];
+        var demand = Math.Min(pool.Length, Math.Max(2, capacity));
+        // Morning trips run a bit fuller than afternoon.
+        if (slot == TripSlot.AfternoonFromCampus) demand = Math.Max(2, demand - 1);
+
+        var chosen = pool.Take(demand).ToList();
+        var result = new List<Booking>();
+
+        for (var i = 0; i < chosen.Count; i++)
+        {
+            var studentId = chosen[i];
+            string bookingStatus = "Confirmed";
+            string boardedStatus;
+            int? shuttleId;
+            DateTime? boardedAt;
+
+            if (isCancelled && i >= capacity)
+            {
+                // No replacement — passengers beyond remaining capacity could not board.
+                boardedStatus = "Pending";
+                shuttleId = null;
+                boardedAt = null;
+            }
+            else if (i == chosen.Count - 1 && chosen.Count > 2)
+            {
+                // Last passenger: a no-show (nice for analytics), unless it's the tiny Humewood trip.
+                boardedStatus = "NoShow";
+                shuttleId = null;
+                boardedAt = null;
+            }
+            else
+            {
+                boardedStatus = "Boarded";
+                shuttleId = isReplaced && i >= ShuttleCapacity[frontShuttle] ? 9 : frontShuttle;
+                boardedAt = trip.InTransitAt!.Value.AddMinutes(-20 + _rng.Next(0, 18));
+            }
+
+            result.Add(new Booking
+            {
+                BookingId = _bookingId++,
+                StudentId = studentId,
+                TripInstanceId = trip.TripInstanceId,
+                BookingStatus = bookingStatus,
+                BookingType = "Standard",
+                BoardedStatus = boardedStatus,
+                QrCodeToken = $"hist_t{trip.TripInstanceId}_s{studentId}_{_bookingId}",
+                ShuttleId = shuttleId,
+                BoardedAt = boardedAt,
+                CreatedAt = trip.TripDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
+                    .AddDays(-1).AddHours(14 + _rng.Next(0, 6))
+            });
+        }
+
+        // Add one explicitly cancelled booking per morning trip for realism.
+        if (slot == TripSlot.MorningToCampus)
+        {
+            var extra = StopStudents[trip.StopId].LastOrDefault();
+            // Only if that student isn't already booked above.
+            if (!chosen.Contains(extra) && extra != 0)
+            {
+                result.Add(new Booking
+                {
+                    BookingId = _bookingId++,
+                    StudentId = extra,
+                    TripInstanceId = trip.TripInstanceId,
+                    BookingStatus = "Cancelled",
+                    BookingType = "Standard",
+                    BoardedStatus = "Pending",
+                    QrCodeToken = $"hist_t{trip.TripInstanceId}_s{extra}_cx_{_bookingId}",
+                    ShuttleId = null,
+                    BoardedAt = null,
+                    CreatedAt = trip.TripDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
+                        .AddDays(-2).AddHours(10)
+                });
+            }
+        }
+
+        return result;
+    }
+
+    // ── Breakdown scenarios ─────────────────────────────────────────────────────
+
+    private BreakdownLog BuildReplacedBreakdownLog(TripInstance trip)
+    {
+        var brokenShuttle = StopShuttle(trip.StopId);
+        var flaggedAt = trip.LockedAt!.Value.AddMinutes(20);
+        return new BreakdownLog
+        {
+            BreakdownLogId = 1,
+            TripInstanceId = trip.TripInstanceId,
+            ShuttleId = brokenShuttle,
+            VendorCompanyName = ShuttleVendor[brokenShuttle],
+            FlaggedAt = flaggedAt,
+            FlaggedByMarshalId = MarshalForStop(trip.StopId),
+            ResolutionType = "Replaced",
+            ReplacementShuttleId = 9,
+            ResolvedAt = flaggedAt.AddMinutes(20),
+            ResolvedByAdminId = 1
+        };
+    }
+
+    private BreakdownLog BuildCancelledBreakdownLog(TripInstance trip)
+    {
+        var brokenShuttle = StopShuttle(trip.StopId);
+        var flaggedAt = trip.LockedAt!.Value.AddMinutes(15);
+        return new BreakdownLog
+        {
+            BreakdownLogId = 2,
+            TripInstanceId = trip.TripInstanceId,
+            ShuttleId = brokenShuttle,
+            VendorCompanyName = ShuttleVendor[brokenShuttle],
+            FlaggedAt = flaggedAt,
+            FlaggedByMarshalId = MarshalForStop(trip.StopId),
+            ResolutionType = "Cancelled",
+            ReplacementShuttleId = null,
+            ResolvedAt = flaggedAt.AddMinutes(25),
+            ResolvedByAdminId = 2
+        };
+    }
+
+    private IEnumerable<TripNote> BuildReplacedNotes(TripInstance trip)
+    {
+        var brokenShuttle = StopShuttle(trip.StopId);
+        var flaggedAt = trip.LockedAt!.Value.AddMinutes(20);
+        return new[]
+        {
+            new TripNote
+            {
+                TripNoteId = 1,
+                TripInstanceId = trip.TripInstanceId,
+                NoteType = "Incident",
+                Body = $"Marshal reported shuttle {ShuttlePlate[brokenShuttle]} failed to arrive. Driver reported engine trouble en route.",
+                CreatedByAdminId = 1,
+                CreatedAt = flaggedAt.AddMinutes(5),
+                IsResolutionAction = false
+            },
+            new TripNote
+            {
+                TripNoteId = 2,
+                TripInstanceId = trip.TripInstanceId,
+                NoteType = "Replacement",
+                Body = $"Replacement shuttle {ShuttlePlate[9]} dispatched from depot. Vendor confirmed availability.",
+                CreatedByAdminId = 1,
+                CreatedAt = flaggedAt.AddMinutes(20),
+                IsResolutionAction = true
+            }
+        };
+    }
+
+    private IEnumerable<TripNote> BuildCancelledNotes(TripInstance trip)
+    {
+        var brokenShuttle = StopShuttle(trip.StopId);
+        var flaggedAt = trip.LockedAt!.Value.AddMinutes(15);
+        return new[]
+        {
+            new TripNote
+            {
+                TripNoteId = 3,
+                TripInstanceId = trip.TripInstanceId,
+                NoteType = "Incident",
+                Body = $"Marshal reported shuttle {ShuttlePlate[brokenShuttle]} mechanical failure at the stop (tyre blowout).",
+                CreatedByAdminId = 2,
+                CreatedAt = flaggedAt.AddMinutes(3),
+                IsResolutionAction = false
+            },
+            new TripNote
+            {
+                TripNoteId = 4,
+                TripInstanceId = trip.TripInstanceId,
+                NoteType = "General",
+                Body = $"No replacement available from {ShuttleVendor[brokenShuttle]}. Trip marked cancelled; affected students notified.",
+                CreatedByAdminId = 2,
+                CreatedAt = flaggedAt.AddMinutes(25),
+                IsResolutionAction = true
+            }
+        };
+    }
+
+    private IEnumerable<Notification> BuildBreakdownNotifications(
+        TripInstance trip, List<Booking> bookings, bool replaced)
+    {
+        var brokenShuttle = StopShuttle(trip.StopId);
+        var resolvedAt = replaced
+            ? trip.LockedAt!.Value.AddMinutes(40)
+            : trip.LockedAt!.Value.AddMinutes(40);
+
+        var title = replaced ? "Shuttle Update" : "Shuttle Cancelled";
+        var message = replaced
+            ? $"Shuttle {ShuttlePlate[brokenShuttle]} on your trip broke down. Replacement {ShuttlePlate[9]} has been dispatched — your trip will proceed."
+            : $"Shuttle {ShuttlePlate[brokenShuttle]} on your trip broke down and no replacement was available. We're sorry for the disruption.";
+
+        var affected = bookings
+            .Where(b => b.TripInstanceId == trip.TripInstanceId && b.BookingStatus == "Confirmed")
+            .Select(b => b.StudentId)
+            .Distinct();
+
+        var result = new List<Notification>();
+        foreach (var studentId in affected)
+        {
+            result.Add(new Notification
+            {
+                NotificationId = _notifId++,
+                OwnerId = studentId,
+                OwnerType = "Student",
+                Title = title,
+                Message = message,
+                IsRead = true,
+                RelatedTripInstanceId = trip.TripInstanceId,
+                CreatedAt = resolvedAt
+            });
+        }
+
+        return result;
+    }
+
+    private IEnumerable<Notification> BuildHistoryNotifications(List<TripInstance> trips)
+    {
+        // A couple of friendly "trip completed" notices for students 1 & 2 so the
+        // in-app notification history has read items alongside the unread demo one.
+        var result = new List<Notification>();
+        var recent = trips
+            .Where(t => StopStudents[t.StopId].Contains(1) || StopStudents[t.StopId].Contains(2))
+            .OrderByDescending(t => t.TripDate)
+            .Take(2)
+            .ToList();
+
+        foreach (var trip in recent)
+        {
+            var studentId = StopStudents[trip.StopId].Contains(1) ? 1 : 2;
+            result.Add(new Notification
+            {
+                NotificationId = _notifId++,
+                OwnerId = studentId,
+                OwnerType = "Student",
+                Title = "Trip Completed",
+                Message = "Thanks for riding with NMU Shuttle. Your trip is complete.",
+                IsRead = true,
+                RelatedTripInstanceId = trip.TripInstanceId,
+                CreatedAt = trip.CompletedAt!.Value
+            });
+        }
+
+        return result;
+    }
+
+    // ── Reports ──────────────────────────────────────────────────────────────
+
+    private List<Report> BuildReports(List<TripInstance> trips)
+    {
+        // Attach reports to real trips where possible for believable deep-links.
+        int? TripAt(int stopId) =>
+            trips.Where(t => t.StopId == stopId)
+                 .OrderByDescending(t => t.TripDate)
+                 .Select(t => (int?)t.TripInstanceId)
+                 .FirstOrDefault();
+
+        var now = SastClock.UtcNow;
+
+        return new List<Report>
+        {
+            new()
+            {
+                ReportId = 1, StudentId = 5, Category = "DriverBehavior",
+                Description = "Driver was overtaking dangerously on Marine Drive. Several passengers felt unsafe.",
+                Status = "Resolved", TripInstanceId = TripAt(2),
+                AdminNotes = "Raised with the vendor. Driver given a written warning; vendor confirmed corrective action.",
+                CreatedAt = now.AddDays(-4), UpdatedAt = now.AddDays(-2)
+            },
+            new()
+            {
+                ReportId = 2, StudentId = 22, Category = "VehicleQuality",
+                Description = "Shuttle had broken air conditioning. Very hot and uncomfortable on the afternoon trip.",
+                Status = "Resolved", TripInstanceId = TripAt(3),
+                AdminNotes = "Vehicle pulled for maintenance and returned to service after AC repair confirmed.",
+                CreatedAt = now.AddDays(-3), UpdatedAt = now.AddDays(-1)
+            },
+            new()
+            {
+                ReportId = 3, StudentId = 14, Category = "TimetableIssue",
+                Description = "The afternoon shuttle has arrived 10-15 minutes late three days in a row.",
+                Status = "UnderReview", TripInstanceId = TripAt(5),
+                AdminNotes = "Investigating with vendor dispatch. Requested GPS logs for the week.",
+                CreatedAt = now.AddDays(-2), UpdatedAt = now.AddDays(-1)
+            },
+            new()
+            {
+                ReportId = 4, StudentId = 7, Category = "Other",
+                Description = "The shelter at the stop has a broken bench. Students stand in the rain while waiting.",
+                Status = "Submitted", TripInstanceId = null,
+                AdminNotes = null, CreatedAt = now.AddDays(-1), UpdatedAt = null
+            },
+            new()
+            {
+                ReportId = 5, StudentId = 16, Category = "VehicleQuality",
+                Description = "Strong diesel smell inside the vehicle. A few passengers felt nauseous.",
+                Status = "Submitted", TripInstanceId = TripAt(1),
+                AdminNotes = null, CreatedAt = now.AddHours(-18), UpdatedAt = null
+            },
+        };
+    }
+
+    // ── Lookups ────────────────────────────────────────────────────────────────
+
+    /// <summary>Marshal assigned to a stop in SeedData (MarshalIds 4-11 map to Stops 1-8).</summary>
+    private static int MarshalForStop(int stopId) => stopId + 3;
+
+    // ── Insert plumbing ──────────────────────────────────────────────────────
 
     private async Task InsertWithIdentity<T>(string tableName, List<T> entities) where T : class
     {
@@ -149,18 +584,11 @@ public class HistoricalDataSeeder
             await _context.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT [{tableName}] ON");
 #pragma warning restore EF1002
 
-            // Batch inserts to avoid timeout on large sets
-            const int batchSize = 5000;
-            for (var i = 0; i < entities.Count; i += batchSize)
-            {
-                var batch = entities.Skip(i).Take(batchSize).ToList();
-                _context.Set<T>().AddRange(batch);
-                await _context.SaveChangesAsync();
+            _context.Set<T>().AddRange(entities);
+            await _context.SaveChangesAsync();
 
-                // Detach to free memory and avoid duplicate tracking
-                foreach (var entry in _context.ChangeTracker.Entries().ToList())
-                    entry.State = Microsoft.EntityFrameworkCore.EntityState.Detached;
-            }
+            foreach (var entry in _context.ChangeTracker.Entries().ToList())
+                entry.State = EntityState.Detached;
 
 #pragma warning disable EF1002
             await _context.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT [{tableName}] OFF");
@@ -169,659 +597,4 @@ public class HistoricalDataSeeder
             await transaction.CommitAsync();
         });
     }
-
-    #region Trip Generation
-
-    private List<TripInstance> GenerateTrips()
-    {
-        var trips = new List<TripInstance>(1096);
-        var tripId = 1;
-
-        foreach (var (date, isSaturday) in OperationalDays)
-        {
-            var timeslotCount = isSaturday ? 8 : 11;
-
-            for (var stopId = 1; stopId <= 8; stopId++)
-            {
-                for (var slotIdx = 0; slotIdx < timeslotCount; slotIdx++)
-                {
-                    var scheduleTimeId = GetScheduleTimeId(stopId, slotIdx, isSaturday);
-                    var departureTime = isSaturday ? SaturdayTimes[slotIdx] : WeekdayTimes[slotIdx];
-                    var (lockedAt, inTransitAt, completedAt) = ComputeTimestamps(date, departureTime);
-
-                    trips.Add(new TripInstance
-                    {
-                        TripInstanceId = tripId,
-                        ScheduleTimeId = scheduleTimeId,
-                        StopId = stopId,
-                        TripDate = date,
-                        Status = "Completed",
-                        LockedAt = lockedAt,
-                        InTransitAt = inTransitAt,
-                        CompletedAt = completedAt
-                    });
-
-                    tripId++;
-                }
-            }
-        }
-
-        return trips;
-    }
-
-    private static int GetScheduleTimeId(int stopId, int slotIndex, bool isSaturday)
-    {
-        // Each stop has 19 ScheduleTimeIds: offsets 0-10 weekday, 11-18 saturday
-        var baseId = (stopId - 1) * 19 + 1;
-        return isSaturday ? baseId + 11 + slotIndex : baseId + slotIndex;
-    }
-
-    private static (DateTime LockedAt, DateTime InTransitAt, DateTime CompletedAt) ComputeTimestamps(
-        DateOnly date, TimeOnly departureTimeSast)
-    {
-        // Convert the SAST departure (date + wall-clock) to its UTC instant.
-        var departureUtc = DateTime.SpecifyKind(
-            SastClock.ToUtc(date, departureTimeSast), DateTimeKind.Utc);
-        var lockedAt = departureUtc.AddHours(-1); // T-60min
-        var completedAt = departureUtc.AddMinutes(45);
-
-        return (lockedAt, departureUtc, completedAt);
-    }
-
-    #endregion
-
-    #region Allocation Generation
-
-    private List<TripShuttleAllocation> GenerateAllocations(List<TripInstance> trips)
-    {
-        var allocations = new List<TripShuttleAllocation>(2700);
-        var allocId = 1;
-
-        foreach (var trip in trips)
-        {
-            var convoy = ConvoyConfig[trip.StopId];
-
-            for (var i = 0; i < convoy.ShuttleIds.Length; i++)
-            {
-                var isOperational = true;
-
-                // Breakdown scenarios
-                if (trip.TripInstanceId == BreakdownReplacedTripId && convoy.ShuttleIds[i] == 2)
-                    isOperational = false;
-                if (trip.TripInstanceId == BreakdownCancelledTripId && convoy.ShuttleIds[i] == 3)
-                    isOperational = false;
-
-                allocations.Add(new TripShuttleAllocation
-                {
-                    AllocationId = allocId++,
-                    TripInstanceId = trip.TripInstanceId,
-                    ShuttleId = convoy.ShuttleIds[i],
-                    OrderPosition = i + 1,
-                    IsOperational = isOperational,
-                    AssignedAt = trip.LockedAt!.Value
-                });
-            }
-
-            // Trip 505: add replacement shuttle 11 at position 4
-            if (trip.TripInstanceId == BreakdownReplacedTripId)
-            {
-                allocations.Add(new TripShuttleAllocation
-                {
-                    AllocationId = allocId++,
-                    TripInstanceId = trip.TripInstanceId,
-                    ShuttleId = 11,
-                    OrderPosition = 4,
-                    IsOperational = true,
-                    AssignedAt = trip.LockedAt!.Value.AddMinutes(65) // ~20min after flag
-                });
-            }
-        }
-
-        return allocations;
-    }
-
-    #endregion
-
-    #region Booking Generation
-
-    private List<Booking> GenerateBookings(List<TripInstance> trips)
-    {
-        var bookings = new List<Booking>(40000);
-        var bookingId = 1;
-
-        foreach (var trip in trips)
-        {
-            var isScenarioTrip = trip.TripInstanceId == WaitlistOverflowTripId;
-            var isBreakdownReplaced = trip.TripInstanceId == BreakdownReplacedTripId;
-            var isBreakdownCancelled = trip.TripInstanceId == BreakdownCancelledTripId;
-
-            if (isScenarioTrip)
-            {
-                bookingId = GenerateWaitlistScenarioBookings(bookings, trip, bookingId);
-                continue;
-            }
-
-            var convoy = ConvoyConfig[trip.StopId];
-            var isSaturday = trip.TripDate.DayOfWeek == DayOfWeek.Saturday;
-            var slotIdx = GetSlotIndex(trip, isSaturday);
-            var loadPercent = isSaturday
-                ? WeekdayLoadPercent[Math.Min(slotIdx, WeekdayLoadPercent.Length - 1)] * 0.6
-                : WeekdayLoadPercent[slotIdx];
-
-            var effectiveCapacity = convoy.Capacity;
-            if (isBreakdownCancelled)
-                effectiveCapacity = 57; // S1(22) + S2(35), S3 down
-
-            var targetBookings = (int)(effectiveCapacity * loadPercent);
-            targetBookings = Math.Max(targetBookings, 3); // minimum 3 bookings
-
-            // Determine which students book this trip
-            var dayOfWeek = trip.TripDate.DayOfWeek;
-            var scheduleTimeId = trip.ScheduleTimeId;
-
-            // Check if this trip has a priority booking
-            int? priorityStudentId = null;
-            foreach (var rule in PriorityBookingRules)
-            {
-                if (rule.ScheduleTimeId == scheduleTimeId && rule.Days.Contains(dayOfWeek))
-                {
-                    priorityStudentId = rule.StudentId;
-                    break;
-                }
-            }
-
-            // Pick students for this trip from primary stop + some overflow from neighbors
-            var students = PickStudentsForTrip(trip.StopId, targetBookings, priorityStudentId);
-            var noShowCount = Math.Max(1, (int)(students.Count * 0.05));
-            var cancelledCount = _rng.Next(0, 2); // 0 or 1 cancellation
-
-            // Determine operational shuttles for boarding assignment
-            int[] operationalShuttles;
-            if (isBreakdownReplaced)
-                operationalShuttles = new[] { 1, 3, 11 }; // S2 down, S11 replacement
-            else if (isBreakdownCancelled)
-                operationalShuttles = new[] { convoy.ShuttleIds[0], convoy.ShuttleIds[1] }; // S3 down
-            else
-                operationalShuttles = convoy.ShuttleIds;
-
-            var boardedCount = 0;
-            var maxBoardable = isBreakdownCancelled ? 57 : effectiveCapacity;
-
-            for (var i = 0; i < students.Count; i++)
-            {
-                var studentId = students[i];
-                var isPriority = studentId == priorityStudentId && i == 0;
-                var isCancelled = i >= students.Count - cancelledCount;
-                var isNoShow = !isCancelled && i >= students.Count - cancelledCount - noShowCount;
-
-                string bookingStatus;
-                string boardedStatus;
-                int? shuttleId = null;
-                DateTime? boardedAt = null;
-                DateTime createdAt;
-
-                if (isCancelled)
-                {
-                    bookingStatus = "Cancelled";
-                    boardedStatus = "Pending";
-                    createdAt = ComputeBookingCreatedAt(trip.TripDate, isPriority);
-                }
-                else if (isNoShow)
-                {
-                    bookingStatus = "Confirmed";
-                    boardedStatus = "NoShow";
-                    createdAt = ComputeBookingCreatedAt(trip.TripDate, isPriority);
-                }
-                else if (boardedCount >= maxBoardable)
-                {
-                    // Breakdown scenario: couldn't board
-                    bookingStatus = "Confirmed";
-                    boardedStatus = "Pending";
-                    createdAt = ComputeBookingCreatedAt(trip.TripDate, isPriority);
-                }
-                else
-                {
-                    bookingStatus = "Confirmed";
-                    boardedStatus = "Boarded";
-                    shuttleId = AssignShuttle(operationalShuttles, boardedCount);
-                    boardedAt = ComputeBoardedAt(trip);
-                    boardedCount++;
-                    createdAt = ComputeBookingCreatedAt(trip.TripDate, isPriority);
-                }
-
-                var suffix = isPriority ? "pri" : isCancelled ? "cx" : "";
-                var qrToken = $"qr_{trip.TripInstanceId}_s{studentId}_{bookingId}";
-
-                bookings.Add(new Booking
-                {
-                    BookingId = bookingId,
-                    StudentId = studentId,
-                    TripInstanceId = trip.TripInstanceId,
-                    BookingStatus = bookingStatus,
-                    BookingType = isPriority ? "Priority" : "Standard",
-                    BoardedStatus = boardedStatus,
-                    QrCodeToken = qrToken,
-                    ShuttleId = shuttleId,
-                    BoardedAt = boardedAt,
-                    CreatedAt = createdAt
-                });
-
-                bookingId++;
-            }
-        }
-
-        return bookings;
-    }
-
-    private int GenerateWaitlistScenarioBookings(List<Booking> bookings, TripInstance trip, int bookingId)
-    {
-        // Trip 593: 79 Confirmed + 2 WaitingList + 2 Cancelled = 83 total
-        var operationalShuttles = new[] { 1, 2, 3 };
-
-        // Priority booking (Student 3, Wed)
-        bookings.Add(new Booking
-        {
-            BookingId = bookingId++,
-            StudentId = 3,
-            TripInstanceId = trip.TripInstanceId,
-            BookingStatus = "Confirmed",
-            BookingType = "Priority",
-            BoardedStatus = "Boarded",
-            QrCodeToken = $"qr_593_s3_pri",
-            ShuttleId = 1,
-            BoardedAt = trip.InTransitAt!.Value.AddMinutes(-10),
-            CreatedAt = new DateTime(2026, 8, 1, 22, 0, 0, DateTimeKind.Utc)
-        });
-
-        // 76 regular confirmed boarded + 2 NoShow = 78 standard confirmed
-        var scenarioStudents = new HashSet<int> { 3, 45, 46, 42, 43, 39, 40 };
-        var allStudents = StopStudents.Values.SelectMany(s => s).Where(s => !scenarioStudents.Contains(s)).ToList();
-        Shuffle(allStudents);
-        var boardedCount = 1; // priority already boarded
-
-        for (var i = 0; i < 76 && i < allStudents.Count; i++)
-        {
-            var shuttleId = AssignShuttle(operationalShuttles, boardedCount);
-            bookings.Add(new Booking
-            {
-                BookingId = bookingId++,
-                StudentId = allStudents[i],
-                TripInstanceId = trip.TripInstanceId,
-                BookingStatus = "Confirmed",
-                BookingType = "Standard",
-                BoardedStatus = "Boarded",
-                QrCodeToken = $"qr_593_s{allStudents[i]}_{bookingId}",
-                ShuttleId = shuttleId,
-                BoardedAt = ComputeBoardedAt(trip),
-                CreatedAt = new DateTime(2026, 8, 3, 4 + _rng.Next(0, 12), _rng.Next(0, 60), 0, DateTimeKind.Utc)
-            });
-            boardedCount++;
-        }
-
-        // 2 NoShow
-        for (var i = 76; i < 78 && i < allStudents.Count; i++)
-        {
-            bookings.Add(new Booking
-            {
-                BookingId = bookingId++,
-                StudentId = allStudents[i],
-                TripInstanceId = trip.TripInstanceId,
-                BookingStatus = "Confirmed",
-                BookingType = "Standard",
-                BoardedStatus = "NoShow",
-                QrCodeToken = $"qr_593_s{allStudents[i]}_ns_{bookingId}",
-                ShuttleId = null,
-                BoardedAt = null,
-                CreatedAt = new DateTime(2026, 8, 3, 5 + _rng.Next(0, 8), _rng.Next(0, 60), 0, DateTimeKind.Utc)
-            });
-        }
-
-        // 2 promoted students (45, 46) — now Confirmed/Boarded
-        bookings.Add(new Booking
-        {
-            BookingId = bookingId++,
-            StudentId = 45,
-            TripInstanceId = trip.TripInstanceId,
-            BookingStatus = "Confirmed",
-            BookingType = "Standard",
-            BoardedStatus = "Boarded",
-            QrCodeToken = $"qr_593_s45_promoted",
-            ShuttleId = AssignShuttle(operationalShuttles, boardedCount++),
-            BoardedAt = ComputeBoardedAt(trip),
-            CreatedAt = new DateTime(2026, 8, 3, 12, 30, 0, DateTimeKind.Utc)
-        });
-
-        bookings.Add(new Booking
-        {
-            BookingId = bookingId++,
-            StudentId = 46,
-            TripInstanceId = trip.TripInstanceId,
-            BookingStatus = "Confirmed",
-            BookingType = "Standard",
-            BoardedStatus = "Boarded",
-            QrCodeToken = $"qr_593_s46_promoted",
-            ShuttleId = AssignShuttle(operationalShuttles, boardedCount++),
-            BoardedAt = ComputeBoardedAt(trip),
-            CreatedAt = new DateTime(2026, 8, 3, 12, 45, 0, DateTimeKind.Utc)
-        });
-
-        // 2 WaitingList (Students 42, 43)
-        bookings.Add(new Booking
-        {
-            BookingId = bookingId++,
-            StudentId = 43,
-            TripInstanceId = trip.TripInstanceId,
-            BookingStatus = "WaitingList",
-            BookingType = "Standard",
-            BoardedStatus = "Pending",
-            QrCodeToken = $"qr_593_s43_wl",
-            ShuttleId = null,
-            BoardedAt = null,
-            CreatedAt = new DateTime(2026, 8, 3, 13, 0, 0, DateTimeKind.Utc)
-        });
-
-        bookings.Add(new Booking
-        {
-            BookingId = bookingId++,
-            StudentId = 42,
-            TripInstanceId = trip.TripInstanceId,
-            BookingStatus = "WaitingList",
-            BookingType = "Standard",
-            BoardedStatus = "Pending",
-            QrCodeToken = $"qr_593_s42_wl",
-            ShuttleId = null,
-            BoardedAt = null,
-            CreatedAt = new DateTime(2026, 8, 3, 13, 15, 0, DateTimeKind.Utc)
-        });
-
-        // 2 Cancelled (Students 39, 40)
-        bookings.Add(new Booking
-        {
-            BookingId = bookingId++,
-            StudentId = 39,
-            TripInstanceId = trip.TripInstanceId,
-            BookingStatus = "Cancelled",
-            BookingType = "Standard",
-            BoardedStatus = "Pending",
-            QrCodeToken = $"qr_593_s39_cx",
-            ShuttleId = null,
-            BoardedAt = null,
-            CreatedAt = new DateTime(2026, 8, 3, 6, 0, 0, DateTimeKind.Utc)
-        });
-
-        bookings.Add(new Booking
-        {
-            BookingId = bookingId++,
-            StudentId = 40,
-            TripInstanceId = trip.TripInstanceId,
-            BookingStatus = "Cancelled",
-            BookingType = "Standard",
-            BoardedStatus = "Pending",
-            QrCodeToken = $"qr_593_s40_cx",
-            ShuttleId = null,
-            BoardedAt = null,
-            CreatedAt = new DateTime(2026, 8, 3, 7, 0, 0, DateTimeKind.Utc)
-        });
-
-        return bookingId;
-    }
-
-    private List<int> PickStudentsForTrip(int stopId, int count, int? priorityStudentId)
-    {
-        var result = new List<int>(count);
-
-        // Priority student first
-        if (priorityStudentId.HasValue)
-            result.Add(priorityStudentId.Value);
-
-        // Primary stop students
-        var primary = StopStudents[stopId].Where(s => s != priorityStudentId).ToList();
-        Shuffle(primary);
-        result.AddRange(primary);
-
-        // If we need more, pull from neighboring stops
-        if (result.Count < count)
-        {
-            var overflow = StopStudents
-                .Where(kv => kv.Key != stopId)
-                .SelectMany(kv => kv.Value)
-                .Where(s => s != priorityStudentId && !result.Contains(s))
-                .ToList();
-            Shuffle(overflow);
-            result.AddRange(overflow.Take(count - result.Count));
-        }
-
-        return result.Take(count).ToList();
-    }
-
-    private int AssignShuttle(int[] operationalShuttles, int boardedSoFar)
-    {
-        var filled = 0;
-        foreach (var shuttleId in operationalShuttles)
-        {
-            var cap = ShuttleCapacity[shuttleId];
-            if (boardedSoFar < filled + cap)
-                return shuttleId;
-            filled += cap;
-        }
-        // Overflow: assign to last shuttle
-        return operationalShuttles[^1];
-    }
-
-    private DateTime ComputeBookingCreatedAt(DateOnly tripDate, bool isPriority)
-    {
-        if (isPriority)
-        {
-            // Midnight SAST on (TripDate - 3) = (TripDate - 4 days) at 22:00 UTC
-            return tripDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
-                .AddDays(-4).AddHours(22);
-        }
-
-        // Standard: 1-3 days before, random time 04:00-20:00 UTC (06:00-22:00 SAST)
-        var daysBefore = _rng.Next(1, 4);
-        var hour = _rng.Next(4, 20);
-        var minute = _rng.Next(0, 60);
-        return tripDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
-            .AddDays(-daysBefore).AddHours(hour).AddMinutes(minute);
-    }
-
-    private DateTime ComputeBoardedAt(TripInstance trip)
-    {
-        // BoardedAt: between T-35min and T-2min (spread within scanning window)
-        var departureUtc = trip.InTransitAt!.Value;
-        var windowStart = departureUtc.AddMinutes(-35);
-        var offsetMinutes = _rng.Next(0, 34); // 0 to 33 minutes into window
-        return windowStart.AddMinutes(offsetMinutes);
-    }
-
-    private int GetSlotIndex(TripInstance trip, bool isSaturday)
-    {
-        // Reverse-compute slot index from ScheduleTimeId
-        var baseId = (trip.StopId - 1) * 19 + 1;
-        var offset = trip.ScheduleTimeId - baseId;
-        return isSaturday ? offset - 11 : offset;
-    }
-
-    private void Shuffle<T>(List<T> list)
-    {
-        for (var i = list.Count - 1; i > 0; i--)
-        {
-            var j = _rng.Next(i + 1);
-            (list[i], list[j]) = (list[j], list[i]);
-        }
-    }
-
-    #endregion
-
-    #region Breakdowns and Notes
-
-    private (List<BreakdownLog>, List<TripNote>) GenerateBreakdownsAndNotes()
-    {
-        var breakdowns = new List<BreakdownLog>
-        {
-            new()
-            {
-                BreakdownLogId = 1,
-                TripInstanceId = BreakdownReplacedTripId,
-                ShuttleId = 2,
-                VendorCompanyName = "Bay Transit Corp",
-                FlaggedAt = new DateTime(2026, 8, 4, 4, 30, 0, DateTimeKind.Utc),
-                FlaggedByMarshalId = 4,
-                ResolutionType = "Replaced",
-                ReplacementShuttleId = 11,
-                ResolvedAt = new DateTime(2026, 8, 4, 4, 50, 0, DateTimeKind.Utc),
-                ResolvedByAdminId = 1
-            },
-            new()
-            {
-                BreakdownLogId = 2,
-                TripInstanceId = BreakdownCancelledTripId,
-                ShuttleId = 3,
-                VendorCompanyName = "Bay Transit Corp",
-                FlaggedAt = new DateTime(2026, 8, 7, 4, 28, 0, DateTimeKind.Utc),
-                FlaggedByMarshalId = 4,
-                ResolutionType = "Cancelled",
-                ReplacementShuttleId = null,
-                ResolvedAt = new DateTime(2026, 8, 7, 4, 55, 0, DateTimeKind.Utc),
-                ResolvedByAdminId = 2
-            }
-        };
-
-        var notes = new List<TripNote>
-        {
-            new() { TripNoteId = 1, TripInstanceId = BreakdownReplacedTripId, NoteType = "Incident", Body = "Marshal reported Shuttle EC 256-491 failed to arrive at Summerstrand Village stop. Driver reported engine failure en route.", CreatedByAdminId = 1, CreatedAt = new DateTime(2026, 8, 4, 4, 35, 0, DateTimeKind.Utc), IsResolutionAction = false },
-            new() { TripNoteId = 2, TripInstanceId = BreakdownReplacedTripId, NoteType = "Replacement", Body = "Replacement shuttle EC 331-058 dispatched from depot. ETA 15 minutes. Vendor confirmed availability.", CreatedByAdminId = 1, CreatedAt = new DateTime(2026, 8, 4, 4, 50, 0, DateTimeKind.Utc), IsResolutionAction = true },
-            new() { TripNoteId = 3, TripInstanceId = BreakdownCancelledTripId, NoteType = "Incident", Body = "Marshal reported Shuttle EC 389-720 mechanical failure at stop. Tyre blowout.", CreatedByAdminId = 2, CreatedAt = new DateTime(2026, 8, 7, 4, 30, 0, DateTimeKind.Utc), IsResolutionAction = false },
-            new() { TripNoteId = 4, TripInstanceId = BreakdownCancelledTripId, NoteType = "General", Body = "No replacement available from Bay Transit Corp. Remaining shuttles (S1, S2) absorbed passengers. Capacity reduced but manageable.", CreatedByAdminId = 2, CreatedAt = new DateTime(2026, 8, 7, 4, 55, 0, DateTimeKind.Utc), IsResolutionAction = true },
-            new() { TripNoteId = 5, TripInstanceId = 100, NoteType = "General", Body = "High passenger volume noted. All shuttles at near capacity. Consider adding fourth shuttle for this route on Wednesdays.", CreatedByAdminId = 1, CreatedAt = new DateTime(2026, 7, 29, 5, 30, 0, DateTimeKind.Utc), IsResolutionAction = false },
-            new() { TripNoteId = 6, TripInstanceId = 417, NoteType = "NoShow", Body = "Unusually high no-show rate (8 students). May correlate with reported campus event schedule change.", CreatedByAdminId = 2, CreatedAt = new DateTime(2026, 8, 3, 5, 45, 0, DateTimeKind.Utc), IsResolutionAction = false },
-        };
-
-        return (breakdowns, notes);
-    }
-
-    #endregion
-
-    #region Notification Generation
-
-    private List<Notification> GenerateNotifications(List<TripInstance> trips, List<Booking> bookings)
-    {
-        var notifications = new List<Notification>(3000);
-        var notifId = 1;
-
-        // Per seed.md recommendation: full notifications for scenario trips + ~50 sample trips
-        var scenarioTripIds = new HashSet<int> { BreakdownReplacedTripId, WaitlistOverflowTripId, BreakdownCancelledTripId };
-
-        // Pick 50 sample trips spread across different days
-        var sampleTripIds = new HashSet<int>();
-        for (var i = 0; i < 50; i++)
-        {
-            var idx = _rng.Next(trips.Count);
-            sampleTripIds.Add(trips[idx].TripInstanceId);
-        }
-
-        var notifiableTripIds = scenarioTripIds.Union(sampleTripIds).ToHashSet();
-
-        // Trip Locked notifications
-        foreach (var booking in bookings.Where(b =>
-            b.BookingStatus == "Confirmed" && notifiableTripIds.Contains(b.TripInstanceId)))
-        {
-            var trip = trips.First(t => t.TripInstanceId == booking.TripInstanceId);
-            notifications.Add(new Notification
-            {
-                NotificationId = notifId++,
-                OwnerId = booking.StudentId,
-                OwnerType = "Student",
-                Title = "Trip Locked",
-                Message = $"Your trip is now locked. No changes can be made. Please be at the stop 10 minutes early.",
-                IsRead = true,
-                RelatedTripInstanceId = trip.TripInstanceId,
-                CreatedAt = trip.LockedAt!.Value
-            });
-        }
-
-        // Breakdown notifications for Trip 505
-        var trip505Bookings = bookings.Where(b =>
-            b.TripInstanceId == BreakdownReplacedTripId && b.BookingStatus == "Confirmed").ToList();
-        foreach (var booking in trip505Bookings)
-        {
-            notifications.Add(new Notification
-            {
-                NotificationId = notifId++,
-                OwnerId = booking.StudentId,
-                OwnerType = "Student",
-                Title = "Shuttle Update",
-                Message = "Shuttle EC 256-491 on your trip experienced a breakdown. A replacement shuttle EC 331-058 has been dispatched. Your trip will proceed.",
-                IsRead = true,
-                RelatedTripInstanceId = BreakdownReplacedTripId,
-                CreatedAt = new DateTime(2026, 8, 4, 4, 50, 0, DateTimeKind.Utc)
-            });
-        }
-
-        // Breakdown notifications for Trip 769
-        var trip769Bookings = bookings.Where(b =>
-            b.TripInstanceId == BreakdownCancelledTripId && b.BookingStatus == "Confirmed").ToList();
-        foreach (var booking in trip769Bookings)
-        {
-            notifications.Add(new Notification
-            {
-                NotificationId = notifId++,
-                OwnerId = booking.StudentId,
-                OwnerType = "Student",
-                Title = "Shuttle Cancelled",
-                Message = "Shuttle EC 389-720 on your trip broke down and no replacement is available. Remaining shuttles will serve all passengers. Expect possible delays.",
-                IsRead = true,
-                RelatedTripInstanceId = BreakdownCancelledTripId,
-                CreatedAt = new DateTime(2026, 8, 7, 4, 55, 0, DateTimeKind.Utc)
-            });
-        }
-
-        // Waitlist promoted notifications (Students 45, 46 on Trip 593)
-        notifications.Add(new Notification
-        {
-            NotificationId = notifId++,
-            OwnerId = 45,
-            OwnerType = "Student",
-            Title = "Waitlist Promoted",
-            Message = "Great news! A spot opened up for your trip from Summerstrand Village (06:45, 05 Aug). Your booking is now confirmed.",
-            IsRead = true,
-            RelatedTripInstanceId = WaitlistOverflowTripId,
-            CreatedAt = new DateTime(2026, 8, 5, 3, 45, 0, DateTimeKind.Utc)
-        });
-
-        notifications.Add(new Notification
-        {
-            NotificationId = notifId++,
-            OwnerId = 46,
-            OwnerType = "Student",
-            Title = "Waitlist Promoted",
-            Message = "Great news! A spot opened up for your trip from Summerstrand Village (06:45, 05 Aug). Your booking is now confirmed.",
-            IsRead = false,
-            RelatedTripInstanceId = WaitlistOverflowTripId,
-            CreatedAt = new DateTime(2026, 8, 5, 3, 45, 0, DateTimeKind.Utc)
-        });
-
-        return notifications;
-    }
-
-    #endregion
-
-    #region Report Generation
-
-    private List<Report> GenerateReports()
-    {
-        return new List<Report>
-        {
-            new() { ReportId = 1, StudentId = 5, Category = "DriverBehavior", Description = "The driver of shuttle EC 628-945 was driving recklessly on Marine Drive, exceeding speed limit and overtaking dangerously. Several passengers felt unsafe.", Status = "Resolved", TripInstanceId = 12, AdminNotes = "Incident reported to Coastal Movers management. Driver has been given a written warning. Vendor confirmed corrective action.", CreatedAt = new DateTime(2026, 7, 28, 10, 30, 0, DateTimeKind.Utc), UpdatedAt = new DateTime(2026, 7, 30, 14, 0, 0, DateTimeKind.Utc) },
-            new() { ReportId = 2, StudentId = 21, Category = "VehicleQuality", Description = "Shuttle EC 714-382 had broken air conditioning. The vehicle was extremely hot and uncomfortable during the afternoon trip. Windows were also difficult to open.", Status = "Resolved", TripInstanceId = 107, AdminNotes = "Reported to Coastal Movers. Vehicle pulled from service for maintenance on 2026-08-01. Returned to service 2026-08-03 after AC repair confirmed.", CreatedAt = new DateTime(2026, 7, 30, 12, 45, 0, DateTimeKind.Utc), UpdatedAt = new DateTime(2026, 8, 1, 9, 0, 0, DateTimeKind.Utc) },
-            new() { ReportId = 3, StudentId = 14, Category = "TimetableIssue", Description = "The 14:30 shuttle from South Campus consistently arrives 10-15 minutes late. This has happened three days in a row. Students are missing connections.", Status = "UnderReview", TripInstanceId = 314, AdminNotes = "Investigating with Bay Transit Corp dispatch. Requested GPS logs for the past week.", CreatedAt = new DateTime(2026, 7, 31, 13, 0, 0, DateTimeKind.Utc), UpdatedAt = new DateTime(2026, 8, 2, 11, 0, 0, DateTimeKind.Utc) },
-            new() { ReportId = 4, StudentId = 22, Category = "Other", Description = "The shelter at Newton Park stop has a broken bench. Students have to stand while waiting for the shuttle in the rain.", Status = "Submitted", TripInstanceId = null, AdminNotes = null, CreatedAt = new DateTime(2026, 8, 3, 7, 30, 0, DateTimeKind.Utc), UpdatedAt = null },
-            new() { ReportId = 5, StudentId = 7, Category = "DriverBehavior", Description = "Driver of shuttle EC 837-256 was on his phone while driving. Very dangerous and irresponsible.", Status = "UnderReview", TripInstanceId = 439, AdminNotes = "Report forwarded to Metro Link SA on 2026-08-05. Awaiting their investigation response.", CreatedAt = new DateTime(2026, 8, 4, 9, 15, 0, DateTimeKind.Utc), UpdatedAt = new DateTime(2026, 8, 5, 10, 0, 0, DateTimeKind.Utc) },
-            new() { ReportId = 6, StudentId = 16, Category = "VehicleQuality", Description = "Shuttle EC 256-491 has a strong diesel smell inside. Multiple passengers complained of nausea during the morning trip.", Status = "Resolved", TripInstanceId = 593, AdminNotes = "Bay Transit Corp inspected the vehicle. Exhaust seal replaced. Vehicle cleared for service after inspection on 2026-08-08.", CreatedAt = new DateTime(2026, 8, 5, 6, 0, 0, DateTimeKind.Utc), UpdatedAt = new DateTime(2026, 8, 8, 15, 30, 0, DateTimeKind.Utc) },
-            new() { ReportId = 7, StudentId = 41, Category = "TimetableIssue", Description = "Saturday 08:45 shuttle from Greenacres never arrived. Waited 30 minutes then had to arrange alternative transport.", Status = "Submitted", TripInstanceId = 915, AdminNotes = null, CreatedAt = new DateTime(2026, 8, 8, 8, 0, 0, DateTimeKind.Utc), UpdatedAt = null },
-            new() { ReportId = 8, StudentId = 55, Category = "Other", Description = "Marshal at Newton Park was rude to a student who arrived 2 minutes after departure time. The student was told to find your own way in front of other passengers.", Status = "UnderReview", TripInstanceId = 703, AdminNotes = "HR department notified. Reviewing CCTV footage from stop. Marshal will be counselled.", CreatedAt = new DateTime(2026, 8, 6, 7, 0, 0, DateTimeKind.Utc), UpdatedAt = new DateTime(2026, 8, 9, 10, 0, 0, DateTimeKind.Utc) },
-        };
-    }
-
-    #endregion
 }

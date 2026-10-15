@@ -92,7 +92,9 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     try {
       final repository = ref.read(bookingRepositoryProvider);
       await repository.cancelBooking(bookingId);
-      ref.invalidate(bookingsProvider);
+      // A cancelled booking leaves the upcoming list and appears in past.
+      ref.invalidate(upcomingBookingsProvider);
+      ref.invalidate(pastBookingsProvider);
       ref.invalidate(bookingDetailProvider(bookingId));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

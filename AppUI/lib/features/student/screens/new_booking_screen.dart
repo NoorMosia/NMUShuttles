@@ -90,8 +90,8 @@ class _NewBookingScreenState extends ConsumerState<NewBookingScreen> {
     try {
       final repository = ref.read(bookingRepositoryProvider);
       final booking = await repository.createBooking(trip.tripInstanceId);
-      // Invalidate bookings cache so home screen refreshes
-      ref.invalidate(bookingsProvider);
+      // Refetch the upcoming list so the home screen reflects the new booking.
+      ref.invalidate(upcomingBookingsProvider);
       if (mounted) {
         context.go('/student/booking/${booking.bookingId}');
       }

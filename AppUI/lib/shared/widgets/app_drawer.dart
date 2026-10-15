@@ -112,7 +112,8 @@ class AppDrawer extends ConsumerWidget {
                   await AuthService().deleteToken();
                   ref.invalidate(authStateProvider);
                   ref.invalidate(studentProfileProvider);
-                  ref.invalidate(bookingsProvider);
+                  ref.invalidate(upcomingBookingsProvider);
+                  ref.invalidate(pastBookingsProvider);
                   ref.invalidate(reportsProvider);
                   ref.invalidate(notificationsProvider);
                   ref.invalidate(tripAvailabilityProvider);

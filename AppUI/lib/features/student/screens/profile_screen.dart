@@ -477,7 +477,8 @@ class ProfileScreen extends ConsumerWidget {
 
     // Invalidate all user-specific cached providers so the next user starts fresh
     ref.invalidate(studentProfileProvider);
-    ref.invalidate(bookingsProvider);
+    ref.invalidate(upcomingBookingsProvider);
+    ref.invalidate(pastBookingsProvider);
     ref.invalidate(reportsProvider);
     ref.invalidate(notificationsProvider);
     ref.invalidate(tripAvailabilityProvider);

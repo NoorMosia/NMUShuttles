@@ -8,17 +8,10 @@ final bookingRepositoryProvider = Provider<BookingRepository>((ref) {
   return BookingRepository(dioClient: ref.watch(dioClientProvider));
 });
 
-/// A "refresh token" provider used solely for invalidation.
-/// When external code calls `ref.invalidate(bookingsProvider)`, this triggers
-/// both [upcomingBookingsProvider] and [pastBookingsProvider] to refetch.
-final bookingsProvider = StateProvider<int>((ref) => 0);
-
 /// Fetches upcoming bookings from the server (tripDate >= today, not cancelled).
-/// Watches [bookingsProvider] so that invalidating it triggers a refetch.
+/// Invalidate this provider directly (e.g. after creating a booking) to refetch.
 final upcomingBookingsProvider =
     FutureProvider<List<BookingModel>>((ref) async {
-  // Depend on the refresh token so invalidation cascades.
-  ref.watch(bookingsProvider);
   final repository = ref.watch(bookingRepositoryProvider);
   final result = await repository.getBookings(
     filter: 'upcoming',
@@ -29,10 +22,8 @@ final upcomingBookingsProvider =
 });
 
 /// Fetches past bookings from the server (tripDate < today or cancelled).
-/// Watches [bookingsProvider] so that invalidating it triggers a refetch.
+/// Invalidate this provider directly (e.g. after cancelling a booking) to refetch.
 final pastBookingsProvider = FutureProvider<List<BookingModel>>((ref) async {
-  // Depend on the refresh token so invalidation cascades.
-  ref.watch(bookingsProvider);
   final repository = ref.watch(bookingRepositoryProvider);
   final result = await repository.getBookings(
     filter: 'past',

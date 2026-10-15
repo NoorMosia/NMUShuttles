@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:nmu_shuttle_app/core/router/app_router.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 
@@ -17,6 +18,13 @@ import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
 ///   push delivery.
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Use hash-based URLs (/#/student/maps) on the web. This keeps go_router
+  // deep links working on static hosts like GitHub Pages that have no
+  // server-side rewrite to index.html, so a hard refresh won't 404.
+  // Vercel can use path URLs via a rewrite (see vercel.json); if you deploy
+  // only to Vercel you may remove this line.
+  setUrlStrategy(const HashUrlStrategy());
 
   runApp(
     const ProviderScope(

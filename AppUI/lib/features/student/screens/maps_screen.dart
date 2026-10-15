@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -481,7 +482,12 @@ class _MapsScreenState extends ConsumerState<MapsScreen>
                           ),
                           TextButton(
                             onPressed: () async {
-                              await Geolocator.openAppSettings();
+                              // `openAppSettings()` is not implemented on web
+                              // (geolocator_web throws). On web, re-requesting
+                              // triggers the browser's permission prompt instead.
+                              if (!kIsWeb) {
+                                await Geolocator.openAppSettings();
+                              }
                               _requestDeviceLocation();
                             },
                             child: const Text('Enable'),

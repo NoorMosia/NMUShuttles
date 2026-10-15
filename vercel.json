@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "bash ./scripts/vercel-build.sh",
+  "outputDirectory": "AppUIWeb/build/web",
+  "installCommand": "echo 'Flutter installed in build step'",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

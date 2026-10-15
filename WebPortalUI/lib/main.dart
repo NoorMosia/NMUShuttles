@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_admin/core/router/admin_router.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Hash-based URLs (/#/dashboard) so go_router deep links survive a hard
+  // refresh on GitHub Pages, which has no server-side rewrite to index.html.
+  setUrlStrategy(const HashUrlStrategy());
+
   runApp(const ProviderScope(child: AdminApp()));
 }
 

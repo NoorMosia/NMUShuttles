@@ -1,0 +1,111 @@
+name: Deploy Flutter web apps to GitHub Pages
+
+# Builds BOTH Flutter web apps and publishes them under one GitHub Pages site:
+#   https://noormosia.github.io/NMUShuttles/app/    -> AppUIWeb   (student/marshal)
+#   https://noormosia.github.io/NMUShuttles/admin/  -> WebPortalUI (admin portal)
+#
+# A repo has only one Pages site, so both apps are assembled into a single
+# artifact (different subfolders) and deployed together.
+#
+# AppUIWeb depends on ../AppUI via a path dependency, so the whole repo is
+# checked out and each build runs from inside its own app folder.
+
+on:
+  push:
+    branches: [deploy]        # change to main if you prefer
+    paths:
+      - 'AppUIWeb/**'
+      - 'AppUI/**'
+      - 'WebPortalUI/**'
+      - '.github/workflows/deploy-appuiweb.yml'
+  workflow_dispatch:           # allows manual runs from the Actions tab
+
+# Permissions required by the Pages deploy action.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deploy at a time; a newer run cancels an in-progress one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          # Matches the local SDK used to develop the apps.
+          flutter-version: 3.44.8
+
+      # --- Student/Marshal app (AppUIWeb) -> /app/ ---
+      - name: Build AppUIWeb
+        working-directory: AppUIWeb
+        run: |
+          flutter pub get
+          flutter build web --release --base-href /NMUShuttles/app/ --no-tree-shake-icons
+
+      # --- Admin portal (WebPortalUI) -> /admin/ ---
+      - name: Build WebPortalUI
+        working-directory: WebPortalUI
+        run: |
+          flutter pub get
+          flutter build web --release --base-href /NMUShuttles/admin/ --no-tree-shake-icons
+
+      # --- Assemble both builds into one publish directory ---
+      - name: Assemble site
+        run: |
+          mkdir -p public/app public/admin
+          cp -r AppUIWeb/build/web/.    public/app/
+          cp -r WebPortalUI/build/web/. public/admin/
+          # Minimal landing page at the site root linking to each app.
+          cat > public/index.html <<'HTML'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>NMU Shuttle</title>
+            <style>
+              body { font-family: system-ui, sans-serif; background:#132e51; color:#fff;
+                     display:flex; min-height:100vh; margin:0; align-items:center;
+                     justify-content:center; }
+              .card { text-align:center; }
+              h1 { margin-bottom:1.5rem; }
+              a { display:inline-block; margin:0.5rem; padding:0.9rem 1.6rem;
+                  background:#ffcc00; color:#132e51; text-decoration:none;
+                  border-radius:8px; font-weight:600; }
+            </style>
+          </head>
+          <body>
+            <div class="card">
+              <h1>NMU Shuttle</h1>
+              <a href="app/">Student / Marshal App</a>
+              <a href="admin/">Admin Portal</a>
+            </div>
+          </body>
+          </html>
+          HTML
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

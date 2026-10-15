@@ -13,7 +13,13 @@ public interface IFcmSender
     /// Optional key/value payload delivered alongside the notification. Used by
     /// the client to deep-link on tap (e.g. "tripInstanceId", "type").
     /// </param>
-    Task SendToTokensAsync(
+    /// <returns>
+    /// The subset of <paramref name="fcmTokens"/> that FCM reported as invalid
+    /// or no longer registered. Callers should delete these from storage so the
+    /// token table self-cleans. Empty when all sends succeed or Firebase is not
+    /// configured.
+    /// </returns>
+    Task<IReadOnlyList<string>> SendToTokensAsync(
         IEnumerable<string> fcmTokens,
         string title,
         string message,

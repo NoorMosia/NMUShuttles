@@ -16,7 +16,7 @@ public class FcmNotificationSender : IFcmSender
         _logger = logger;
     }
 
-    public async Task SendToTokensAsync(
+    public async Task<IReadOnlyList<string>> SendToTokensAsync(
         IEnumerable<string> fcmTokens,
         string title,
         string message,
@@ -24,7 +24,7 @@ public class FcmNotificationSender : IFcmSender
     {
         var tokens = fcmTokens.ToList();
         if (tokens.Count == 0)
-            return;
+            return Array.Empty<string>();
 
         // Graceful degradation: if Firebase is not initialized, skip dispatch
         if (FirebaseApp.DefaultInstance == null)
@@ -32,7 +32,7 @@ public class FcmNotificationSender : IFcmSender
             _logger.LogWarning(
                 "Firebase is not configured. Skipping FCM dispatch for {TokenCount} token(s). Title: {Title}",
                 tokens.Count, title);
-            return;
+            return Array.Empty<string>();
         }
 
         var multicastMessage = new MulticastMessage
@@ -63,6 +63,8 @@ public class FcmNotificationSender : IFcmSender
             }
         };
 
+        var invalidTokens = new List<string>();
+
         try
         {
             var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(multicastMessage);
@@ -74,6 +76,20 @@ public class FcmNotificationSender : IFcmSender
                     var sendResponse = response.Responses[i];
                     if (!sendResponse.IsSuccess)
                     {
+                        var messagingError =
+                            (sendResponse.Exception as FirebaseMessagingException)?.MessagingErrorCode;
+
+                        // A token FCM rejects as unregistered or malformed will
+                        // never succeed again — flag it for deletion so the
+                        // token table self-cleans. Other errors (e.g. transient
+                        // server/quota issues) are left in place for retry.
+                        if (messagingError is MessagingErrorCode.Unregistered
+                            or MessagingErrorCode.InvalidArgument
+                            or MessagingErrorCode.SenderIdMismatch)
+                        {
+                            invalidTokens.Add(tokens[i]);
+                        }
+
                         _logger.LogWarning(
                             "FCM dispatch failed for token index {Index} (token: {Token}). Error: {Error}",
                             i,
@@ -84,13 +100,15 @@ public class FcmNotificationSender : IFcmSender
             }
 
             _logger.LogInformation(
-                "FCM multicast completed. Success: {Success}, Failures: {Failures}",
-                response.SuccessCount, response.FailureCount);
+                "FCM multicast completed. Success: {Success}, Failures: {Failures}, Invalid: {Invalid}",
+                response.SuccessCount, response.FailureCount, invalidTokens.Count);
         }
         catch (Exception ex)
         {
             // Never abort — log the error and continue
             _logger.LogError(ex, "FCM multicast dispatch failed entirely. Title: {Title}", title);
         }
+
+        return invalidTokens;
     }
 }

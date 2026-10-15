@@ -108,7 +108,28 @@ public class NotificationService : INotificationService
                 data["tripInstanceId"] = tripInstanceId.Value.ToString();
             }
 
-            await _fcmSender.SendToTokensAsync(tokens, title, message, data);
+            var invalidTokens = await _fcmSender.SendToTokensAsync(tokens, title, message, data);
+
+            // Self-clean: remove any tokens FCM rejected as invalid/unregistered
+            // so we stop pushing to dead devices (and stop logging warnings for
+            // stale or placeholder tokens).
+            if (invalidTokens.Count > 0)
+            {
+                var stale = await _db.DeviceRegistrations
+                    .Where(d => d.OwnerId == ownerId
+                        && d.OwnerType == ownerType
+                        && invalidTokens.Contains(d.FcmToken))
+                    .ToListAsync();
+
+                if (stale.Count > 0)
+                {
+                    _db.DeviceRegistrations.RemoveRange(stale);
+                    await _db.SaveChangesAsync();
+                    _logger.LogInformation(
+                        "Pruned {Count} invalid device token(s) for {OwnerType} {OwnerId}.",
+                        stale.Count, ownerType, ownerId);
+                }
+            }
         }
         else
         {

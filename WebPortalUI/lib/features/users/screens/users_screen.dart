@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nmu_shuttle_admin/core/validators.dart';
 import 'package:nmu_shuttle_admin/features/users/providers/users_providers.dart';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -960,13 +961,7 @@ class _UserFormDialogState extends State<_UserFormDialog> {
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
                       if (!_useCustomEmail) return null;
-                      if (v == null || v.trim().isEmpty) {
-                        return 'Email is required';
-                      }
-                      if (!v.contains('@') || !v.contains('.')) {
-                        return 'Enter a valid email address';
-                      }
-                      return null;
+                      return Validators.email(v);
                     },
                   )
                 else

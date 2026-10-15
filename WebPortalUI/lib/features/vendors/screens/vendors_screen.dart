@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nmu_shuttle_admin/core/validators.dart';
 import 'package:nmu_shuttle_admin/features/vendors/providers/vendors_providers.dart';
 
 /// Admin screen for managing vendor companies.
@@ -250,6 +251,11 @@ class _VendorsScreenState extends ConsumerState<VendorsScreen> {
                         ),
                         style: GoogleFonts.hankenGrotesk(),
                         keyboardType: TextInputType.emailAddress,
+                        validator: (v) => Validators.email(
+                          v,
+                          optional: true,
+                          fieldName: 'Contact email',
+                        ),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(

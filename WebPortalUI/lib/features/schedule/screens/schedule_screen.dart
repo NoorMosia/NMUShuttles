@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nmu_shuttle_admin/core/validators.dart';
 import 'package:nmu_shuttle_admin/features/schedule/providers/schedule_providers.dart';
 
 /// Schedule Times management screen (standalone, no tabs).
@@ -388,8 +390,9 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
                 ),
                 style: GoogleFonts.hankenGrotesk(),
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Required' : null,
+                    Validators.positiveInt(v, fieldName: 'Campus ID'),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -404,8 +407,9 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
                 ),
                 style: GoogleFonts.hankenGrotesk(),
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Required' : null,
+                    Validators.positiveInt(v, fieldName: 'Stop ID'),
               ),
               const SizedBox(height: 16),
               // Requires Scanning toggle

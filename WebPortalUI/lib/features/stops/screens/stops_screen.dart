@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nmu_shuttle_admin/core/validators.dart';
 import 'package:nmu_shuttle_admin/features/stops/providers/stops_providers.dart';
 import 'package:nmu_shuttle_admin/features/stops/widgets/map_location_picker.dart';
 
@@ -364,14 +365,19 @@ class _StopsScreenState extends ConsumerState<StopsScreen> {
                             labelStyle: GoogleFonts.hankenGrotesk(),
                             hintStyle: GoogleFonts.hankenGrotesk(color: Colors.grey.shade400),
                             helperStyle: GoogleFonts.hankenGrotesk(fontSize: 11, color: Colors.grey.shade500),
+                            counterText: '',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                           style: GoogleFonts.hankenGrotesk(),
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                          validator: (v) => v == null || v.trim().isEmpty ? 'Postal code is required' : null,
+                          maxLength: 4,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            const MaxLengthFormatter(4),
+                          ],
+                          validator: Validators.postalCode,
                         ),
                         const SizedBox(height: 16),
                         // Latitude + Longitude

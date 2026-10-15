@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nmu_shuttle_admin/core/validators.dart';
 import 'package:nmu_shuttle_admin/features/auth/providers/admin_auth_providers.dart';
 
 /// Full-screen standalone admin login screen with two-step OTP flow.
@@ -195,16 +196,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter your email';
-                                }
-                                if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$')
-                                    .hasMatch(value.trim())) {
-                                  return 'Please enter a valid email address';
-                                }
-                                return null;
-                              },
+                              validator: Validators.email,
                               onFieldSubmitted: (_) => _handleRequestOtp(),
                             ),
                             const SizedBox(height: 28),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nmu_shuttle_admin/core/validators.dart';
 import 'package:nmu_shuttle_admin/features/shuttles/providers/shuttles_providers.dart';
 import 'package:nmu_shuttle_admin/features/vendors/providers/vendors_providers.dart';
 
@@ -405,8 +406,10 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                         ),
                         style: GoogleFonts.hankenGrotesk(),
                         textCapitalization: TextCapitalization.characters,
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty ? 'License plate is required' : null,
+                        inputFormatters: const [
+                          MaxLengthFormatter(Validators.maxLicensePlateLength),
+                        ],
+                        validator: Validators.licensePlate,
                       ),
                       const SizedBox(height: 16),
                       // Capacity: slider + editable text field
@@ -449,30 +452,29 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                                 width: 72,
                                 child: TextFormField(
                                   controller: capacityController,
+                                  style: GoogleFonts.hankenGrotesk(fontSize: 14),
+                                  textAlign: TextAlign.center,
+                                  keyboardType: TextInputType.number,
+                                  maxLength: 2,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    const IntRangeFormatter(
+                                      min: 0,
+                                      max: Validators.maxShuttleCapacity,
+                                    ),
+                                  ],
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     contentPadding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 10),
+                                    counterText: '',
                                   ),
-                                  style: GoogleFonts.hankenGrotesk(fontSize: 14),
-                                  textAlign: TextAlign.center,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly
-                                  ],
                                   onChanged: (v) {
                                     setDialogState(() {});
                                   },
-                                  validator: (v) {
-                                    if (v == null || v.trim().isEmpty) {
-                                      return 'Required';
-                                    }
-                                    final n = int.tryParse(v.trim());
-                                    if (n == null || n <= 0) return '> 0';
-                                    return null;
-                                  },
+                                  validator: Validators.shuttleCapacity,
                                 ),
                               ),
                             ],

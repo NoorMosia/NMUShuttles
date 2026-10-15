@@ -288,6 +288,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                           onPressed: _dismissError,
                           style: FilledButton.styleFrom(
                             backgroundColor: AppTheme.navy,
+                            foregroundColor: Colors.white,
                           ),
                           child: const Text('Scan Again'),
                         ),

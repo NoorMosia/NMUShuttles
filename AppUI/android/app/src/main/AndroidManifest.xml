@@ -7,11 +7,17 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Runtime notification permission required on Android 13+ (API 33) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Saving QR codes to the gallery via MediaStore. Only needed up to API 29;
+         from API 30+ MediaStore writes to Pictures without any permission. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
 
     <application
         android:label="LATT"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"

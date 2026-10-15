@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:media_store_plus/media_store_plus.dart';
 import 'package:nmu_shuttle_app/core/notifications/push_notification_service.dart';
 import 'package:nmu_shuttle_app/core/router/app_router.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
@@ -11,6 +12,10 @@ import 'package:nmu_shuttle_app/features/student/providers/notification_provider
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // Initialise MediaStore once so QR codes can be saved to the gallery.
+  await MediaStore.ensureInitialized();
+  MediaStore.appFolder = 'NMU Shuttle';
 
   // Initialise Firebase + push notifications. Failures must not block startup
   // (e.g. missing google-services.json in a dev build).

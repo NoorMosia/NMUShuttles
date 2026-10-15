@@ -180,7 +180,10 @@ class _MarshalCheckinScreenState extends ConsumerState<MarshalCheckinScreen>
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(ctx),
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.navy),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.navy,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('OK'),
           ),
         ],
@@ -428,6 +431,7 @@ class _QrScannerTabState extends ConsumerState<_QrScannerTab>
                         onPressed: _dismissError,
                         style: FilledButton.styleFrom(
                           backgroundColor: AppTheme.navy,
+                          foregroundColor: Colors.white,
                         ),
                         child: const Text('Scan Again'),
                       ),

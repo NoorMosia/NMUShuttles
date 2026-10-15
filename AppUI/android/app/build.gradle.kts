@@ -8,7 +8,9 @@ plugins {
 
 android {
     namespace = "com.example.nmu_shuttle_app"
-    compileSdk = flutter.compileSdkVersion
+    // Pinned to 34: media_store_plus pulls in androidx libraries that require
+    // compiling against API 34+. flutter.compileSdkVersion may resolve lower.
+    compileSdk = maxOf(flutter.compileSdkVersion, 34)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

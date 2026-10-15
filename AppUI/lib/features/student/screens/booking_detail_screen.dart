@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:media_store_plus/media_store_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:nmu_shuttle_app/core/api/api_exception.dart';
 import 'package:nmu_shuttle_app/core/theme/app_theme.dart';
@@ -31,25 +34,74 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
   final GlobalKey _qrKey = GlobalKey();
   bool _isCancelling = false;
 
+  bool _isDownloading = false;
+
+  /// Timestamp burned into the captured QR image so a saved screenshot is
+  /// identifiable. Only shown while capturing, then cleared.
+  DateTime? _captureStamp;
+
   Future<void> _downloadQrCode() async {
+    if (_isDownloading) return;
+    final now = DateTime.now();
+    setState(() {
+      _isDownloading = true;
+      // Burn the timestamp into the captured image.
+      _captureStamp = now;
+    });
     try {
+      // Let the caption render into the RepaintBoundary before we capture it.
+      await WidgetsBinding.instance.endOfFrame;
+
       final boundary =
           _qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) return;
+      if (boundary == null) {
+        throw StateError('QR code is not ready yet.');
+      }
 
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return;
+      if (byteData == null) {
+        throw StateError('Could not render the QR code image.');
+      }
+      final pngBytes = byteData.buffer.asUint8List();
 
-      byteData.buffer.asUint8List();
+      // Write the PNG to a temporary file first, then hand the path to
+      // MediaStore which copies it into the public Pictures folder (visible in
+      // the gallery). No storage permission is needed on Android 10+ for this.
+      final tempDir = await getTemporaryDirectory();
+      // Human-readable timestamp (local SAST time) so each saved QR screenshot
+      // is identifiable, e.g. nmu_shuttle_qr_2026-10-15_15-34-26.png
+      final stamp = DateFormat('yyyy-MM-dd_HH-mm-ss').format(now);
+      final fileName = 'nmu_shuttle_qr_$stamp.png';
+      final tempFile = File('${tempDir.path}/$fileName');
+      await tempFile.writeAsBytes(pngBytes);
 
-      // In a real implementation, save to gallery using image_gallery_saver
-      // or share via share_plus. For now, show a success message.
-      if (mounted) {
+      MediaStore.appFolder = 'NMU Shuttle';
+      final mediaStore = MediaStore();
+      final saveInfo = await mediaStore.saveFile(
+        tempFilePath: tempFile.path,
+        dirType: DirType.photo,
+        dirName: DirName.pictures,
+      );
+
+      // Clean up the temp file regardless of outcome.
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+
+      if (!mounted) return;
+      if (saveInfo != null && saveInfo.isSuccessful) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('QR code saved to gallery'),
+            content: Text('QR code saved to Pictures/NMU Shuttle'),
             backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not save the QR code. Please try again.'),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -61,6 +113,13 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
             backgroundColor: Colors.red,
           ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+          _captureStamp = null;
+        });
       }
     }
   }
@@ -261,23 +320,68 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: QrImageView(
-                    data: booking.qrCodeToken!,
-                    version: QrVersions.auto,
-                    size: 256,
-                    embeddedImage: const AssetImage('assets/logos/qrImg.png'),
-                    embeddedImageStyle: const QrEmbeddedImageStyle(
-                      size: Size(48, 48),
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      QrImageView(
+                        data: booking.qrCodeToken!,
+                        version: QrVersions.auto,
+                        size: 256,
+                        embeddedImage:
+                            const AssetImage('assets/logos/qrImg.png'),
+                        embeddedImageStyle: const QrEmbeddedImageStyle(
+                          size: Size(48, 48),
+                        ),
+                      ),
+                      // Trip identity + save timestamp, burned into the saved
+                      // image so a screenshot is identifiable on its own.
+                      const SizedBox(height: 12),
+                      Text(
+                        '$directionLabel \u2022 ${booking.stopName}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.navy,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        dateFormat.format(booking.tripDate),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      if (_captureStamp != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'Saved ${DateFormat('yyyy-MM-dd HH:mm').format(_captureStamp!)}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
               const SizedBox(height: 16),
               // Download QR button
               OutlinedButton.icon(
-                onPressed: _downloadQrCode,
-                icon: const Icon(Icons.download),
-                label: const Text('Download QR Code'),
+                onPressed: _isDownloading ? null : _downloadQrCode,
+                icon: _isDownloading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.download),
+                label: Text(
+                    _isDownloading ? 'Preparing...' : 'Download QR Code'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.navy,
                   side: const BorderSide(color: AppTheme.navy),

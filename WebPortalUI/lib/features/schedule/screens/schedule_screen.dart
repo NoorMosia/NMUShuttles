@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:nmu_shuttle_admin/core/validators.dart';
 import 'package:nmu_shuttle_admin/features/schedule/providers/schedule_providers.dart';
+import 'package:nmu_shuttle_admin/features/stops/providers/stops_providers.dart';
 
 /// Schedule Times management screen (standalone, no tabs).
 class ScheduleScreen extends ConsumerStatefulWidget {
@@ -115,17 +114,18 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
               DataColumn(label: Text('DEPARTURE TIME')),
               DataColumn(label: Text('DIRECTION')),
               DataColumn(label: Text('SCHEDULE TYPE')),
-              DataColumn(label: Text('CAMPUS ID')),
-              DataColumn(label: Text('STOP ID')),
+              DataColumn(label: Text('STOP')),
               DataColumn(label: Text('ACTIONS')),
             ],
             rows: items.map((item) {
+              final stopLabel = (item.stopName != null && item.stopName!.isNotEmpty)
+                  ? item.stopName!
+                  : 'Stop ${item.stopId}';
               return DataRow(cells: [
                 DataCell(Text(item.departureTime)),
                 DataCell(_DirectionChip(direction: item.direction)),
                 DataCell(_ScheduleTypeChip(type: item.scheduleType)),
-                DataCell(Text('${item.campusId}')),
-                DataCell(Text('${item.stopId}')),
+                DataCell(Text(stopLabel)),
                 DataCell(Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -157,12 +157,11 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       context: context,
       builder: (ctx) => _ScheduleTimeFormDialog(
         title: 'Add Schedule Time',
-        onSubmit: (departureTime, direction, scheduleType, campusId, stopId, requiresScanning) {
+        onSubmit: (departureTime, direction, scheduleType, stopId, requiresScanning) {
           ref.read(scheduleTimesProvider.notifier).addScheduleTime(
                 departureTime: departureTime,
                 direction: direction,
                 scheduleType: scheduleType,
-                campusId: campusId,
                 stopId: stopId,
                 requiresScanning: requiresScanning,
               );
@@ -180,15 +179,13 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         initialDepartureTime: item.departureTime,
         initialDirection: item.direction,
         initialScheduleType: item.scheduleType,
-        initialCampusId: item.campusId,
         initialStopId: item.stopId,
-        onSubmit: (departureTime, direction, scheduleType, campusId, stopId, requiresScanning) {
+        onSubmit: (departureTime, direction, scheduleType, stopId, requiresScanning) {
           ref.read(scheduleTimesProvider.notifier).updateScheduleTime(
                 id: item.id,
                 departureTime: departureTime,
                 direction: direction,
                 scheduleType: scheduleType,
-                campusId: campusId,
                 stopId: stopId,
                 requiresScanning: requiresScanning,
               );
@@ -238,38 +235,36 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
 // ─── Form Dialog ─────────────────────────────────────────────────────────────
 
-class _ScheduleTimeFormDialog extends StatefulWidget {
+class _ScheduleTimeFormDialog extends ConsumerStatefulWidget {
   const _ScheduleTimeFormDialog({
     required this.title,
     required this.onSubmit,
     this.initialDepartureTime,
     this.initialDirection,
     this.initialScheduleType,
-    this.initialCampusId,
     this.initialStopId,
   });
 
   final String title;
   final void Function(String departureTime, String direction,
-      String scheduleType, int campusId, int stopId, bool requiresScanning) onSubmit;
+      String scheduleType, int stopId, bool requiresScanning) onSubmit;
   final String? initialDepartureTime;
   final String? initialDirection;
   final String? initialScheduleType;
-  final int? initialCampusId;
   final int? initialStopId;
 
   @override
-  State<_ScheduleTimeFormDialog> createState() =>
+  ConsumerState<_ScheduleTimeFormDialog> createState() =>
       _ScheduleTimeFormDialogState();
 }
 
-class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
+class _ScheduleTimeFormDialogState
+    extends ConsumerState<_ScheduleTimeFormDialog> {
   static const Color _navy = Color(0xFF132E51);
 
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _departureTimeController;
-  late final TextEditingController _campusIdController;
-  late final TextEditingController _stopIdController;
+  int? _stopId;
   late String _direction;
   late String _scheduleType;
   late bool _requiresScanning;
@@ -279,20 +274,22 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
     super.initState();
     _departureTimeController =
         TextEditingController(text: widget.initialDepartureTime ?? '');
-    _campusIdController =
-        TextEditingController(text: widget.initialCampusId?.toString() ?? '');
-    _stopIdController =
-        TextEditingController(text: widget.initialStopId?.toString() ?? '');
+    _stopId = widget.initialStopId;
     _direction = widget.initialDirection ?? 'ToCampus';
     _scheduleType = widget.initialScheduleType ?? 'Weekday';
     _requiresScanning = true;
+    // Ensure the stops list is loaded for the stop dropdown.
+    Future.microtask(() {
+      final stopsState = ref.read(stopsProvider);
+      if (stopsState.stops.isEmpty) {
+        ref.read(stopsProvider.notifier).fetchStops();
+      }
+    });
   }
 
   @override
   void dispose() {
     _departureTimeController.dispose();
-    _campusIdController.dispose();
-    _stopIdController.dispose();
     super.dispose();
   }
 
@@ -378,39 +375,7 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
                     setState(() => _scheduleType = v ?? 'Weekday'),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _campusIdController,
-                decoration: InputDecoration(
-                  labelText: 'Campus ID',
-                  labelStyle: GoogleFonts.hankenGrotesk(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  prefixIcon: const Icon(Icons.school_outlined),
-                ),
-                style: GoogleFonts.hankenGrotesk(),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) =>
-                    Validators.positiveInt(v, fieldName: 'Campus ID'),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _stopIdController,
-                decoration: InputDecoration(
-                  labelText: 'Stop ID',
-                  labelStyle: GoogleFonts.hankenGrotesk(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  prefixIcon: const Icon(Icons.location_on_outlined),
-                ),
-                style: GoogleFonts.hankenGrotesk(),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) =>
-                    Validators.positiveInt(v, fieldName: 'Stop ID'),
-              ),
+              _buildStopDropdown(),
               const SizedBox(height: 16),
               // Requires Scanning toggle
               SwitchListTile(
@@ -447,16 +412,71 @@ class _ScheduleTimeFormDialogState extends State<_ScheduleTimeFormDialog> {
     );
   }
 
+  Widget _buildStopDropdown() {
+    final stopsState = ref.watch(stopsProvider);
+    if (stopsState.isLoading && stopsState.stops.isEmpty) {
+      return _dropdownPlaceholder(
+        label: 'Stop',
+        icon: Icons.location_on_outlined,
+        child: const SizedBox(
+          height: 16,
+          width: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+    final stops = stopsState.stops;
+    final hasSelected = stops.any((s) => s.id == _stopId);
+    return DropdownButtonFormField<int>(
+      initialValue: hasSelected ? _stopId : null,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: 'Stop',
+        labelStyle: GoogleFonts.hankenGrotesk(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        prefixIcon: const Icon(Icons.location_on_outlined),
+      ),
+      style: GoogleFonts.hankenGrotesk(color: _navy),
+      items: stops
+          .map((s) => DropdownMenuItem<int>(
+                value: s.id,
+                child: Text(s.stopName),
+              ))
+          .toList(),
+      onChanged: (v) => setState(() => _stopId = v),
+      validator: (v) => v == null ? 'Please select a stop' : null,
+    );
+  }
+
+  /// A disabled, outlined field used while dropdown data is loading or failed,
+  /// keeping the dialog layout stable.
+  Widget _dropdownPlaceholder({
+    required String label,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.hankenGrotesk(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        prefixIcon: Icon(icon),
+      ),
+      child: Align(alignment: Alignment.centerLeft, child: child),
+    );
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    final campusId = int.tryParse(_campusIdController.text) ?? 0;
-    final stopId = int.tryParse(_stopIdController.text) ?? 0;
     widget.onSubmit(
       _departureTimeController.text,
       _direction,
       _scheduleType,
-      campusId,
-      stopId,
+      _stopId!,
       _requiresScanning,
     );
     Navigator.of(context).pop();

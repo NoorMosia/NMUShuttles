@@ -407,6 +407,7 @@ class _ShuttlesScreenState extends ConsumerState<ShuttlesScreen> {
                         style: GoogleFonts.hankenGrotesk(),
                         textCapitalization: TextCapitalization.characters,
                         inputFormatters: const [
+                          UpperCaseFormatter(),
                           MaxLengthFormatter(Validators.maxLicensePlateLength),
                         ],
                         validator: Validators.licensePlate,

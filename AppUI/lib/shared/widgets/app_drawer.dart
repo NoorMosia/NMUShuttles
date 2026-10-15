@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_app/core/auth/auth_service.dart';
@@ -51,12 +52,16 @@ class AppDrawer extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Row(
                   children: [
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.primaryGold,
-                        shape: BoxShape.circle,
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: SvgPicture.asset(
+                        'assets/logo.svg',
+                        fit: BoxFit.contain,
+                        colorFilter: const ColorFilter.mode(
+                          AppTheme.navy,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),

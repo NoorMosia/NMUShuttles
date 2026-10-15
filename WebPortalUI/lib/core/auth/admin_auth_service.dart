@@ -24,6 +24,24 @@ class AdminAuthService {
     await prefs.remove(_tokenKey);
   }
 
+  /// Returns the admin's display name derived from the token's `identifier`
+  /// claim (the login email). For `transport@mandela.ac.za` this returns
+  /// `transport`. Falls back to `Admin` when the token is missing or malformed.
+  Future<String> getDisplayName() async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) return 'Admin';
+
+    try {
+      final claims = JwtDecoder.decode(token);
+      final identifier = (claims['identifier'] ?? '').toString();
+      if (identifier.isEmpty) return 'Admin';
+      final localPart = identifier.split('@').first.trim();
+      return localPart.isEmpty ? 'Admin' : localPart;
+    } catch (_) {
+      return 'Admin';
+    }
+  }
+
   /// Check if the user is authenticated with a valid (non-expired) token.
   Future<bool> isAuthenticated() async {
     final token = await getToken();

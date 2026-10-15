@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nmu_shuttle_admin/core/auth/admin_auth_service.dart';
@@ -34,6 +35,9 @@ class _AdminScaffoldState extends State<AdminScaffold>
 
   bool _isExpanded = false;
 
+  final AdminAuthService _authService = AdminAuthService();
+  String _displayName = 'Admin';
+
   late final AnimationController _animController;
   late final Animation<double> _widthAnimation;
 
@@ -64,6 +68,14 @@ class _AdminScaffoldState extends State<AdminScaffold>
       parent: _animController,
       curve: Curves.easeInOut,
     ));
+    _loadDisplayName();
+  }
+
+  Future<void> _loadDisplayName() async {
+    final name = await _authService.getDisplayName();
+    if (mounted) {
+      setState(() => _displayName = name);
+    }
   }
 
   @override
@@ -134,17 +146,18 @@ class _AdminScaffoldState extends State<AdminScaffold>
           ),
           const SizedBox(width: 16),
           // Brand
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: _gold,
-              shape: BoxShape.circle,
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: SvgPicture.asset(
+              'assets/logo.svg',
+              fit: BoxFit.contain,
+              colorFilter: const ColorFilter.mode(_navy, BlendMode.srcIn),
             ),
           ),
           const SizedBox(width: 8),
           Text(
-            'NMU Shuttles',
+            'LATT admin',
             style: GoogleFonts.hankenGrotesk(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -171,7 +184,9 @@ class _AdminScaffoldState extends State<AdminScaffold>
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    'A',
+                    _displayName.isNotEmpty
+                        ? _displayName[0].toUpperCase()
+                        : 'A',
                     style: GoogleFonts.hankenGrotesk(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -181,7 +196,7 @@ class _AdminScaffoldState extends State<AdminScaffold>
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Admin',
+                  _displayName,
                   style: GoogleFonts.hankenGrotesk(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,

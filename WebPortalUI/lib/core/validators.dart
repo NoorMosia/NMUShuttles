@@ -64,6 +64,30 @@ class Validators {
     return null;
   }
 
+  /// Number of digits required for a valid phone number.
+  static const int phoneNumberLength = 10;
+
+  /// Validates a contact phone number: must be exactly [phoneNumberLength]
+  /// digits (dashes and spacing are ignored when counting).
+  ///
+  /// When [optional] is true an empty value is accepted (returns null),
+  /// otherwise an empty value is reported as required.
+  static String? phone(
+    String? value, {
+    bool optional = false,
+    String fieldName = 'Phone number',
+  }) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) {
+      return optional ? null : '$fieldName is required';
+    }
+    final digits = v.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length != phoneNumberLength) {
+      return '$fieldName must be exactly $phoneNumberLength digits';
+    }
+    return null;
+  }
+
   /// Validates a shuttle licence plate: required, within a sensible length,
   /// and limited to letters, digits, spaces and hyphens.
   static String? licensePlate(String? value) {
@@ -126,6 +150,28 @@ class Validators {
       return 'Postal code must be 4 digits';
     }
     return null;
+  }
+}
+
+/// Input formatter that forces all entered text to upper case.
+///
+/// Unlike `TextCapitalization.characters` (which is only a soft-keyboard hint
+/// and is ignored by physical keyboards on web/desktop), this enforces upper
+/// case on every edit, so values like a license plate are always stored
+/// capitalized regardless of how they were typed.
+class UpperCaseFormatter extends TextInputFormatter {
+  const UpperCaseFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return newValue.copyWith(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+      composing: TextRange.empty,
+    );
   }
 }
 

@@ -167,7 +167,6 @@ class ScheduleTimesNotifier extends StateNotifier<ScheduleTimesState> {
     required String departureTime,
     required String direction,
     required String scheduleType,
-    required int campusId,
     required int stopId,
     bool requiresScanning = true,
   }) async {
@@ -176,7 +175,6 @@ class ScheduleTimesNotifier extends StateNotifier<ScheduleTimesState> {
         'departureTime': departureTime,
         'direction': direction,
         'scheduleType': scheduleType,
-        'campusId': campusId,
         'stopId': stopId,
         'requiresScanning': requiresScanning,
       });
@@ -193,7 +191,6 @@ class ScheduleTimesNotifier extends StateNotifier<ScheduleTimesState> {
     required String departureTime,
     required String direction,
     required String scheduleType,
-    required int campusId,
     required int stopId,
     bool requiresScanning = true,
   }) async {
@@ -202,7 +199,6 @@ class ScheduleTimesNotifier extends StateNotifier<ScheduleTimesState> {
         'departureTime': departureTime,
         'direction': direction,
         'scheduleType': scheduleType,
-        'campusId': campusId,
         'stopId': stopId,
         'requiresScanning': requiresScanning,
       });
@@ -431,3 +427,4 @@ final prioritySchedulesProvider = StateNotifierProvider<
   final dioClient = ref.watch(dioClientProvider);
   return PrioritySchedulesNotifier(dioClient);
 });
+

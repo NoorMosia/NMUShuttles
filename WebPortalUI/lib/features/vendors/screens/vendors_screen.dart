@@ -276,6 +276,11 @@ class _VendorsScreenState extends ConsumerState<VendorsScreen> {
                           FilteringTextInputFormatter.digitsOnly,
                           _PhoneNumberFormatter(),
                         ],
+                        validator: (v) => Validators.phone(
+                          v,
+                          optional: true,
+                          fieldName: 'Contact phone',
+                        ),
                       ),
                     ],
                   ),

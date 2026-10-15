@@ -62,9 +62,23 @@ jobs:
       # --- Assemble both builds into one publish directory ---
       - name: Assemble site
         run: |
+          set -euo pipefail
+          # Fail loudly if either build is missing its entry point.
+          test -f AppUIWeb/build/web/index.html    || { echo "AppUIWeb build missing"; exit 1; }
+          test -f WebPortalUI/build/web/index.html || { echo "WebPortalUI build missing"; exit 1; }
+
           mkdir -p public/app public/admin
-          cp -r AppUIWeb/build/web/.    public/app/
-          cp -r WebPortalUI/build/web/. public/admin/
+          cp -a AppUIWeb/build/web/.    public/app/
+          cp -a WebPortalUI/build/web/. public/admin/
+
+          echo "----- public/ tree -----"
+          ls -la public
+          echo "----- public/app -----"
+          ls -la public/app | head
+          echo "----- public/admin -----"
+          ls -la public/admin | head
+          test -f public/app/index.html   || { echo "app/index.html not assembled"; exit 1; }
+          test -f public/admin/index.html || { echo "admin/index.html not assembled"; exit 1; }
           # Minimal landing page at the site root linking to each app.
           cat > public/index.html <<'HTML'
           <!DOCTYPE html>

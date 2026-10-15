@@ -25,6 +25,7 @@ class AuthState {
     this.currentStep = AuthStep.identifier,
     this.role = AuthRole.student,
     this.authenticatedRole,
+    this.devOtp,
   });
 
   final bool isLoading;
@@ -35,6 +36,10 @@ class AuthState {
   /// Set after successful OTP verification; used for routing.
   final String? authenticatedRole;
 
+  /// EVALUATION ONLY: the OTP returned by non-production backends so it can be
+  /// shown on the confirm screen. Null in production (backend omits it).
+  final String? devOtp;
+
   AuthState copyWith({
     bool? isLoading,
     String? error,
@@ -42,6 +47,8 @@ class AuthState {
     AuthStep? currentStep,
     AuthRole? role,
     String? authenticatedRole,
+    String? devOtp,
+    bool clearDevOtp = false,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -49,6 +56,7 @@ class AuthState {
       currentStep: currentStep ?? this.currentStep,
       role: role ?? this.role,
       authenticatedRole: authenticatedRole ?? this.authenticatedRole,
+      devOtp: clearDevOtp ? null : (devOtp ?? this.devOtp),
     );
   }
 }
@@ -81,18 +89,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Step 1: Request an OTP for the given identifier.
   Future<void> requestOtp(AuthRole role, String identifier) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(isLoading: true, clearError: true, clearDevOtp: true);
 
     try {
+      final String? devOtp;
       if (role == AuthRole.student) {
-        await _authRepository.requestStudentOtp(identifier);
+        devOtp = await _authRepository.requestStudentOtp(identifier);
       } else {
-        await _authRepository.requestMarshalOtp(identifier);
+        devOtp = await _authRepository.requestMarshalOtp(identifier);
       }
 
       state = state.copyWith(
         isLoading: false,
         currentStep: AuthStep.otp,
+        devOtp: devOtp,
+        clearDevOtp: devOtp == null,
       );
     } on DioException catch (e) {
       state = state.copyWith(

@@ -22,11 +22,13 @@ public partial class AuthController : ControllerBase
 {
     private readonly IOtpService _otpService;
     private readonly ShuttleDbContext _dbContext;
+    private readonly IHostEnvironment _environment;
 
-    public AuthController(IOtpService otpService, ShuttleDbContext dbContext)
+    public AuthController(IOtpService otpService, ShuttleDbContext dbContext, IHostEnvironment environment)
     {
         _otpService = otpService;
         _dbContext = dbContext;
+        _environment = environment;
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -51,9 +53,9 @@ public partial class AuthController : ControllerBase
             });
         }
 
-        var success = await _otpService.RequestStudentOtpAsync(dto.StudentNumber);
+        var otp = await _otpService.RequestStudentOtpWithCodeAsync(dto.StudentNumber);
 
-        if (!success)
+        if (otp is null)
         {
             return NotFound(new ProblemDetails
             {
@@ -64,7 +66,13 @@ public partial class AuthController : ControllerBase
             });
         }
 
-        return Ok(new { Message = "OTP sent successfully." });
+        // EVALUATION ONLY: expose the OTP to the client in non-production builds so
+        // testers can log in without inbox access. Never returned in Production.
+        return Ok(new
+        {
+            Message = "OTP sent successfully.",
+            DevOtp = _environment.IsProduction() ? null : otp
+        });
     }
 
     /// <summary>
@@ -115,9 +123,9 @@ public partial class AuthController : ControllerBase
             });
         }
 
-        var success = await _otpService.RequestMarshalOtpAsync(dto.StaffNumber);
+        var otp = await _otpService.RequestMarshalOtpWithCodeAsync(dto.StaffNumber);
 
-        if (!success)
+        if (otp is null)
         {
             return NotFound(new ProblemDetails
             {
@@ -128,7 +136,13 @@ public partial class AuthController : ControllerBase
             });
         }
 
-        return Ok(new { Message = "OTP sent successfully." });
+        // EVALUATION ONLY: expose the OTP to the client in non-production builds so
+        // testers can log in without inbox access. Never returned in Production.
+        return Ok(new
+        {
+            Message = "OTP sent successfully.",
+            DevOtp = _environment.IsProduction() ? null : otp
+        });
     }
 
     /// <summary>

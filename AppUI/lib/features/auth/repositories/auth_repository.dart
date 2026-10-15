@@ -17,11 +17,15 @@ class AuthRepository {
   /// Request an OTP for a student.
   /// POST /auth/student/otp/request
   /// Body: { "studentNumber": "s312345678" }
-  Future<void> requestStudentOtp(String studentNumber) async {
-    await _dio.post(
+  ///
+  /// Returns the plain OTP when the backend runs in a non-production
+  /// (evaluation) build and includes `devOtp` in the response; otherwise null.
+  Future<String?> requestStudentOtp(String studentNumber) async {
+    final response = await _dio.post(
       '/auth/student/otp/request',
       data: {'studentNumber': studentNumber},
     );
+    return _extractDevOtp(response.data);
   }
 
   /// Verify a student's OTP and return auth response data (includes JWT token).
@@ -43,11 +47,25 @@ class AuthRepository {
   /// Request an OTP for a marshal.
   /// POST /auth/marshal/otp/request
   /// Body: { "staffNumber": "4827391" }
-  Future<void> requestMarshalOtp(String staffNumber) async {
-    await _dio.post(
+  ///
+  /// Returns the plain OTP when the backend runs in a non-production
+  /// (evaluation) build and includes `devOtp` in the response; otherwise null.
+  Future<String?> requestMarshalOtp(String staffNumber) async {
+    final response = await _dio.post(
       '/auth/marshal/otp/request',
       data: {'staffNumber': staffNumber},
     );
+    return _extractDevOtp(response.data);
+  }
+
+  /// Pulls the evaluation-only `devOtp` field out of an OTP-request response.
+  /// Tolerates casing differences and non-map payloads by returning null.
+  String? _extractDevOtp(dynamic data) {
+    if (data is! Map) return null;
+    final value = data['devOtp'] ?? data['DevOtp'];
+    if (value == null) return null;
+    final otp = value.toString().trim();
+    return otp.isEmpty ? null : otp;
   }
 
   /// Verify a marshal's OTP and return auth response data (includes JWT token).

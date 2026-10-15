@@ -11,6 +11,20 @@ public interface IOtpService
     string GenerateOtp();
 
     /// <summary>
+    /// Generates and stores an OTP for a student, returning the plain code.
+    /// Returns null if the student does not exist. The plain OTP is intended
+    /// for non-production evaluation builds only — never expose it in Production.
+    /// </summary>
+    Task<string?> RequestStudentOtpWithCodeAsync(string studentNumber);
+
+    /// <summary>
+    /// Generates and stores an OTP for a marshal, returning the plain code.
+    /// Returns null if the marshal does not exist. The plain OTP is intended
+    /// for non-production evaluation builds only — never expose it in Production.
+    /// </summary>
+    Task<string?> RequestMarshalOtpWithCodeAsync(string staffNumber);
+
+    /// <summary>
     /// Returns the SHA-256 hex hash of the given OTP.
     /// </summary>
     string HashOtp(string otp);

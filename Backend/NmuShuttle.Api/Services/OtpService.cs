@@ -69,13 +69,13 @@ public class OtpService : IOtpService
     }
 
     /// <inheritdoc />
-    public async Task<bool> RequestStudentOtpAsync(string studentNumber)
+    public async Task<string?> RequestStudentOtpWithCodeAsync(string studentNumber)
     {
         var student = await _db.Students
             .FirstOrDefaultAsync(s => s.StudentNumber == studentNumber);
 
         if (student is null)
-            return false;
+            return null;
 
         var otp = GenerateOtp();
         student.OtpHash = HashOtp(otp);
@@ -87,8 +87,12 @@ public class OtpService : IOtpService
 
         await SendOtpEmailAsync(student.UniversityEmail, otp, student.FirstName);
 
-        return true;
+        return otp;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> RequestStudentOtpAsync(string studentNumber)
+        => await RequestStudentOtpWithCodeAsync(studentNumber) is not null;
 
     /// <inheritdoc />
     public async Task<string?> VerifyStudentOtpAsync(string studentNumber, string otp)
@@ -116,13 +120,13 @@ public class OtpService : IOtpService
     }
 
     /// <inheritdoc />
-    public async Task<bool> RequestMarshalOtpAsync(string staffNumber)
+    public async Task<string?> RequestMarshalOtpWithCodeAsync(string staffNumber)
     {
         var marshal = await _db.Marshals
             .FirstOrDefaultAsync(m => m.StaffNumber == staffNumber);
 
         if (marshal is null)
-            return false;
+            return null;
 
         var otp = GenerateOtp();
         marshal.OtpHash = HashOtp(otp);
@@ -134,8 +138,12 @@ public class OtpService : IOtpService
 
         await SendOtpEmailAsync(marshal.UniversityEmail, otp, marshal.FirstName);
 
-        return true;
+        return otp;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> RequestMarshalOtpAsync(string staffNumber)
+        => await RequestMarshalOtpWithCodeAsync(staffNumber) is not null;
 
     /// <inheritdoc />
     public async Task<string?> VerifyMarshalOtpAsync(string staffNumber, string otp)

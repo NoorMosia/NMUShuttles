@@ -247,6 +247,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // ─── Step 2: OTP ─────────────────────────────
                   if (authState.currentStep == AuthStep.otp) ...[
                     const SizedBox(height: 48),
+
+                    // EVALUATION ONLY: the backend returns the OTP in non-production
+                    // builds so testers can log in without inbox access. Shown here
+                    // on top of the confirm screen. Production backends omit it.
+                    if (authState.devOtp != null) ...[
+                      _buildDevOtpBanner(authState.devOtp!),
+                      const SizedBox(height: 24),
+                    ],
+
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text.rich(
@@ -530,6 +539,59 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       onCompleted: (_) => _onVerifyOtp(),
       onChanged: (_) {},
+    );
+  }
+
+  // ─── Evaluation-only OTP banner ───────────────────────────────
+  // Displays the OTP returned by non-production backends so testers can log in
+  // without email access. Tapping it fills the code into the input boxes.
+
+  Widget _buildDevOtpBanner(String otp) {
+    return GestureDetector(
+      onTap: () {
+        _otpController.text = otp;
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: _gold.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: _gold, width: 1.5),
+        ),
+        child: Column(
+          children: [
+            Text(
+              'TEST MODE — YOUR OTP',
+              style: GoogleFonts.hankenGrotesk(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: _navy.withValues(alpha: 0.7),
+                letterSpacing: 0.08 * 11,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              otp,
+              style: GoogleFonts.hankenGrotesk(
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                color: _navy,
+                letterSpacing: 0.2 * 32,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Tap to fill automatically',
+              style: GoogleFonts.hankenGrotesk(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: _navy.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

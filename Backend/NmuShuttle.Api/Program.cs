@@ -245,7 +245,14 @@ builder.Services.AddHostedService<LockoutGateService>();
 // ──────────────────────────────────────────────────────────────────
 // Controllers
 // ──────────────────────────────────────────────────────────────────
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Emit every DateTime as a UTC instant with a trailing "Z" so clients
+        // (e.g. Dart's DateTime.parse) don't misread stored-UTC values as local time.
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter());
+        options.JsonSerializerOptions.Converters.Add(new NullableUtcDateTimeJsonConverter());
+    });
 
 // ──────────────────────────────────────────────────────────────────
 // ProblemDetails exception handler

@@ -12,7 +12,6 @@ namespace NmuShuttle.Api.Services;
 public class CheckInService : ICheckInService
 {
     private readonly ShuttleDbContext _db;
-    private static readonly TimeSpan SastOffset = TimeSpan.FromHours(2);
     private static readonly TimeSpan ScanWindowMinutes = TimeSpan.FromMinutes(35);
 
     public CheckInService(ShuttleDbContext db)
@@ -134,7 +133,7 @@ public class CheckInService : ICheckInService
 
         // Step 7: Update booking
         booking.BoardedStatus = "Boarded";
-        booking.BoardedAt = DateTime.UtcNow;
+        booking.BoardedAt = SastClock.UtcNow;
         booking.ShuttleId = assignedShuttleId;
 
         await _db.SaveChangesAsync();
@@ -254,7 +253,7 @@ public class CheckInService : ICheckInService
 
         // Step 8: Update booking
         booking.BoardedStatus = "Boarded";
-        booking.BoardedAt = DateTime.UtcNow;
+        booking.BoardedAt = SastClock.UtcNow;
         booking.ShuttleId = assignedShuttleId;
 
         await _db.SaveChangesAsync();
@@ -266,7 +265,7 @@ public class CheckInService : ICheckInService
     /// Converts a trip's SAST date + departure time into its UTC departure instant.
     /// </summary>
     private static DateTime ToUtcDeparture(DateOnly tripDate, TimeOnly departureTime)
-        => tripDate.ToDateTime(departureTime) - SastOffset;
+        => SastClock.ToUtc(tripDate, departureTime);
 
     /// <summary>
     /// Determines whether the given trip is the "very next" upcoming trip overall —
@@ -277,12 +276,12 @@ public class CheckInService : ICheckInService
     /// </summary>
     private async Task<bool> IsNextUpcomingTripAsync(TripInstance tripInstance)
     {
-        var now = DateTime.UtcNow;
+        var now = SastClock.UtcNow;
 
         // Narrow the candidate set to today's and tomorrow's trips (a departure can only
         // be "next" if it is near-term), then compute UTC departure instants in memory
         // because TripDate (DateOnly) and DepartureTime (TimeOnly) are stored separately.
-        var today = DateOnly.FromDateTime(now + SastOffset);
+        var today = SastClock.Today;
         var tomorrow = today.AddDays(1);
 
         var candidates = await _db.TripInstances
@@ -317,7 +316,7 @@ public class CheckInService : ICheckInService
     /// </summary>
     private async Task ValidateScanWindowAsync(TripInstance tripInstance)
     {
-        var now = DateTime.UtcNow;
+        var now = SastClock.UtcNow;
         var utcDeparture = ToUtcDeparture(tripInstance.TripDate, tripInstance.ScheduleTime.DepartureTime);
 
         // Once a trip's departure has passed it is no longer upcoming — scanning is closed.

@@ -30,6 +30,31 @@ class MarshalTimeSlotModel {
   /// Whether this time slot has not yet reached Completed status.
   bool get isActive => status != 'Completed';
 
+  /// The slot's departure as a local DateTime, or null if it can't be parsed.
+  /// tripDate is "yyyy-MM-dd" and departureTime is "HH:mm[:ss]" in SAST
+  /// (the device is assumed to be on SAST, matching the deployment region).
+  DateTime? get departureDateTime {
+    try {
+      final datePart = DateTime.parse(tripDate); // yyyy-MM-dd
+      final t = departureTime.length >= 5 ? departureTime : '00:00';
+      final hh = int.parse(t.substring(0, 2));
+      final mm = int.parse(t.substring(3, 5));
+      return DateTime(datePart.year, datePart.month, datePart.day, hh, mm);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Whether this slot is still upcoming (departure instant has not passed) and
+  /// not already completed. This is what makes a slot eligible to be shown as
+  /// the marshal's "next boarding" so a departed-but-still-Locked trip drops off.
+  bool isUpcoming([DateTime? now]) {
+    if (status == 'Completed') return false;
+    final dep = departureDateTime;
+    if (dep == null) return true; // if unparseable, don't hide it
+    return !dep.isBefore(now ?? DateTime.now());
+  }
+
   /// Display-friendly direction label.
   String get directionLabel {
     switch (direction) {

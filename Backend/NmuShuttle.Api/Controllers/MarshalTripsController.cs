@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.DTOs;
+using NmuShuttle.Api.Infrastructure;
 
 namespace NmuShuttle.Api.Controllers;
 
@@ -19,7 +20,6 @@ namespace NmuShuttle.Api.Controllers;
 public class MarshalTripsController : ControllerBase
 {
     private readonly ShuttleDbContext _dbContext;
-    private static readonly TimeSpan SastOffset = TimeSpan.FromHours(2);
     private static readonly TimeSpan ScanWindowMinutes = TimeSpan.FromMinutes(35);
 
     public MarshalTripsController(ShuttleDbContext dbContext)
@@ -46,7 +46,7 @@ public class MarshalTripsController : ControllerBase
         if (marshal is null)
             return NotFound(new { message = "Marshal not found" });
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow.Add(SastOffset));
+        var today = SastClock.Today;
 
         var query = _dbContext.TripInstances
             .Include(t => t.ScheduleTime)
@@ -118,8 +118,8 @@ public class MarshalTripsController : ControllerBase
         // campuses/directions). That trip is open to scanning at any time; every other
         // future trip only opens 35 minutes before departure. This mirrors the authority
         // in CheckInService.ValidateScanWindowAsync.
-        var nowUtc = DateTime.UtcNow;
-        var sastToday = DateOnly.FromDateTime(nowUtc.Add(SastOffset));
+        var nowUtc = SastClock.UtcNow;
+        var sastToday = SastClock.Today;
         var sastTomorrow = sastToday.AddDays(1);
 
         var upcomingCandidates = await _dbContext.TripInstances
@@ -129,15 +129,21 @@ public class MarshalTripsController : ControllerBase
             .ToListAsync();
 
         DateTime? nextDeparture = upcomingCandidates
-            .Select(c => c.TripDate.ToDateTime(c.DepartureTime) - SastOffset)
+            .Select(c => SastClock.ToUtc(c.TripDate, c.DepartureTime))
             .Where(d => d >= nowUtc)
             .OrderBy(d => d)
             .Cast<DateTime?>()
             .FirstOrDefault();
 
-        // Group trips by (DepartureTime, Direction) for campus marshals
+        // Group trips by (DepartureTime, Direction) for campus marshals.
+        // Time slots whose departure instant has already passed are dropped so the
+        // marshal always sees the next upcoming boarding rather than a stale slot.
+        // (Nothing auto-advances a Locked trip past departure, so without this filter
+        // a departed slot would keep showing all day — e.g. a 12:30 "Locked" slot at 13:22.)
+        var nowForFilter = SastClock.UtcNow;
         var grouped = trips
             .GroupBy(t => new { t.ScheduleTime.DepartureTime, t.ScheduleTime.Direction })
+            .Where(g => SastClock.ToUtc(today, g.Key.DepartureTime) >= nowForFilter)
             .OrderBy(g => g.Key.DepartureTime)
             .ThenBy(g => g.Key.Direction)
             .Select(g =>
@@ -153,10 +159,9 @@ public class MarshalTripsController : ControllerBase
                 var status = ResolveGroupStatus(groupTrips.Select(t => t.Status));
 
                 // Check if scanning is open.
-                var departureDateTime = today.ToDateTime(g.Key.DepartureTime);
-                var utcDeparture = departureDateTime - SastOffset;
+                var utcDeparture = SastClock.ToUtc(today, g.Key.DepartureTime);
                 var scanWindowStart = utcDeparture - ScanWindowMinutes;
-                var now = DateTime.UtcNow;
+                var now = SastClock.UtcNow;
 
                 // The very next upcoming trip overall is open at any time until it departs.
                 // Every other future trip is gated to the 35-minute pre-departure window.

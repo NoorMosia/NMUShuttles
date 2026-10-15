@@ -17,7 +17,7 @@ public static class StartupTripGenerator
         var db = scope.ServiceProvider.GetRequiredService<ShuttleDbContext>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<ShuttleDbContext>>();
 
-        var sastToday = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(2));
+        var sastToday = SastClock.Today;
 
         logger.LogInformation("StartupTripGenerator: Generating trips for {Today} through {End}.",
             sastToday, sastToday.AddDays(3));

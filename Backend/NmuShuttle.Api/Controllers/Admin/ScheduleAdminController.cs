@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.DTOs.Admin;
+using NmuShuttle.Api.Infrastructure;
 using NmuShuttle.Api.Models;
 using NmuShuttle.Api.Services;
 
@@ -152,7 +153,7 @@ public class ScheduleAdminController : ControllerBase
             return NotFound(new { message = "Schedule time not found" });
 
         // Reject if future TripInstances reference this schedule time
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = SastClock.Today;
         var hasFutureTrips = await _context.TripInstances
             .AnyAsync(t => t.ScheduleTimeId == id && t.TripDate >= today);
         if (hasFutureTrips)

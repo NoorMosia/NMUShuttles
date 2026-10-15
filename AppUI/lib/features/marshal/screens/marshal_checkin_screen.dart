@@ -387,12 +387,13 @@ class _QrScannerTabState extends ConsumerState<_QrScannerTab>
             ),
           ),
 
-        // Error overlay
+        // Error overlay. Clear the bottom safe-area inset (gesture/nav bar) so
+        // the "Scan Again" button below a two-line message is never clipped.
         if (_errorMessage != null)
           Positioned(
             left: 16,
             right: 16,
-            bottom: 40,
+            bottom: 24 + MediaQuery.of(context).padding.bottom,
             child: Card(
               color: Colors.red.shade50,
               elevation: 0,
@@ -442,7 +443,7 @@ class _QrScannerTabState extends ConsumerState<_QrScannerTab>
           Positioned(
             left: 16,
             right: 16,
-            bottom: 40,
+            bottom: 24 + MediaQuery.of(context).padding.bottom,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(

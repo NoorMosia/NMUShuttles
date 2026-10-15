@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
+using NmuShuttle.Api.Infrastructure;
 using NmuShuttle.Api.Models;
 
 namespace NmuShuttle.Api.Services;
@@ -74,7 +75,7 @@ public class BookingService : IBookingService
             BookingStatus = bookingStatus,
             BookingType = "Standard",
             BoardedStatus = "Pending",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = SastClock.UtcNow
         };
 
         const int maxRetries = 3;
@@ -144,7 +145,7 @@ public class BookingService : IBookingService
     public async Task<(List<Booking> Items, int TotalCount)> GetStudentBookingsAsync(
         int studentId, string filter, int page, int pageSize)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = SastClock.Today;
 
         var query = _db.Bookings
             .Where(b => b.StudentId == studentId)

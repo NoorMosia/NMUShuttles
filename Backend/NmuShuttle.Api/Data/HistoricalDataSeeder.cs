@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NmuShuttle.Api.Infrastructure;
 using NmuShuttle.Api.Models;
 
 namespace NmuShuttle.Api.Data;
@@ -218,8 +219,9 @@ public class HistoricalDataSeeder
     private static (DateTime LockedAt, DateTime InTransitAt, DateTime CompletedAt) ComputeTimestamps(
         DateOnly date, TimeOnly departureTimeSast)
     {
-        // Convert SAST to UTC: subtract 2 hours
-        var departureUtc = date.ToDateTime(departureTimeSast, DateTimeKind.Utc).AddHours(-2);
+        // Convert the SAST departure (date + wall-clock) to its UTC instant.
+        var departureUtc = DateTime.SpecifyKind(
+            SastClock.ToUtc(date, departureTimeSast), DateTimeKind.Utc);
         var lockedAt = departureUtc.AddHours(-1); // T-60min
         var completedAt = departureUtc.AddMinutes(45);
 

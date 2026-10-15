@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
+using NmuShuttle.Api.Infrastructure;
 using NmuShuttle.Api.Models;
 
 namespace NmuShuttle.Api.BackgroundServices;
@@ -55,12 +56,8 @@ public class RollingInjectionService : BackgroundService
     /// </summary>
     private static TimeSpan CalculateDelayUntilMidnightSast()
     {
-        var utcNow = DateTime.UtcNow;
-        var sastNow = utcNow.AddHours(2); // SAST = UTC+2
-
-        // Next SAST midnight
-        var nextMidnightSast = sastNow.Date.AddDays(1); // midnight tomorrow SAST
-        var nextMidnightUtc = nextMidnightSast.AddHours(-2); // convert back to UTC
+        var utcNow = SastClock.UtcNow;
+        var nextMidnightUtc = SastClock.NextMidnightUtc(utcNow);
 
         var delay = nextMidnightUtc - utcNow;
 
@@ -77,7 +74,7 @@ public class RollingInjectionService : BackgroundService
     internal async Task RunInjectionAsync(CancellationToken cancellationToken)
     {
         // SAST today + 3 days
-        var sastToday = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(2));
+        var sastToday = SastClock.Today;
         var targetDate = sastToday.AddDays(3);
 
         _logger.LogInformation("RollingInjectionService executing for TargetDate={TargetDate}.", targetDate);
@@ -176,7 +173,7 @@ public class RollingInjectionService : BackgroundService
                         ShuttleId = def.ShuttleId,
                         OrderPosition = def.OrderPosition,
                         IsOperational = true,
-                        AssignedAt = DateTime.UtcNow
+                        AssignedAt = SastClock.UtcNow
                     });
                     allocationsCreated++;
                 }
@@ -251,7 +248,7 @@ public class RollingInjectionService : BackgroundService
                 BoardedStatus = "Pending",
                 QrCodeToken = Guid.NewGuid().ToString("N"),
                 ShuttleId = shuttleId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = SastClock.UtcNow
             };
 
             db.Bookings.Add(booking);

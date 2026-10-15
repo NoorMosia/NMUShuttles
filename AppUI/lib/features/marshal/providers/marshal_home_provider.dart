@@ -56,11 +56,22 @@ class MarshalHomeState {
   final bool isLoading;
   final String? error;
 
-  /// Active (non-Completed) time slots sorted chronologically.
-  List<MarshalTimeSlotModel> get activeSlots =>
-      timeSlots.where((t) => t.isActive).toList();
+  /// Upcoming time slots (departure not yet passed, not Completed) sorted
+  /// chronologically. A departed trip that is still "Locked" is excluded here
+  /// so it can never be shown as the next boarding.
+  List<MarshalTimeSlotModel> get activeSlots {
+    final now = DateTime.now();
+    final slots = timeSlots.where((t) => t.isUpcoming(now)).toList();
+    slots.sort((a, b) {
+      final da = a.departureDateTime;
+      final db = b.departureDateTime;
+      if (da == null || db == null) return 0;
+      return da.compareTo(db);
+    });
+    return slots;
+  }
 
-  /// The next upcoming time slot (soonest non-Completed).
+  /// The next upcoming time slot (soonest upcoming, non-Completed).
   MarshalTimeSlotModel? get nextTimeSlot =>
       activeSlots.isNotEmpty ? activeSlots.first : null;
 

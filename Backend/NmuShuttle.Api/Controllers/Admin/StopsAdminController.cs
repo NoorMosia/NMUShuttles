@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
 using NmuShuttle.Api.DTOs.Admin;
+using NmuShuttle.Api.Infrastructure;
 using NmuShuttle.Api.Models;
 using NmuShuttle.Api.Services;
 
@@ -359,7 +360,7 @@ public class StopsAdminController : ControllerBase
         if (stop == null)
             return NotFound(new { message = "Stop not found" });
 
-        var sastToday = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(2));
+        var sastToday = SastClock.Today;
         var effectiveFrom = fromDate ?? sastToday;
         var effectiveTo = toDate ?? sastToday.AddDays(3);
 

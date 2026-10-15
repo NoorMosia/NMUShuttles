@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NmuShuttle.Api.Data;
+using NmuShuttle.Api.Infrastructure;
 using NmuShuttle.Api.Services;
 
 namespace NmuShuttle.Api.BackgroundServices;
@@ -76,7 +77,7 @@ public class LockoutGateService : BackgroundService
 
         // Calculate lockout time: departure (SAST) - 60 minutes, converted to UTC
         var lockoutTimeUtc = CalculateLockoutTimeUtc(nextTrip.TripDate, nextTrip.ScheduleTime.DepartureTime);
-        var utcNow = DateTime.UtcNow;
+        var utcNow = SastClock.UtcNow;
 
         if (lockoutTimeUtc > utcNow)
         {
@@ -136,7 +137,7 @@ public class LockoutGateService : BackgroundService
 
                 // Lock the trip
                 trip.Status = "Locked";
-                trip.LockedAt = DateTime.UtcNow;
+                trip.LockedAt = SastClock.UtcNow;
 
                 await db.SaveChangesAsync(stoppingToken);
                 await transaction.CommitAsync(stoppingToken);
@@ -167,20 +168,9 @@ public class LockoutGateService : BackgroundService
 
     /// <summary>
     /// Calculates the lockout time in UTC.
-    /// Lockout = Departure time (SAST) minus 60 minutes, converted to UTC.
-    /// SAST = UTC+2, so lockoutUtc = departureDateTime - 60min - 2hours.
+    /// Lockout = departure instant (UTC) minus 60 minutes. The departure instant is
+    /// derived from the SAST (TripDate, DepartureTime) pair via <see cref="SastClock"/>.
     /// </summary>
     private static DateTime CalculateLockoutTimeUtc(DateOnly tripDate, TimeOnly departureTime)
-    {
-        // Combine date and time to get full SAST departure DateTime
-        var departureSast = tripDate.ToDateTime(departureTime);
-
-        // Lockout is 60 minutes before departure in SAST
-        var lockoutSast = departureSast.AddMinutes(-60);
-
-        // Convert SAST to UTC (SAST = UTC + 2)
-        var lockoutUtc = lockoutSast.AddHours(-2);
-
-        return lockoutUtc;
-    }
+        => SastClock.ToUtc(tripDate, departureTime).AddMinutes(-60);
 }

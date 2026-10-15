@@ -111,7 +111,7 @@ public class CalendarAdminController : ControllerBase
         var marshalBody =
             $"{typeLabel} added for {dateLabel}{descSuffix}. No shuttles will run on this date.";
         await _notificationService.DispatchToAllMarshalsAsync(
-            "Schedule exception added",
+            "Shuttles cancelled",
             marshalBody);
 
         // Notify every student whose booking was just cancelled by this exception.

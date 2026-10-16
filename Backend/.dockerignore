@@ -1,0 +1,20 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# IDE / OS
+.vs/
+.vscode/
+*.user
+.DS_Store
+
+# Other projects not needed by the API image
+HashGen/
+
+# Secrets — never bake into the image
+**/appsettings.*.Local.json
+**/firebase-service-account.json
+**/*.pfx
+.env

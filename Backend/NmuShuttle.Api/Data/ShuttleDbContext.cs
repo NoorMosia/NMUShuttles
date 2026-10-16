@@ -76,16 +76,16 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Students");
             entity.HasKey(e => e.StudentId);
 
-            entity.Property(e => e.StudentNumber).HasColumnType("nvarchar(20)").IsRequired();
-            entity.Property(e => e.FirstName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.LastName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.UniversityEmail).HasColumnType("nvarchar(200)").IsRequired();
+            entity.Property(e => e.StudentNumber).HasColumnType("varchar(20)").IsRequired();
+            entity.Property(e => e.FirstName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.LastName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.UniversityEmail).HasColumnType("varchar(200)").IsRequired();
             entity.Property(e => e.IsPriorityUser).IsRequired().HasDefaultValue(false);
             entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
-            entity.Property(e => e.OtpHash).HasColumnType("nvarchar(256)");
-            entity.Property(e => e.OtpExpiry).HasColumnType("datetime2");
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.OtpHash).HasColumnType("varchar(256)");
+            entity.Property(e => e.OtpExpiry).HasColumnType("timestamp");
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             entity.HasIndex(e => e.StudentNumber).IsUnique();
             entity.HasIndex(e => e.UniversityEmail).IsUnique();
@@ -99,14 +99,14 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Marshals");
             entity.HasKey(e => e.MarshalId);
 
-            entity.Property(e => e.StaffNumber).HasColumnType("nvarchar(20)").IsRequired();
-            entity.Property(e => e.FirstName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.LastName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.UniversityEmail).HasColumnType("nvarchar(200)").IsRequired();
-            entity.Property(e => e.OtpHash).HasColumnType("nvarchar(256)");
-            entity.Property(e => e.OtpExpiry).HasColumnType("datetime2");
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.StaffNumber).HasColumnType("varchar(20)").IsRequired();
+            entity.Property(e => e.FirstName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.LastName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.UniversityEmail).HasColumnType("varchar(200)").IsRequired();
+            entity.Property(e => e.OtpHash).HasColumnType("varchar(256)");
+            entity.Property(e => e.OtpExpiry).HasColumnType("timestamp");
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             entity.HasIndex(e => e.StaffNumber).IsUnique();
             entity.HasIndex(e => e.UniversityEmail).IsUnique();
@@ -136,13 +136,13 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Admins");
             entity.HasKey(e => e.AdminId);
 
-            entity.Property(e => e.Email).HasColumnType("nvarchar(200)").IsRequired();
-            entity.Property(e => e.StaffNumber).HasColumnType("nvarchar(20)").IsRequired();
-            entity.Property(e => e.PasswordHash).HasColumnType("nvarchar(256)").IsRequired();
-            entity.Property(e => e.FirstName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.LastName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.Email).HasColumnType("varchar(200)").IsRequired();
+            entity.Property(e => e.StaffNumber).HasColumnType("varchar(20)").IsRequired();
+            entity.Property(e => e.PasswordHash).HasColumnType("varchar(256)").IsRequired();
+            entity.Property(e => e.FirstName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.LastName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
             entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
 
             entity.HasIndex(e => e.Email).IsUnique();
@@ -156,8 +156,8 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Campuses");
             entity.HasKey(e => e.CampusId);
 
-            entity.Property(e => e.CampusName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.GpsCoordinates).HasColumnType("nvarchar(50)").IsRequired();
+            entity.Property(e => e.CampusName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.GpsCoordinates).HasColumnType("varchar(50)").IsRequired();
 
             entity.HasIndex(e => e.CampusName).IsUnique();
         });
@@ -170,12 +170,12 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Stops");
             entity.HasKey(e => e.StopId);
 
-            entity.Property(e => e.StopName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.Street).HasColumnType("nvarchar(200)").IsRequired();
-            entity.Property(e => e.Suburb).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.City).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.PostalCode).HasColumnType("nvarchar(10)").IsRequired();
-            entity.Property(e => e.GpsCoordinates).HasColumnType("nvarchar(50)").IsRequired();
+            entity.Property(e => e.StopName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.Street).HasColumnType("varchar(200)").IsRequired();
+            entity.Property(e => e.Suburb).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.City).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.PostalCode).HasColumnType("varchar(10)").IsRequired();
+            entity.Property(e => e.GpsCoordinates).HasColumnType("varchar(50)").IsRequired();
             entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
 
             entity.HasIndex(e => e.StopName).IsUnique();
@@ -192,18 +192,18 @@ public class ShuttleDbContext : DbContext
             entity.HasKey(e => e.ScheduleTimeId);
 
             entity.Property(e => e.DepartureTime).IsRequired();
-            entity.Property(e => e.Direction).HasColumnType("nvarchar(20)").IsRequired();
-            entity.Property(e => e.ScheduleType).HasColumnType("nvarchar(20)").IsRequired();
+            entity.Property(e => e.Direction).HasColumnType("varchar(20)").IsRequired();
+            entity.Property(e => e.ScheduleType).HasColumnType("varchar(20)").IsRequired();
             entity.Property(e => e.RequiresScanning).IsRequired().HasDefaultValue(true);
 
             // CHECK constraints for enum-like columns
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_ScheduleTimes_Direction",
-                "Direction IN ('ToCampus','FromCampus')"));
+                "\"Direction\" IN ('ToCampus','FromCampus')"));
 
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_ScheduleTimes_ScheduleType",
-                "ScheduleType IN ('Weekday','Saturday')"));
+                "\"ScheduleType\" IN ('Weekday','Saturday')"));
 
             // Relationships
             entity.HasOne(e => e.Stop)
@@ -221,15 +221,15 @@ public class ShuttleDbContext : DbContext
             entity.HasKey(e => e.CalendarExceptionId);
 
             entity.Property(e => e.TargetDate).IsRequired();
-            entity.Property(e => e.ExceptionType).HasColumnType("nvarchar(30)").IsRequired();
-            entity.Property(e => e.Description).HasColumnType("nvarchar(500)");
+            entity.Property(e => e.ExceptionType).HasColumnType("varchar(30)").IsRequired();
+            entity.Property(e => e.Description).HasColumnType("varchar(500)");
 
             entity.HasIndex(e => e.TargetDate).IsUnique();
 
             // CHECK constraint for ExceptionType
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_CalendarExceptions_ExceptionType",
-                "ExceptionType IN ('PublicHoliday','UniversityRecess')"));
+                "\"ExceptionType\" IN ('PublicHoliday','UniversityRecess')"));
         });
     }
 
@@ -240,26 +240,26 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Shuttles");
             entity.HasKey(e => e.ShuttleId);
 
-            entity.Property(e => e.LicensePlate).HasColumnType("nvarchar(20)").IsRequired();
+            entity.Property(e => e.LicensePlate).HasColumnType("varchar(20)").IsRequired();
             entity.Property(e => e.Capacity).IsRequired();
-            entity.Property(e => e.VendorCompanyName).HasColumnType("nvarchar(100)").IsRequired();
+            entity.Property(e => e.VendorCompanyName).HasColumnType("varchar(100)").IsRequired();
             entity.Property(e => e.VendorId).IsRequired();
             entity.Property(e => e.IsAccessibleVehicle).IsRequired().HasDefaultValue(false);
             entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             entity.HasIndex(e => e.LicensePlate).IsUnique();
 
             // Filtered index for active shuttles
             entity.HasIndex(e => e.IsActive)
                 .HasDatabaseName("IX_Shuttles_IsActive")
-                .HasFilter("IsActive = 1");
+                .HasFilter("\"IsActive\" = true");
 
             // CHECK constraint: Capacity > 0
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Shuttles_Capacity",
-                "Capacity > 0"));
+                "\"Capacity\" > 0"));
 
             // Relationships
             entity.HasOne(e => e.Vendor)
@@ -277,16 +277,16 @@ public class ShuttleDbContext : DbContext
             entity.HasKey(e => e.TripInstanceId);
 
             entity.Property(e => e.TripDate).IsRequired();
-            entity.Property(e => e.Status).HasColumnType("nvarchar(20)").IsRequired()
+            entity.Property(e => e.Status).HasColumnType("varchar(20)").IsRequired()
                 .HasDefaultValue("Scheduling");
-            entity.Property(e => e.LockedAt).HasColumnType("datetime2");
-            entity.Property(e => e.InTransitAt).HasColumnType("datetime2");
-            entity.Property(e => e.CompletedAt).HasColumnType("datetime2");
+            entity.Property(e => e.LockedAt).HasColumnType("timestamp");
+            entity.Property(e => e.InTransitAt).HasColumnType("timestamp");
+            entity.Property(e => e.CompletedAt).HasColumnType("timestamp");
 
             // CHECK constraint for Status
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_TripInstances_Status",
-                "Status IN ('Scheduling','Locked','InTransit','Completed','IncidentActive','Cancelled')"));
+                "\"Status\" IN ('Scheduling','Locked','InTransit','Completed','IncidentActive','Cancelled')"));
 
             // Composite unique constraint: prevents duplicate trip injection
             entity.HasIndex(e => new { e.ScheduleTimeId, e.StopId, e.TripDate }).IsUnique()
@@ -318,8 +318,8 @@ public class ShuttleDbContext : DbContext
 
             entity.Property(e => e.OrderPosition).IsRequired();
             entity.Property(e => e.IsOperational).IsRequired().HasDefaultValue(true);
-            entity.Property(e => e.AssignedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.AssignedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             // Composite unique constraints
             entity.HasIndex(e => new { e.TripInstanceId, e.ShuttleId }).IsUnique()
@@ -352,29 +352,29 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Bookings");
             entity.HasKey(e => e.BookingId);
 
-            entity.Property(e => e.BookingStatus).HasColumnType("nvarchar(20)").IsRequired()
+            entity.Property(e => e.BookingStatus).HasColumnType("varchar(20)").IsRequired()
                 .HasDefaultValue("Confirmed");
-            entity.Property(e => e.BookingType).HasColumnType("nvarchar(20)").IsRequired()
+            entity.Property(e => e.BookingType).HasColumnType("varchar(20)").IsRequired()
                 .HasDefaultValue("Standard");
-            entity.Property(e => e.BoardedStatus).HasColumnType("nvarchar(20)").IsRequired()
+            entity.Property(e => e.BoardedStatus).HasColumnType("varchar(20)").IsRequired()
                 .HasDefaultValue("Pending");
-            entity.Property(e => e.QrCodeToken).HasColumnType("nvarchar(128)").IsRequired();
-            entity.Property(e => e.BoardedAt).HasColumnType("datetime2");
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.QrCodeToken).HasColumnType("varchar(128)").IsRequired();
+            entity.Property(e => e.BoardedAt).HasColumnType("timestamp");
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             // CHECK constraints for enum-like columns
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Bookings_BookingStatus",
-                "BookingStatus IN ('Confirmed','WaitingList','Cancelled')"));
+                "\"BookingStatus\" IN ('Confirmed','WaitingList','Cancelled')"));
 
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Bookings_BookingType",
-                "BookingType IN ('Standard','Priority')"));
+                "\"BookingType\" IN ('Standard','Priority')"));
 
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Bookings_BoardedStatus",
-                "BoardedStatus IN ('Pending','Boarded','NoShow')"));
+                "\"BoardedStatus\" IN ('Pending','Boarded','NoShow')"));
 
             // Unique constraint on QrCodeToken
             entity.HasIndex(e => e.QrCodeToken).IsUnique();
@@ -383,7 +383,7 @@ public class ShuttleDbContext : DbContext
             entity.HasIndex(e => new { e.StudentId, e.TripInstanceId })
                 .IsUnique()
                 .HasDatabaseName("UQ_Bookings_Student_TripInstance_Active")
-                .HasFilter("BookingStatus != 'Cancelled'");
+                .HasFilter("\"BookingStatus\" != 'Cancelled'");
 
             // Performance indexes
             entity.HasIndex(e => new { e.TripInstanceId, e.BookingStatus })
@@ -420,15 +420,15 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("PrioritySchedules");
             entity.HasKey(e => e.PriorityScheduleId);
 
-            entity.Property(e => e.DayOfWeek).HasColumnType("nvarchar(10)").IsRequired();
+            entity.Property(e => e.DayOfWeek).HasColumnType("varchar(10)").IsRequired();
             entity.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             // CHECK constraint for DayOfWeek
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_PrioritySchedules_DayOfWeek",
-                "DayOfWeek IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')"));
+                "\"DayOfWeek\" IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')"));
 
             // Performance index
             entity.HasIndex(e => new { e.DayOfWeek, e.IsActive })
@@ -460,20 +460,20 @@ public class ShuttleDbContext : DbContext
             entity.HasKey(e => e.DeviceRegistrationId);
 
             entity.Property(e => e.OwnerId).IsRequired();
-            entity.Property(e => e.OwnerType).HasColumnType("nvarchar(10)").IsRequired();
-            entity.Property(e => e.FcmToken).HasColumnType("nvarchar(512)").IsRequired();
-            entity.Property(e => e.Platform).HasColumnType("nvarchar(10)").IsRequired();
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.OwnerType).HasColumnType("varchar(10)").IsRequired();
+            entity.Property(e => e.FcmToken).HasColumnType("varchar(512)").IsRequired();
+            entity.Property(e => e.Platform).HasColumnType("varchar(10)").IsRequired();
+            entity.Property(e => e.UpdatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             // CHECK constraints for enum-like columns
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_DeviceRegistrations_OwnerType",
-                "OwnerType IN ('Student','Marshal')"));
+                "\"OwnerType\" IN ('Student','Marshal')"));
 
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_DeviceRegistrations_Platform",
-                "Platform IN ('android','ios')"));
+                "\"Platform\" IN ('android','ios')"));
 
             // Composite unique constraint: one token per platform per user
             entity.HasIndex(e => new { e.OwnerId, e.OwnerType, e.Platform }).IsUnique()
@@ -493,17 +493,17 @@ public class ShuttleDbContext : DbContext
             entity.HasKey(e => e.NotificationId);
 
             entity.Property(e => e.OwnerId).IsRequired();
-            entity.Property(e => e.OwnerType).HasColumnType("nvarchar(10)").IsRequired();
-            entity.Property(e => e.Title).HasColumnType("nvarchar(200)").IsRequired();
-            entity.Property(e => e.Message).HasColumnType("nvarchar(1000)").IsRequired();
+            entity.Property(e => e.OwnerType).HasColumnType("varchar(10)").IsRequired();
+            entity.Property(e => e.Title).HasColumnType("varchar(200)").IsRequired();
+            entity.Property(e => e.Message).HasColumnType("varchar(1000)").IsRequired();
             entity.Property(e => e.IsRead).IsRequired().HasDefaultValue(false);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             // CHECK constraint for enum-like OwnerType
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Notifications_OwnerType",
-                "OwnerType IN ('Student','Marshal')"));
+                "\"OwnerType\" IN ('Student','Marshal')"));
 
             // Performance index: fetch a user's notifications and count unread
             entity.HasIndex(e => new { e.OwnerId, e.OwnerType, e.IsRead })
@@ -524,23 +524,23 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Reports");
             entity.HasKey(e => e.ReportId);
 
-            entity.Property(e => e.Category).HasColumnType("nvarchar(30)").IsRequired();
-            entity.Property(e => e.Description).HasColumnType("nvarchar(2000)").IsRequired();
-            entity.Property(e => e.Status).HasColumnType("nvarchar(20)").IsRequired()
+            entity.Property(e => e.Category).HasColumnType("varchar(30)").IsRequired();
+            entity.Property(e => e.Description).HasColumnType("varchar(2000)").IsRequired();
+            entity.Property(e => e.Status).HasColumnType("varchar(20)").IsRequired()
                 .HasDefaultValue("Submitted");
-            entity.Property(e => e.AdminNotes).HasColumnType("nvarchar(2000)");
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime2");
+            entity.Property(e => e.AdminNotes).HasColumnType("varchar(2000)");
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
+            entity.Property(e => e.UpdatedAt).HasColumnType("timestamp");
 
             // CHECK constraints for enum-like columns
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Reports_Category",
-                "Category IN ('DriverBehavior','TimetableIssue','VehicleQuality','Other')"));
+                "\"Category\" IN ('DriverBehavior','TimetableIssue','VehicleQuality','Other')"));
 
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_Reports_Status",
-                "Status IN ('Submitted','UnderReview','Resolved')"));
+                "\"Status\" IN ('Submitted','UnderReview','Resolved')"));
 
             // Relationships
             entity.HasOne(e => e.Student)
@@ -562,16 +562,16 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("BreakdownLogs");
             entity.HasKey(e => e.BreakdownLogId);
 
-            entity.Property(e => e.VendorCompanyName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.FlaggedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
-            entity.Property(e => e.ResolutionType).HasColumnType("nvarchar(20)");
-            entity.Property(e => e.ResolvedAt).HasColumnType("datetime2");
+            entity.Property(e => e.VendorCompanyName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.FlaggedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
+            entity.Property(e => e.ResolutionType).HasColumnType("varchar(20)");
+            entity.Property(e => e.ResolvedAt).HasColumnType("timestamp");
 
             // CHECK constraint for ResolutionType (nullable, so only checked when not null)
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_BreakdownLogs_ResolutionType",
-                "ResolutionType IS NULL OR ResolutionType IN ('Replaced','Cancelled')"));
+                "\"ResolutionType\" IS NULL OR \"ResolutionType\" IN ('Replaced','Cancelled')"));
 
             // Performance indexes
             entity.HasIndex(e => e.ShuttleId)
@@ -618,11 +618,11 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("Vendors");
             entity.HasKey(e => e.VendorId);
 
-            entity.Property(e => e.CompanyName).HasColumnType("nvarchar(100)").IsRequired();
-            entity.Property(e => e.ContactEmail).HasColumnType("nvarchar(200)");
-            entity.Property(e => e.ContactPhone).HasColumnType("nvarchar(20)");
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.CompanyName).HasColumnType("varchar(100)").IsRequired();
+            entity.Property(e => e.ContactEmail).HasColumnType("varchar(200)");
+            entity.Property(e => e.ContactPhone).HasColumnType("varchar(20)");
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             entity.HasIndex(e => e.CompanyName).IsUnique()
                 .HasDatabaseName("UQ_Vendors_CompanyName");
@@ -637,8 +637,8 @@ public class ShuttleDbContext : DbContext
             entity.HasKey(e => e.StopShuttleDefaultId);
 
             entity.Property(e => e.OrderPosition).IsRequired();
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
 
             // Composite unique constraints
             entity.HasIndex(e => new { e.StopId, e.ShuttleId }).IsUnique()
@@ -704,16 +704,16 @@ public class ShuttleDbContext : DbContext
             entity.ToTable("TripNotes");
             entity.HasKey(e => e.TripNoteId);
 
-            entity.Property(e => e.NoteType).HasColumnType("nvarchar(20)").IsRequired();
-            entity.Property(e => e.Body).HasColumnType("nvarchar(max)").IsRequired();
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime2").IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.NoteType).HasColumnType("varchar(20)").IsRequired();
+            entity.Property(e => e.Body).HasColumnType("text").IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp").IsRequired()
+                .HasDefaultValueSql("timezone('utc', now())");
             entity.Property(e => e.IsResolutionAction).IsRequired().HasDefaultValue(false);
 
             // CHECK constraint for NoteType
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_TripNotes_NoteType",
-                "NoteType IN ('Incident','Replacement','General','NoShow')"));
+                "\"NoteType\" IN ('Incident','Replacement','General','NoShow')"));
 
             // Performance indexes
             entity.HasIndex(e => e.TripInstanceId)

@@ -2,9 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NmuShuttle.Api.Data;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -17,60 +17,60 @@ namespace NmuShuttle.Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("NmuShuttle.Api.Models.Admin", b =>
                 {
                     b.Property<int>("AdminId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AdminId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AdminId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("OtpExpiry")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("OtpHash")
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("StaffNumber")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("AdminId");
 
@@ -108,52 +108,52 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("BookingId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookingId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BookingId"));
 
                     b.Property<DateTime?>("BoardedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("BoardedStatus")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("varchar(20)")
                         .HasDefaultValue("Pending");
 
                     b.Property<string>("BookingStatus")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("varchar(20)")
                         .HasDefaultValue("Confirmed");
 
                     b.Property<string>("BookingType")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("varchar(20)")
                         .HasDefaultValue("Standard");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<string>("QrCodeToken")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<int?>("ShuttleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("StudentId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("TripInstanceId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("BookingId");
 
@@ -169,18 +169,18 @@ namespace NmuShuttle.Api.Migrations
                     b.HasIndex("StudentId", "TripInstanceId")
                         .IsUnique()
                         .HasDatabaseName("UQ_Bookings_Student_TripInstance_Active")
-                        .HasFilter("BookingStatus != 'Cancelled'");
+                        .HasFilter("\"BookingStatus\" != 'Cancelled'");
 
                     b.HasIndex("TripInstanceId", "BookingStatus")
                         .HasDatabaseName("IX_Bookings_TripInstanceId_Status");
 
                     b.ToTable("Bookings", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Bookings_BoardedStatus", "BoardedStatus IN ('Pending','Boarded','NoShow')");
+                            t.HasCheckConstraint("CK_Bookings_BoardedStatus", "\"BoardedStatus\" IN ('Pending','Boarded','NoShow')");
 
-                            t.HasCheckConstraint("CK_Bookings_BookingStatus", "BookingStatus IN ('Confirmed','WaitingList','Cancelled')");
+                            t.HasCheckConstraint("CK_Bookings_BookingStatus", "\"BookingStatus\" IN ('Confirmed','WaitingList','Cancelled')");
 
-                            t.HasCheckConstraint("CK_Bookings_BookingType", "BookingType IN ('Standard','Priority')");
+                            t.HasCheckConstraint("CK_Bookings_BookingType", "\"BookingType\" IN ('Standard','Priority')");
                         });
                 });
 
@@ -188,41 +188,41 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("BreakdownLogId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BreakdownLogId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BreakdownLogId"));
 
                     b.Property<DateTime>("FlaggedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<int>("FlaggedByMarshalId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("ReplacementShuttleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ResolutionType")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp");
 
                     b.Property<int?>("ResolvedByAdminId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ShuttleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("TripInstanceId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("VendorCompanyName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("BreakdownLogId");
 
@@ -245,7 +245,7 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("BreakdownLogs", null, t =>
                         {
-                            t.HasCheckConstraint("CK_BreakdownLogs_ResolutionType", "ResolutionType IS NULL OR ResolutionType IN ('Replaced','Cancelled')");
+                            t.HasCheckConstraint("CK_BreakdownLogs_ResolutionType", "\"ResolutionType\" IS NULL OR \"ResolutionType\" IN ('Replaced','Cancelled')");
                         });
                 });
 
@@ -253,18 +253,18 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("CalendarExceptionId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CalendarExceptionId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CalendarExceptionId"));
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("ExceptionType")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("varchar(30)");
 
                     b.Property<DateOnly>("TargetDate")
                         .HasColumnType("date");
@@ -276,7 +276,7 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("CalendarExceptions", null, t =>
                         {
-                            t.HasCheckConstraint("CK_CalendarExceptions_ExceptionType", "ExceptionType IN ('PublicHoliday','UniversityRecess')");
+                            t.HasCheckConstraint("CK_CalendarExceptions_ExceptionType", "\"ExceptionType\" IN ('PublicHoliday','UniversityRecess')");
                         });
 
                     b.HasData(
@@ -412,19 +412,19 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("CampusId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CampusId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CampusId"));
 
                     b.Property<string>("CampusName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("GpsCoordinates")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("CampusId");
 
@@ -458,32 +458,32 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("DeviceRegistrationId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeviceRegistrationId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DeviceRegistrationId"));
 
                     b.Property<string>("FcmToken")
                         .IsRequired()
                         .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasColumnType("varchar(512)");
 
                     b.Property<int>("OwnerId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("OwnerType")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<string>("Platform")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.HasKey("DeviceRegistrationId");
 
@@ -496,9 +496,9 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("DeviceRegistrations", null, t =>
                         {
-                            t.HasCheckConstraint("CK_DeviceRegistrations_OwnerType", "OwnerType IN ('Student','Marshal')");
+                            t.HasCheckConstraint("CK_DeviceRegistrations_OwnerType", "\"OwnerType\" IN ('Student','Marshal')");
 
-                            t.HasCheckConstraint("CK_DeviceRegistrations_Platform", "Platform IN ('android','ios')");
+                            t.HasCheckConstraint("CK_DeviceRegistrations_Platform", "\"Platform\" IN ('android','ios')");
                         });
 
                     b.HasData(
@@ -787,50 +787,50 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("MarshalId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MarshalId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MarshalId"));
 
                     b.Property<int?>("AssignedCampusId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("AssignedStopId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("OtpExpiry")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("OtpHash")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("StaffNumber")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("UniversityEmail")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.HasKey("MarshalId");
 
@@ -977,40 +977,40 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("NotificationId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("NotificationId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<bool>("IsRead")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("varchar(1000)");
 
                     b.Property<int>("OwnerId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("OwnerType")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<int?>("RelatedTripInstanceId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.HasKey("NotificationId");
 
@@ -1021,7 +1021,7 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("Notifications", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Notifications_OwnerType", "OwnerType IN ('Student','Marshal')");
+                            t.HasCheckConstraint("CK_Notifications_OwnerType", "\"OwnerType\" IN ('Student','Marshal')");
                         });
                 });
 
@@ -1029,33 +1029,33 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("PriorityScheduleId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PriorityScheduleId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PriorityScheduleId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<string>("DayOfWeek")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
                     b.Property<int>("ScheduleTimeId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("StopId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("StudentId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("PriorityScheduleId");
 
@@ -1070,7 +1070,7 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("PrioritySchedules", null, t =>
                         {
-                            t.HasCheckConstraint("CK_PrioritySchedules_DayOfWeek", "DayOfWeek IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')");
+                            t.HasCheckConstraint("CK_PrioritySchedules_DayOfWeek", "\"DayOfWeek\" IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')");
                         });
 
                     b.HasData(
@@ -1360,47 +1360,47 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("ReportId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReportId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ReportId"));
 
                     b.Property<string>("AdminNotes")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("varchar(2000)");
 
                     b.Property<int?>("BookingId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("varchar(30)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("varchar(2000)");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("varchar(20)")
                         .HasDefaultValue("Submitted");
 
                     b.Property<int>("StudentId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("TripInstanceId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp");
 
                     b.HasKey("ReportId");
 
@@ -1412,9 +1412,9 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("Reports", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Reports_Category", "Category IN ('DriverBehavior','TimetableIssue','VehicleQuality','Other')");
+                            t.HasCheckConstraint("CK_Reports_Category", "\"Category\" IN ('DriverBehavior','TimetableIssue','VehicleQuality','Other')");
 
-                            t.HasCheckConstraint("CK_Reports_Status", "Status IN ('Submitted','UnderReview','Resolved')");
+                            t.HasCheckConstraint("CK_Reports_Status", "\"Status\" IN ('Submitted','UnderReview','Resolved')");
                         });
                 });
 
@@ -1422,30 +1422,30 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("ScheduleTimeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScheduleTimeId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ScheduleTimeId"));
 
                     b.Property<TimeOnly>("DepartureTime")
-                        .HasColumnType("time");
+                        .HasColumnType("time without time zone");
 
                     b.Property<string>("Direction")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<bool>("RequiresScanning")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
                     b.Property<string>("ScheduleType")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<int>("StopId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("ScheduleTimeId");
 
@@ -1453,9 +1453,9 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("ScheduleTimes", null, t =>
                         {
-                            t.HasCheckConstraint("CK_ScheduleTimes_Direction", "Direction IN ('ToCampus','FromCampus')");
+                            t.HasCheckConstraint("CK_ScheduleTimes_Direction", "\"Direction\" IN ('ToCampus','FromCampus')");
 
-                            t.HasCheckConstraint("CK_ScheduleTimes_ScheduleType", "ScheduleType IN ('Weekday','Saturday')");
+                            t.HasCheckConstraint("CK_ScheduleTimes_ScheduleType", "\"ScheduleType\" IN ('Weekday','Saturday')");
                         });
 
                     b.HasData(
@@ -2833,18 +2833,18 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("ScheduleTimeCampusId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScheduleTimeCampusId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ScheduleTimeCampusId"));
 
                     b.Property<int>("CampusId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ScheduleTimeId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("StopOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("ScheduleTimeCampusId");
 
@@ -3934,46 +3934,46 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("ShuttleId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShuttleId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ShuttleId"));
 
                     b.Property<int>("Capacity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<bool>("IsAccessibleVehicle")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
                     b.Property<string>("LicensePlate")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("VendorCompanyName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<int>("VendorId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("ShuttleId");
 
                     b.HasIndex("IsActive")
                         .HasDatabaseName("IX_Shuttles_IsActive")
-                        .HasFilter("IsActive = 1");
+                        .HasFilter("\"IsActive\" = true");
 
                     b.HasIndex("LicensePlate")
                         .IsUnique();
@@ -3982,7 +3982,7 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("Shuttles", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Shuttles_Capacity", "Capacity > 0");
+                            t.HasCheckConstraint("CK_Shuttles_Capacity", "\"Capacity\" > 0");
                         });
 
                     b.HasData(
@@ -4091,44 +4091,44 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("StopId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StopId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("StopId"));
 
                     b.Property<string>("City")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("GpsCoordinates")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
                     b.Property<string>("PostalCode")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<string>("StopName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Street")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("Suburb")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("StopId");
 
@@ -4232,23 +4232,23 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("StopShuttleDefaultId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StopShuttleDefaultId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("StopShuttleDefaultId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<int>("OrderPosition")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ShuttleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("StopId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("StopShuttleDefaultId");
 
@@ -4338,51 +4338,51 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("StudentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("StudentId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
                     b.Property<bool>("IsPriorityUser")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("OtpExpiry")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("OtpHash")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("StudentNumber")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("UniversityEmail")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.HasKey("StudentId");
 
@@ -5061,31 +5061,31 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("TripInstanceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TripInstanceId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TripInstanceId"));
 
                     b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp");
 
                     b.Property<DateTime?>("InTransitAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp");
 
                     b.Property<DateTime?>("LockedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp");
 
                     b.Property<int>("ScheduleTimeId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("varchar(20)")
                         .HasDefaultValue("Scheduling");
 
                     b.Property<int>("StopId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateOnly>("TripDate")
                         .HasColumnType("date");
@@ -5103,7 +5103,7 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("TripInstances", null, t =>
                         {
-                            t.HasCheckConstraint("CK_TripInstances_Status", "Status IN ('Scheduling','Locked','InTransit','Completed','IncidentActive','Cancelled')");
+                            t.HasCheckConstraint("CK_TripInstances_Status", "\"Status\" IN ('Scheduling','Locked','InTransit','Completed','IncidentActive','Cancelled')");
                         });
                 });
 
@@ -5111,34 +5111,34 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("TripNoteId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TripNoteId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TripNoteId"));
 
                     b.Property<string>("Body")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<int>("CreatedByAdminId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsResolutionAction")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
                     b.Property<string>("NoteType")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<int>("TripInstanceId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("TripNoteId");
 
@@ -5152,7 +5152,7 @@ namespace NmuShuttle.Api.Migrations
 
                     b.ToTable("TripNotes", null, t =>
                         {
-                            t.HasCheckConstraint("CK_TripNotes_NoteType", "NoteType IN ('Incident','Replacement','General','NoShow')");
+                            t.HasCheckConstraint("CK_TripNotes_NoteType", "\"NoteType\" IN ('Incident','Replacement','General','NoShow')");
                         });
                 });
 
@@ -5160,28 +5160,28 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("AllocationId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllocationId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AllocationId"));
 
                     b.Property<DateTime>("AssignedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.Property<bool>("IsOperational")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
                     b.Property<int>("OrderPosition")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ShuttleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("TripInstanceId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("AllocationId");
 
@@ -5205,27 +5205,27 @@ namespace NmuShuttle.Api.Migrations
                 {
                     b.Property<int>("VendorId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VendorId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VendorId"));
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("ContactEmail")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("ContactPhone")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("timezone('utc', now())");
 
                     b.HasKey("VendorId");
 

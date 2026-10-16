@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NmuShuttle.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreatePg : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,17 +18,17 @@ namespace NmuShuttle.Api.Migrations
                 name: "Admins",
                 columns: table => new
                 {
-                    AdminId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Email = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    StaffNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    OtpHash = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
-                    OtpExpiry = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    AdminId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Email = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    StaffNumber = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    PasswordHash = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
+                    FirstName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    OtpHash = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    OtpExpiry = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -38,26 +39,26 @@ namespace NmuShuttle.Api.Migrations
                 name: "CalendarExceptions",
                 columns: table => new
                 {
-                    CalendarExceptionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CalendarExceptionId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TargetDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    ExceptionType = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                    ExceptionType = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
+                    Description = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CalendarExceptions", x => x.CalendarExceptionId);
-                    table.CheckConstraint("CK_CalendarExceptions_ExceptionType", "ExceptionType IN ('PublicHoliday','UniversityRecess')");
+                    table.CheckConstraint("CK_CalendarExceptions_ExceptionType", "\"ExceptionType\" IN ('PublicHoliday','UniversityRecess')");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Campuses",
                 columns: table => new
                 {
-                    CampusId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CampusName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    GpsCoordinates = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    CampusId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CampusName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    GpsCoordinates = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -68,34 +69,34 @@ namespace NmuShuttle.Api.Migrations
                 name: "DeviceRegistrations",
                 columns: table => new
                 {
-                    DeviceRegistrationId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OwnerId = table.Column<int>(type: "int", nullable: false),
-                    OwnerType = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    FcmToken = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
-                    Platform = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    DeviceRegistrationId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    OwnerId = table.Column<int>(type: "integer", nullable: false),
+                    OwnerType = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
+                    FcmToken = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: false),
+                    Platform = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DeviceRegistrations", x => x.DeviceRegistrationId);
-                    table.CheckConstraint("CK_DeviceRegistrations_OwnerType", "OwnerType IN ('Student','Marshal')");
-                    table.CheckConstraint("CK_DeviceRegistrations_Platform", "Platform IN ('android','ios')");
+                    table.CheckConstraint("CK_DeviceRegistrations_OwnerType", "\"OwnerType\" IN ('Student','Marshal')");
+                    table.CheckConstraint("CK_DeviceRegistrations_Platform", "\"Platform\" IN ('android','ios')");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Stops",
                 columns: table => new
                 {
-                    StopId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StopName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Street = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Suburb = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    PostalCode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    GpsCoordinates = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    StopId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StopName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    Street = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    Suburb = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    City = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    PostalCode = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
+                    GpsCoordinates = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -106,17 +107,17 @@ namespace NmuShuttle.Api.Migrations
                 name: "Students",
                 columns: table => new
                 {
-                    StudentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StudentNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UniversityEmail = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    IsPriorityUser = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    OtpHash = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    OtpExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    StudentId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StudentNumber = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    FirstName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    UniversityEmail = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    IsPriorityUser = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    OtpHash = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    OtpExpiry = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
@@ -127,12 +128,12 @@ namespace NmuShuttle.Api.Migrations
                 name: "Vendors",
                 columns: table => new
                 {
-                    VendorId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CompanyName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    ContactEmail = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    ContactPhone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    VendorId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CompanyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    ContactEmail = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
+                    ContactPhone = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
@@ -143,18 +144,18 @@ namespace NmuShuttle.Api.Migrations
                 name: "Marshals",
                 columns: table => new
                 {
-                    MarshalId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StaffNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UniversityEmail = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    AssignedCampusId = table.Column<int>(type: "int", nullable: true),
-                    AssignedStopId = table.Column<int>(type: "int", nullable: true),
-                    OtpHash = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    OtpExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    MarshalId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StaffNumber = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    FirstName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    UniversityEmail = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    AssignedCampusId = table.Column<int>(type: "integer", nullable: true),
+                    AssignedStopId = table.Column<int>(type: "integer", nullable: true),
+                    OtpHash = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    OtpExpiry = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
@@ -178,19 +179,19 @@ namespace NmuShuttle.Api.Migrations
                 name: "ScheduleTimes",
                 columns: table => new
                 {
-                    ScheduleTimeId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DepartureTime = table.Column<TimeOnly>(type: "time", nullable: false),
-                    Direction = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    ScheduleType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    StopId = table.Column<int>(type: "int", nullable: false),
-                    RequiresScanning = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    ScheduleTimeId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    DepartureTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    Direction = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    ScheduleType = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    StopId = table.Column<int>(type: "integer", nullable: false),
+                    RequiresScanning = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ScheduleTimes", x => x.ScheduleTimeId);
-                    table.CheckConstraint("CK_ScheduleTimes_Direction", "Direction IN ('ToCampus','FromCampus')");
-                    table.CheckConstraint("CK_ScheduleTimes_ScheduleType", "ScheduleType IN ('Weekday','Saturday')");
+                    table.CheckConstraint("CK_ScheduleTimes_Direction", "\"Direction\" IN ('ToCampus','FromCampus')");
+                    table.CheckConstraint("CK_ScheduleTimes_ScheduleType", "\"ScheduleType\" IN ('Weekday','Saturday')");
                     table.ForeignKey(
                         name: "FK_ScheduleTimes_Stops_StopId",
                         column: x => x.StopId,
@@ -203,20 +204,20 @@ namespace NmuShuttle.Api.Migrations
                 name: "Shuttles",
                 columns: table => new
                 {
-                    ShuttleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    LicensePlate = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Capacity = table.Column<int>(type: "int", nullable: false),
-                    VendorCompanyName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    VendorId = table.Column<int>(type: "int", nullable: false),
-                    IsAccessibleVehicle = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    ShuttleId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    LicensePlate = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    Capacity = table.Column<int>(type: "integer", nullable: false),
+                    VendorCompanyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    VendorId = table.Column<int>(type: "integer", nullable: false),
+                    IsAccessibleVehicle = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Shuttles", x => x.ShuttleId);
-                    table.CheckConstraint("CK_Shuttles_Capacity", "Capacity > 0");
+                    table.CheckConstraint("CK_Shuttles_Capacity", "\"Capacity\" > 0");
                     table.ForeignKey(
                         name: "FK_Shuttles_Vendors_VendorId",
                         column: x => x.VendorId,
@@ -229,19 +230,19 @@ namespace NmuShuttle.Api.Migrations
                 name: "PrioritySchedules",
                 columns: table => new
                 {
-                    PriorityScheduleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StudentId = table.Column<int>(type: "int", nullable: false),
-                    StopId = table.Column<int>(type: "int", nullable: false),
-                    ScheduleTimeId = table.Column<int>(type: "int", nullable: false),
-                    DayOfWeek = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    PriorityScheduleId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StudentId = table.Column<int>(type: "integer", nullable: false),
+                    StopId = table.Column<int>(type: "integer", nullable: false),
+                    ScheduleTimeId = table.Column<int>(type: "integer", nullable: false),
+                    DayOfWeek = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PrioritySchedules", x => x.PriorityScheduleId);
-                    table.CheckConstraint("CK_PrioritySchedules_DayOfWeek", "DayOfWeek IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')");
+                    table.CheckConstraint("CK_PrioritySchedules_DayOfWeek", "\"DayOfWeek\" IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')");
                     table.ForeignKey(
                         name: "FK_PrioritySchedules_ScheduleTimes_ScheduleTimeId",
                         column: x => x.ScheduleTimeId,
@@ -266,11 +267,11 @@ namespace NmuShuttle.Api.Migrations
                 name: "ScheduleTimeCampuses",
                 columns: table => new
                 {
-                    ScheduleTimeCampusId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ScheduleTimeId = table.Column<int>(type: "int", nullable: false),
-                    CampusId = table.Column<int>(type: "int", nullable: false),
-                    StopOrder = table.Column<int>(type: "int", nullable: false)
+                    ScheduleTimeCampusId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ScheduleTimeId = table.Column<int>(type: "integer", nullable: false),
+                    CampusId = table.Column<int>(type: "integer", nullable: false),
+                    StopOrder = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -293,20 +294,20 @@ namespace NmuShuttle.Api.Migrations
                 name: "TripInstances",
                 columns: table => new
                 {
-                    TripInstanceId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ScheduleTimeId = table.Column<int>(type: "int", nullable: false),
-                    StopId = table.Column<int>(type: "int", nullable: false),
+                    TripInstanceId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ScheduleTimeId = table.Column<int>(type: "integer", nullable: false),
+                    StopId = table.Column<int>(type: "integer", nullable: false),
                     TripDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Scheduling"),
-                    LockedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    InTransitAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false, defaultValue: "Scheduling"),
+                    LockedAt = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    InTransitAt = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TripInstances", x => x.TripInstanceId);
-                    table.CheckConstraint("CK_TripInstances_Status", "Status IN ('Scheduling','Locked','InTransit','Completed','IncidentActive')");
+                    table.CheckConstraint("CK_TripInstances_Status", "\"Status\" IN ('Scheduling','Locked','InTransit','Completed','IncidentActive','Cancelled')");
                     table.ForeignKey(
                         name: "FK_TripInstances_ScheduleTimes_ScheduleTimeId",
                         column: x => x.ScheduleTimeId,
@@ -325,12 +326,12 @@ namespace NmuShuttle.Api.Migrations
                 name: "StopShuttleDefaults",
                 columns: table => new
                 {
-                    StopShuttleDefaultId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StopId = table.Column<int>(type: "int", nullable: false),
-                    ShuttleId = table.Column<int>(type: "int", nullable: false),
-                    OrderPosition = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    StopShuttleDefaultId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StopId = table.Column<int>(type: "integer", nullable: false),
+                    ShuttleId = table.Column<int>(type: "integer", nullable: false),
+                    OrderPosition = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
@@ -353,24 +354,24 @@ namespace NmuShuttle.Api.Migrations
                 name: "Bookings",
                 columns: table => new
                 {
-                    BookingId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StudentId = table.Column<int>(type: "int", nullable: false),
-                    TripInstanceId = table.Column<int>(type: "int", nullable: false),
-                    BookingStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Confirmed"),
-                    BookingType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Standard"),
-                    BoardedStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Pending"),
-                    QrCodeToken = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ShuttleId = table.Column<int>(type: "int", nullable: true),
-                    BoardedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    BookingId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StudentId = table.Column<int>(type: "integer", nullable: false),
+                    TripInstanceId = table.Column<int>(type: "integer", nullable: false),
+                    BookingStatus = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false, defaultValue: "Confirmed"),
+                    BookingType = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false, defaultValue: "Standard"),
+                    BoardedStatus = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false, defaultValue: "Pending"),
+                    QrCodeToken = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false),
+                    ShuttleId = table.Column<int>(type: "integer", nullable: true),
+                    BoardedAt = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Bookings", x => x.BookingId);
-                    table.CheckConstraint("CK_Bookings_BoardedStatus", "BoardedStatus IN ('Pending','Boarded','NoShow')");
-                    table.CheckConstraint("CK_Bookings_BookingStatus", "BookingStatus IN ('Confirmed','WaitingList','Cancelled')");
-                    table.CheckConstraint("CK_Bookings_BookingType", "BookingType IN ('Standard','Priority')");
+                    table.CheckConstraint("CK_Bookings_BoardedStatus", "\"BoardedStatus\" IN ('Pending','Boarded','NoShow')");
+                    table.CheckConstraint("CK_Bookings_BookingStatus", "\"BookingStatus\" IN ('Confirmed','WaitingList','Cancelled')");
+                    table.CheckConstraint("CK_Bookings_BookingType", "\"BookingType\" IN ('Standard','Priority')");
                     table.ForeignKey(
                         name: "FK_Bookings_Shuttles_ShuttleId",
                         column: x => x.ShuttleId,
@@ -395,22 +396,22 @@ namespace NmuShuttle.Api.Migrations
                 name: "BreakdownLogs",
                 columns: table => new
                 {
-                    BreakdownLogId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TripInstanceId = table.Column<int>(type: "int", nullable: false),
-                    ShuttleId = table.Column<int>(type: "int", nullable: false),
-                    VendorCompanyName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    FlaggedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    FlaggedByMarshalId = table.Column<int>(type: "int", nullable: false),
-                    ResolutionType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    ReplacementShuttleId = table.Column<int>(type: "int", nullable: true),
-                    ResolvedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ResolvedByAdminId = table.Column<int>(type: "int", nullable: true)
+                    BreakdownLogId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TripInstanceId = table.Column<int>(type: "integer", nullable: false),
+                    ShuttleId = table.Column<int>(type: "integer", nullable: false),
+                    VendorCompanyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    FlaggedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    FlaggedByMarshalId = table.Column<int>(type: "integer", nullable: false),
+                    ResolutionType = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
+                    ReplacementShuttleId = table.Column<int>(type: "integer", nullable: true),
+                    ResolvedAt = table.Column<DateTime>(type: "timestamp", nullable: true),
+                    ResolvedByAdminId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BreakdownLogs", x => x.BreakdownLogId);
-                    table.CheckConstraint("CK_BreakdownLogs_ResolutionType", "ResolutionType IS NULL OR ResolutionType IN ('Replaced','Cancelled')");
+                    table.CheckConstraint("CK_BreakdownLogs_ResolutionType", "\"ResolutionType\" IS NULL OR \"ResolutionType\" IN ('Replaced','Cancelled')");
                     table.ForeignKey(
                         name: "FK_BreakdownLogs_Admins_ResolvedByAdminId",
                         column: x => x.ResolvedByAdminId,
@@ -447,24 +448,20 @@ namespace NmuShuttle.Api.Migrations
                 name: "Notifications",
                 columns: table => new
                 {
-                    NotificationId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StudentId = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    IsRead = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    RelatedTripInstanceId = table.Column<int>(type: "int", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    NotificationId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    OwnerId = table.Column<int>(type: "integer", nullable: false),
+                    OwnerType = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
+                    Title = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    Message = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    RelatedTripInstanceId = table.Column<int>(type: "integer", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Notifications", x => x.NotificationId);
-                    table.ForeignKey(
-                        name: "FK_Notifications_Students_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "Students",
-                        principalColumn: "StudentId",
-                        onDelete: ReferentialAction.Restrict);
+                    table.CheckConstraint("CK_Notifications_OwnerType", "\"OwnerType\" IN ('Student','Marshal')");
                     table.ForeignKey(
                         name: "FK_Notifications_TripInstances_RelatedTripInstanceId",
                         column: x => x.RelatedTripInstanceId,
@@ -477,19 +474,19 @@ namespace NmuShuttle.Api.Migrations
                 name: "TripNotes",
                 columns: table => new
                 {
-                    TripNoteId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TripInstanceId = table.Column<int>(type: "int", nullable: false),
-                    NoteType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedByAdminId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    IsResolutionAction = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                    TripNoteId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TripInstanceId = table.Column<int>(type: "integer", nullable: false),
+                    NoteType = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    Body = table.Column<string>(type: "text", nullable: false),
+                    CreatedByAdminId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    IsResolutionAction = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TripNotes", x => x.TripNoteId);
-                    table.CheckConstraint("CK_TripNotes_NoteType", "NoteType IN ('Incident','Replacement','General','NoShow')");
+                    table.CheckConstraint("CK_TripNotes_NoteType", "\"NoteType\" IN ('Incident','Replacement','General','NoShow')");
                     table.ForeignKey(
                         name: "FK_TripNotes_Admins_CreatedByAdminId",
                         column: x => x.CreatedByAdminId,
@@ -508,13 +505,13 @@ namespace NmuShuttle.Api.Migrations
                 name: "TripShuttleAllocations",
                 columns: table => new
                 {
-                    AllocationId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TripInstanceId = table.Column<int>(type: "int", nullable: false),
-                    ShuttleId = table.Column<int>(type: "int", nullable: false),
-                    OrderPosition = table.Column<int>(type: "int", nullable: false),
-                    IsOperational = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    AllocationId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TripInstanceId = table.Column<int>(type: "integer", nullable: false),
+                    ShuttleId = table.Column<int>(type: "integer", nullable: false),
+                    OrderPosition = table.Column<int>(type: "integer", nullable: false),
+                    IsOperational = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    AssignedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())")
                 },
                 constraints: table =>
                 {
@@ -537,23 +534,23 @@ namespace NmuShuttle.Api.Migrations
                 name: "Reports",
                 columns: table => new
                 {
-                    ReportId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StudentId = table.Column<int>(type: "int", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Submitted"),
-                    TripInstanceId = table.Column<int>(type: "int", nullable: true),
-                    BookingId = table.Column<int>(type: "int", nullable: true),
-                    AdminNotes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    ReportId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StudentId = table.Column<int>(type: "integer", nullable: false),
+                    Category = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
+                    Description = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: false),
+                    Status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false, defaultValue: "Submitted"),
+                    TripInstanceId = table.Column<int>(type: "integer", nullable: true),
+                    BookingId = table.Column<int>(type: "integer", nullable: true),
+                    AdminNotes = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "timezone('utc', now())"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Reports", x => x.ReportId);
-                    table.CheckConstraint("CK_Reports_Category", "Category IN ('DriverBehavior','TimetableIssue','VehicleQuality','Other')");
-                    table.CheckConstraint("CK_Reports_Status", "Status IN ('Submitted','UnderReview','Resolved')");
+                    table.CheckConstraint("CK_Reports_Category", "\"Category\" IN ('DriverBehavior','TimetableIssue','VehicleQuality','Other')");
+                    table.CheckConstraint("CK_Reports_Status", "\"Status\" IN ('Submitted','UnderReview','Resolved')");
                     table.ForeignKey(
                         name: "FK_Reports_Bookings_BookingId",
                         column: x => x.BookingId,
@@ -996,58 +993,25 @@ namespace NmuShuttle.Api.Migrations
             migrationBuilder.InsertData(
                 table: "Shuttles",
                 columns: new[] { "ShuttleId", "Capacity", "CreatedAt", "IsAccessibleVehicle", "IsActive", "LicensePlate", "VendorCompanyName", "VendorId" },
-                values: new object[] { 1, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, true, "EC 142-837", "Bay Transit Corp", 1 });
+                values: new object[,]
+                {
+                    { 1, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, true, "EC 101-001", "Bay Transit Corp", 1 },
+                    { 2, 2, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, true, "EC 102-002", "Bay Transit Corp", 1 },
+                    { 3, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, true, "EC 103-003", "Coastal Movers", 2 },
+                    { 4, 28, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, true, "EC 104-004", "Metro Link SA", 3 },
+                    { 5, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, true, "EC 105-005", "Bay Transit Corp", 1 }
+                });
 
             migrationBuilder.InsertData(
                 table: "Shuttles",
                 columns: new[] { "ShuttleId", "Capacity", "CreatedAt", "IsActive", "LicensePlate", "VendorCompanyName", "VendorId" },
                 values: new object[,]
                 {
-                    { 2, 35, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 256-491", "Bay Transit Corp", 1 },
-                    { 3, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 389-720", "Bay Transit Corp", 1 }
+                    { 6, 35, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 106-006", "Coastal Movers", 2 },
+                    { 7, 28, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 107-007", "Metro Link SA", 3 },
+                    { 8, 35, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 108-008", "Bay Transit Corp", 1 },
+                    { 9, 28, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 109-009", "Coastal Movers", 2 }
                 });
-
-            migrationBuilder.InsertData(
-                table: "Shuttles",
-                columns: new[] { "ShuttleId", "Capacity", "CreatedAt", "IsAccessibleVehicle", "IsActive", "LicensePlate", "VendorCompanyName", "VendorId" },
-                values: new object[] { 4, 28, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, true, "EC 501-163", "Coastal Movers", 2 });
-
-            migrationBuilder.InsertData(
-                table: "Shuttles",
-                columns: new[] { "ShuttleId", "Capacity", "CreatedAt", "IsActive", "LicensePlate", "VendorCompanyName", "VendorId" },
-                values: new object[,]
-                {
-                    { 5, 35, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 628-945", "Coastal Movers", 2 },
-                    { 6, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 714-382", "Coastal Movers", 2 },
-                    { 7, 28, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 837-256", "Metro Link SA", 3 },
-                    { 8, 35, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 948-617", "Metro Link SA", 3 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Shuttles",
-                columns: new[] { "ShuttleId", "Capacity", "CreatedAt", "IsAccessibleVehicle", "IsActive", "LicensePlate", "VendorCompanyName", "VendorId" },
-                values: new object[] { 9, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, true, "EC 103-475", "Metro Link SA", 3 });
-
-            migrationBuilder.InsertData(
-                table: "Shuttles",
-                columns: new[] { "ShuttleId", "Capacity", "CreatedAt", "IsActive", "LicensePlate", "VendorCompanyName", "VendorId" },
-                values: new object[,]
-                {
-                    { 10, 28, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 217-864", "Bay Transit Corp", 1 },
-                    { 11, 35, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 331-058", "Bay Transit Corp", 1 },
-                    { 12, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 445-912", "Coastal Movers", 2 },
-                    { 13, 28, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 552-376", "Coastal Movers", 2 },
-                    { 14, 35, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 668-741", "Coastal Movers", 2 },
-                    { 15, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 774-285", "Metro Link SA", 3 },
-                    { 16, 28, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 889-639", "Metro Link SA", 3 },
-                    { 17, 35, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 993-104", "Metro Link SA", 3 },
-                    { 18, 22, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, "EC 107-528", "Bay Transit Corp", 1 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Shuttles",
-                columns: new[] { "ShuttleId", "Capacity", "CreatedAt", "IsAccessibleVehicle", "IsActive", "LicensePlate", "VendorCompanyName", "VendorId" },
-                values: new object[] { 19, 28, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), true, true, "EC 214-963", "Bay Transit Corp", 1 });
 
             migrationBuilder.InsertData(
                 table: "PrioritySchedules",
@@ -1249,24 +1213,13 @@ namespace NmuShuttle.Api.Migrations
                 values: new object[,]
                 {
                     { 1, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 1, 1 },
-                    { 2, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 2, 2, 1 },
-                    { 3, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 3, 3, 1 },
-                    { 4, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 4, 2 },
-                    { 5, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 2, 5, 2 },
-                    { 6, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 3, 6, 2 },
-                    { 7, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 9, 3 },
-                    { 8, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 2, 7, 3 },
-                    { 9, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 3, 8, 3 },
-                    { 10, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 19, 4 },
-                    { 11, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 2, 10, 4 },
-                    { 12, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 11, 5 },
-                    { 13, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 2, 12, 5 },
-                    { 14, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 13, 6 },
-                    { 15, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 2, 14, 6 },
-                    { 16, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 15, 7 },
-                    { 17, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 2, 16, 7 },
-                    { 18, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 17, 8 },
-                    { 19, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 2, 18, 8 }
+                    { 2, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 2, 2 },
+                    { 3, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 3, 3 },
+                    { 4, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 4, 4 },
+                    { 5, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 5, 5 },
+                    { 6, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 6, 6 },
+                    { 7, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 7, 7 },
+                    { 8, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), 1, 8, 8 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1301,7 +1254,7 @@ namespace NmuShuttle.Api.Migrations
                 table: "Bookings",
                 columns: new[] { "StudentId", "TripInstanceId" },
                 unique: true,
-                filter: "BookingStatus != 'Cancelled'");
+                filter: "\"BookingStatus\" != 'Cancelled'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BreakdownLogs_FlaggedAt",
@@ -1384,14 +1337,14 @@ namespace NmuShuttle.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_Owner_IsRead",
+                table: "Notifications",
+                columns: new[] { "OwnerId", "OwnerType", "IsRead" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Notifications_RelatedTripInstanceId",
                 table: "Notifications",
                 column: "RelatedTripInstanceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Notifications_StudentId_IsRead",
-                table: "Notifications",
-                columns: new[] { "StudentId", "IsRead" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PrioritySchedules_DayOfWeek_Active",
@@ -1459,7 +1412,7 @@ namespace NmuShuttle.Api.Migrations
                 name: "IX_Shuttles_IsActive",
                 table: "Shuttles",
                 column: "IsActive",
-                filter: "IsActive = 1");
+                filter: "\"IsActive\" = true");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shuttles_LicensePlate",

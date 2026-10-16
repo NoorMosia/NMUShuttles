@@ -16,15 +16,21 @@ using NmuShuttle.Api.Data;
 using NmuShuttle.Api.Infrastructure;
 using NmuShuttle.Api.Services;
 
+// The app stores all DateTime values as UTC (Kind=Utc) and maps them to
+// PostgreSQL `timestamp without time zone` columns. Npgsql 6+ otherwise rejects
+// writing Utc-kind DateTimes to `timestamp`. This switch restores the legacy
+// behaviour so our UTC-in/UTC-out semantics are preserved unchanged.
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ──────────────────────────────────────────────────────────────────
 // Database
 // ──────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<ShuttleDbContext>(options =>
-    options.UseSqlServer(
+    options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sql => sql.EnableRetryOnFailure(3)));
+        npgsql => npgsql.EnableRetryOnFailure(3)));
 
 // ──────────────────────────────────────────────────────────────────
 // Authentication — JWT Bearer
@@ -153,7 +159,12 @@ builder.Services.AddCors(options =>
         if (builder.Environment.IsDevelopment())
         {
             // In development, allow any localhost origin (Flutter Web uses random ports)
-            policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
+            // plus any explicitly configured origins (e.g. the GitHub Pages demo frontend
+            // reached over an ngrok tunnel).
+            var devAllowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                ?? Array.Empty<string>();
+            policy.SetIsOriginAllowed(origin =>
+                    new Uri(origin).Host == "localhost" || devAllowedOrigins.Contains(origin))
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -241,7 +252,7 @@ builder.Services.AddScoped<IWaitlistPromotionService, WaitlistPromotionService>(
 // ──────────────────────────────────────────────────────────────────
 // Background Services (disabled temporarily for local dev — re-enable for production)
 // ──────────────────────────────────────────────────────────────────
-// builder.Services.AddHostedService<RollingInjectionService>();
+builder.Services.AddHostedService<RollingInjectionService>();
 builder.Services.AddHostedService<LockoutGateService>();
 
 // ──────────────────────────────────────────────────────────────────
@@ -266,6 +277,19 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 // Build App
 // ──────────────────────────────────────────────────────────────────
 var app = builder.Build();
+
+// ──────────────────────────────────────────────────────────────────
+// Apply EF Core migrations at startup
+// ──────────────────────────────────────────────────────────────────
+// The deployed database (Supabase) starts empty, and nothing else in this
+// app creates the schema. Running Migrate() here guarantees all tables,
+// constraints, indexes and HasData seed rows exist before the seeders and
+// StartupTripGenerator below run against them.
+using (var migrateScope = app.Services.CreateScope())
+{
+    var db = migrateScope.ServiceProvider.GetRequiredService<ShuttleDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 // ──────────────────────────────────────────────────────────────────
 // Middleware Pipeline

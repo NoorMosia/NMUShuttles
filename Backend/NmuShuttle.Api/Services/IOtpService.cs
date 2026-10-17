@@ -6,6 +6,13 @@ namespace NmuShuttle.Api.Services;
 public interface IOtpService
 {
     /// <summary>
+    /// Whether OTP codes may be returned to the client in the API response.
+    /// True in non-Production builds, or when the Otp:ExposeInResponse flag is set.
+    /// Intended for evaluation only — never enable for real production use.
+    /// </summary>
+    bool ExposeOtpInResponse { get; }
+
+    /// <summary>
     /// Generates a 5-digit numeric OTP string (10000–99999).
     /// </summary>
     string GenerateOtp();

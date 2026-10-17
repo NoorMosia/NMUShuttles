@@ -16,20 +16,33 @@ public class OtpService : IOtpService
     private readonly IEmailService _emailService;
     private readonly ILogger<OtpService> _logger;
     private readonly IHostEnvironment _environment;
+    private readonly bool _exposeOtpInResponse;
 
     public OtpService(
         ShuttleDbContext db,
         IJwtTokenService jwtTokenService,
         IEmailService emailService,
         ILogger<OtpService> logger,
-        IHostEnvironment environment)
+        IHostEnvironment environment,
+        IConfiguration configuration)
     {
         _db = db;
         _jwtTokenService = jwtTokenService;
         _emailService = emailService;
         _logger = logger;
         _environment = environment;
+
+        // TEST FLAG: when Otp:ExposeInResponse is true, OTP codes are returned in the
+        // API response and email-send failures are non-fatal. Lets testers log in
+        // without an inbox. MUST be false for any real production use.
+        _exposeOtpInResponse = configuration.GetValue("Otp:ExposeInResponse", false);
     }
+
+    /// <summary>
+    /// Whether OTP codes should be returned to the client in the response
+    /// (non-Production evaluation, or when Otp:ExposeInResponse is enabled).
+    /// </summary>
+    public bool ExposeOtpInResponse => _exposeOtpInResponse || !_environment.IsProduction();
 
     /// <summary>
     /// Sends the OTP by email. In Development, email failures are logged but do not
@@ -48,10 +61,12 @@ public class OtpService : IOtpService
         {
             await _emailService.SendOtpAsync(overrideRecipient, otp, recipientName);
         }
-        catch (Exception ex) when (_environment.IsDevelopment())
+        catch (Exception ex) when (_environment.IsDevelopment() || _exposeOtpInResponse)
         {
+            // Email delivery is non-fatal when OTPs are exposed to the client:
+            // the tester reads the code from the response/console instead of an inbox.
             _logger.LogWarning(ex,
-                "OTP email send failed in Development for {Email}; relying on console log.", overrideRecipient);
+                "OTP email send failed for {Email}; relying on exposed OTP / console log.", overrideRecipient);
         }
     }
 

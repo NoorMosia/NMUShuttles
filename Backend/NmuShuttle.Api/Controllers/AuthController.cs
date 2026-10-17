@@ -66,12 +66,12 @@ public partial class AuthController : ControllerBase
             });
         }
 
-        // EVALUATION ONLY: expose the OTP to the client in non-production builds so
-        // testers can log in without inbox access. Never returned in Production.
+        // EVALUATION ONLY: expose the OTP to the client when enabled so testers can
+        // log in without inbox access. Controlled by Otp:ExposeInResponse / environment.
         return Ok(new
         {
             Message = "OTP sent successfully.",
-            DevOtp = _environment.IsProduction() ? null : otp
+            DevOtp = _otpService.ExposeOtpInResponse ? otp : null
         });
     }
 
@@ -136,12 +136,12 @@ public partial class AuthController : ControllerBase
             });
         }
 
-        // EVALUATION ONLY: expose the OTP to the client in non-production builds so
-        // testers can log in without inbox access. Never returned in Production.
+        // EVALUATION ONLY: expose the OTP to the client when enabled so testers can
+        // log in without inbox access. Controlled by Otp:ExposeInResponse / environment.
         return Ok(new
         {
             Message = "OTP sent successfully.",
-            DevOtp = _environment.IsProduction() ? null : otp
+            DevOtp = _otpService.ExposeOtpInResponse ? otp : null
         });
     }
 

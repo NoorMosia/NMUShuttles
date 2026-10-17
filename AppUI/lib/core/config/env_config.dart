@@ -17,11 +17,11 @@ class EnvConfig {
       'https://nmu-shuttle-api.fly.dev/api/v1';
 
   /// Resolved base URL based on [environment].
-  static const String baseUrl = switch (environment) {
-    Environment.local => _localBaseUrl,
-    Environment.ngrok => _ngrokBaseUrl,
-    Environment.production => _productionBaseUrl,
-  };
+  /// Uses const ternaries (not a switch expression) so it stays a compile-time
+  /// constant, which `const String` requires.
+  static const String baseUrl = environment == Environment.production
+      ? _productionBaseUrl
+      : (environment == Environment.ngrok ? _ngrokBaseUrl : _localBaseUrl);
 
   /// Whether the active environment is the ngrok tunnel (adds a skip-warning
   /// header so the browser interstitial doesn't block API calls).

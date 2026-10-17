@@ -13,7 +13,7 @@ const _gold = Color(0xFFFFCC00);
 
 // ─── Validation ──────────────────────────────────────────────────────────────
 
-final _studentNumberRegex = RegExp(r'^s3[12]\d{7}$');
+final _studentNumberRegex = RegExp(r'^s3[1-4]\d{7}$');
 final _staffNumberRegex = RegExp(r'^\d{7}$');
 
 String? _validateIdentifier(String? value, String role) {
@@ -23,7 +23,7 @@ String? _validateIdentifier(String? value, String role) {
   final v = value.trim();
   if (role == 'Student') {
     if (!_studentNumberRegex.hasMatch(v)) {
-      return 'Student number must match s3[1|2]XXXXXXX (e.g. s312345678)';
+      return 'Student number must match s3[1-4]XXXXXXX (e.g. s312345678)';
     }
   } else {
     if (!_staffNumberRegex.hasMatch(v)) {
@@ -345,7 +345,8 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                   DataCell(Text(user.email)),
                   DataCell(
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: user.isActive
                             ? Colors.green.shade50
@@ -376,10 +377,14 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                       if (user.role != 'Admin')
                         IconButton(
                           icon: Icon(
-                            user.isActive ? Icons.block_outlined : Icons.check_circle_outline,
+                            user.isActive
+                                ? Icons.block_outlined
+                                : Icons.check_circle_outline,
                             size: 18,
                           ),
-                          color: user.isActive ? Colors.orange.shade700 : Colors.green.shade700,
+                          color: user.isActive
+                              ? Colors.orange.shade700
+                              : Colors.green.shade700,
                           tooltip: user.isActive ? 'Deactivate' : 'Activate',
                           onPressed: () => _toggleUserActive(user),
                         ),
@@ -752,8 +757,7 @@ class _UserFormDialogState extends State<_UserFormDialog> {
     _role = validRoles.contains(initial) ? initial : 'Student';
     _identifierCtrl =
         TextEditingController(text: widget.initialIdentifier ?? '');
-    _firstNameCtrl =
-        TextEditingController(text: widget.initialFirstName ?? '');
+    _firstNameCtrl = TextEditingController(text: widget.initialFirstName ?? '');
     _lastNameCtrl = TextEditingController(text: widget.initialLastName ?? '');
     _emailCtrl = TextEditingController(text: widget.initialEmail ?? '');
     // If an existing email is provided and it doesn't match the auto-derived
@@ -887,9 +891,8 @@ class _UserFormDialogState extends State<_UserFormDialog> {
                   style: GoogleFonts.hankenGrotesk(fontSize: 14),
                   decoration: _inputDecoration(
                     _role == 'Student' ? 'Student Number' : 'Staff Number',
-                    hint: _role == 'Student'
-                        ? 'e.g. s312345678'
-                        : 'e.g. 1234567',
+                    hint:
+                        _role == 'Student' ? 'e.g. s312345678' : 'e.g. 1234567',
                   ),
                   onChanged: _onIdentifierChanged,
                   validator: (v) => _validateIdentifier(v, _role),
@@ -1031,8 +1034,7 @@ class _UserFormDialogState extends State<_UserFormDialog> {
                 )
               : Text(
                   widget.title == 'Add User' ? 'Add' : 'Save',
-                  style:
-                      GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w600),
+                  style: GoogleFonts.hankenGrotesk(fontWeight: FontWeight.w600),
                 ),
         ),
       ],
@@ -1110,8 +1112,10 @@ class _CsvPreviewDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final students = rows.where((r) => r.role.toLowerCase() == 'student').toList();
-    final marshals = rows.where((r) => r.role.toLowerCase() == 'marshal').toList();
+    final students =
+        rows.where((r) => r.role.toLowerCase() == 'student').toList();
+    final marshals =
+        rows.where((r) => r.role.toLowerCase() == 'marshal').toList();
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1143,7 +1147,8 @@ class _CsvPreviewDialog extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.insert_drive_file_outlined, size: 18, color: Colors.grey.shade600),
+                  Icon(Icons.insert_drive_file_outlined,
+                      size: 18, color: Colors.grey.shade600),
                   const SizedBox(width: 8),
                   Text(
                     fileName,
@@ -1177,7 +1182,8 @@ class _CsvPreviewDialog extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.warning_amber_outlined, size: 16, color: Colors.orange.shade700),
+                    Icon(Icons.warning_amber_outlined,
+                        size: 16, color: Colors.orange.shade700),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -1252,7 +1258,8 @@ class _CsvPreviewDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text('Cancel', style: GoogleFonts.hankenGrotesk(color: Colors.grey.shade600)),
+          child: Text('Cancel',
+              style: GoogleFonts.hankenGrotesk(color: Colors.grey.shade600)),
         ),
         FilledButton.icon(
           onPressed: () => Navigator.of(context).pop(true),

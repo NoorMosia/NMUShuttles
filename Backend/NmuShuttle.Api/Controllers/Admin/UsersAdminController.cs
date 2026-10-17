@@ -262,9 +262,9 @@ public class UsersAdminController : ControllerBase
         if (string.IsNullOrWhiteSpace(dto.StudentNumber))
             return UnprocessableEntity(new { message = "StudentNumber is required for student users" });
 
-        // Validate StudentNumber format: s3[12]\d{7}
-        if (!Regex.IsMatch(dto.StudentNumber, @"^s3[12]\d{7}$"))
-            return UnprocessableEntity(new { message = "StudentNumber must match format: s3[1 or 2] followed by 7 digits (e.g., s312345678)" });
+        // Validate StudentNumber format: s3[1-4]\d{7}
+        if (!Regex.IsMatch(dto.StudentNumber, @"^s3[1-4]\d{7}$"))
+            return UnprocessableEntity(new { message = "StudentNumber must match format: s3[1, 2, 3, or 4] followed by 7 digits (e.g., s312345678)" });
 
         // Reject duplicate email
         var emailDuplicate = await _context.Students
@@ -396,8 +396,8 @@ public class UsersAdminController : ControllerBase
             return NotFound(new { message = "Student not found" });
 
         if (!string.IsNullOrWhiteSpace(dto.StudentNumber) &&
-            !Regex.IsMatch(dto.StudentNumber, @"^s3[12]\d{7}$"))
-            return UnprocessableEntity(new { message = "StudentNumber must match format: s3[1 or 2] followed by 7 digits" });
+            !Regex.IsMatch(dto.StudentNumber, @"^s3[1-4]\d{7}$"))
+            return UnprocessableEntity(new { message = "StudentNumber must match format: s3[1, 2, 3, or 4] followed by 7 digits" });
 
         // Reject duplicate email (exclude current)
         var emailDuplicate = await _context.Students

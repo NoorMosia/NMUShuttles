@@ -10,7 +10,7 @@ public class CsvUserImportService : ICsvUserImportService
 {
     private readonly ShuttleDbContext _context;
 
-    private static readonly Regex StudentIdentifierRegex = new(@"^s3[12]\d{7}$", RegexOptions.Compiled);
+    private static readonly Regex StudentIdentifierRegex = new(@"^s3[1-4]\d{7}$", RegexOptions.Compiled);
     private static readonly Regex MarshalIdentifierRegex = new(@"^\d{7}$", RegexOptions.Compiled);
 
     public CsvUserImportService(ShuttleDbContext context)

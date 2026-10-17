@@ -48,7 +48,7 @@ public partial class AuthController : ControllerBase
             {
                 Status = StatusCodes.Status422UnprocessableEntity,
                 Title = "Validation Error",
-                Detail = "StudentNumber must match format: s3 followed by 1 or 2, then 7 digits (e.g., s312345678).",
+                Detail = "StudentNumber must match format: s3 followed by 1, 2, 3, or 4, then 7 digits (e.g., s312345678).",
                 Instance = HttpContext.Request.Path
             });
         }
@@ -262,7 +262,7 @@ public partial class AuthController : ControllerBase
     // Compiled regex patterns for format validation
     // ──────────────────────────────────────────────────────────────
 
-    [GeneratedRegex(@"^s3[12]\d{7}$")]
+    [GeneratedRegex(@"^s3[1-4]\d{7}$")]
     private static partial Regex StudentNumberRegex();
 
     [GeneratedRegex(@"^\d{7}$")]

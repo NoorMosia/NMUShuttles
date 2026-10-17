@@ -186,13 +186,13 @@ public class OtpService : IOtpService
     }
 
     /// <inheritdoc />
-    public async Task<bool> RequestAdminOtpAsync(string email)
+    public async Task<string?> RequestAdminOtpWithCodeAsync(string email)
     {
         var admin = await _db.Admins
             .FirstOrDefaultAsync(a => a.Email.ToLower() == email.ToLower());
 
         if (admin is null)
-            return false;
+            return null;
 
         var otp = GenerateOtp();
         admin.OtpHash = HashOtp(otp);
@@ -204,8 +204,12 @@ public class OtpService : IOtpService
 
         await SendOtpEmailAsync(admin.Email, otp, admin.FirstName);
 
-        return true;
+        return otp;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> RequestAdminOtpAsync(string email)
+        => await RequestAdminOtpWithCodeAsync(email) is not null;
 
     /// <inheritdoc />
     public async Task<string?> VerifyAdminOtpAsync(string email, string otp)

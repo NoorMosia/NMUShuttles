@@ -22,29 +22,36 @@ class LoginState {
     this.status = LoginStatus.idle,
     this.errorMessage,
     this.email,
+    this.devOtp,
   });
 
   final LoginStatus status;
   final String? errorMessage;
   final String? email;
 
+  /// EVALUATION ONLY: the OTP returned by the backend when
+  /// Otp:ExposeInResponse is enabled, so testers can log in without an inbox.
+  /// Null when the backend omits it (real production).
+  final String? devOtp;
+
   LoginState copyWith({
     LoginStatus? status,
     String? errorMessage,
     String? email,
+    String? devOtp,
   }) {
     return LoginState(
       status: status ?? this.status,
       errorMessage: errorMessage,
       email: email ?? this.email,
+      devOtp: devOtp ?? this.devOtp,
     );
   }
 }
 
 /// StateNotifier that manages the two-step OTP login flow.
 class LoginNotifier extends StateNotifier<LoginState> {
-  LoginNotifier(this._dioClient, this._authService)
-      : super(const LoginState());
+  LoginNotifier(this._dioClient, this._authService) : super(const LoginState());
 
   final DioClient _dioClient;
   final AdminAuthService _authService;
@@ -63,7 +70,11 @@ class LoginNotifier extends StateNotifier<LoginState> {
       );
 
       if (response.statusCode == 200) {
-        state = LoginState(status: LoginStatus.otpSent, email: email);
+        state = LoginState(
+          status: LoginStatus.otpSent,
+          email: email,
+          devOtp: _extractDevOtp(response.data),
+        );
         return true;
       }
 
@@ -157,6 +168,14 @@ class LoginNotifier extends StateNotifier<LoginState> {
     }
   }
 
+  /// Pulls the evaluation-only `devOtp` field out of an OTP-request response.
+  /// Tolerates casing differences and non-map payloads by returning null.
+  String? _extractDevOtp(dynamic data) {
+    if (data is! Map) return null;
+    final value = data['devOtp'] ?? data['DevOtp'];
+    return value is String && value.isNotEmpty ? value : null;
+  }
+
   /// Reset to idle state (e.g., when navigating away or going back).
   void reset() {
     state = const LoginState();
@@ -169,8 +188,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
 }
 
 /// Provider for the LoginNotifier.
-final loginProvider =
-    StateNotifierProvider<LoginNotifier, LoginState>((ref) {
+final loginProvider = StateNotifierProvider<LoginNotifier, LoginState>((ref) {
   final dioClient = ref.watch(dioClientProvider);
   final authService = ref.watch(adminAuthServiceProvider);
   return LoginNotifier(dioClient, authService);

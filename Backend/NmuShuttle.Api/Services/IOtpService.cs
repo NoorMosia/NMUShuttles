@@ -61,6 +61,13 @@ public interface IOtpService
     Task<string?> VerifyMarshalOtpAsync(string staffNumber, string otp);
 
     /// <summary>
+    /// Generates and stores an OTP for an admin, returning the plain code.
+    /// Returns null if the admin does not exist. The plain OTP is intended
+    /// for evaluation only — never expose it in real production use.
+    /// </summary>
+    Task<string?> RequestAdminOtpWithCodeAsync(string email);
+
+    /// <summary>
     /// Generates an OTP for the admin, stores the hash + expiry, and logs the code.
     /// Returns false if admin not found.
     /// </summary>

@@ -28,9 +28,9 @@ public class AdminAuthController : ControllerBase
     [EnableRateLimiting("OtpRateLimit")]
     public async Task<IActionResult> RequestOtp([FromBody] AdminOtpRequestDto dto)
     {
-        var success = await _otpService.RequestAdminOtpAsync(dto.Email);
+        var otp = await _otpService.RequestAdminOtpWithCodeAsync(dto.Email);
 
-        if (!success)
+        if (otp is null)
         {
             return NotFound(new ProblemDetails
             {
@@ -41,7 +41,13 @@ public class AdminAuthController : ControllerBase
             });
         }
 
-        return Ok(new { Message = "OTP sent successfully." });
+        // EVALUATION ONLY: expose the OTP to the client when enabled so testers can
+        // log in without inbox access. Controlled by Otp:ExposeInResponse / environment.
+        return Ok(new
+        {
+            Message = "OTP sent successfully.",
+            DevOtp = _otpService.ExposeOtpInResponse ? otp : null
+        });
     }
 
     /// <summary>

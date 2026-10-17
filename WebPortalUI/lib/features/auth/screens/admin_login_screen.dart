@@ -266,6 +266,44 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       ),
                       const SizedBox(height: 20),
 
+                      // EVALUATION ONLY: shows the OTP returned by the backend
+                      // (Otp:ExposeInResponse) so testers can log in without an
+                      // inbox. Tap to autofill. Hidden when the backend omits it.
+                      if (loginState.devOtp != null) ...[
+                        InkWell(
+                          onTap: () {
+                            _otpController.text = loginState.devOtp!;
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: _gold.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: _gold),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.vpn_key_outlined,
+                                    color: _navy, size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Test OTP: ${loginState.devOtp}  (tap to fill)',
+                                    style: GoogleFonts.hankenGrotesk(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: _navy,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+
                       Form(
                         key: _otpFormKey,
                         child: Column(

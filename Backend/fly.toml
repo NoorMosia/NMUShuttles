@@ -12,9 +12,11 @@ primary_region = 'lhr'
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = 'stop'
+  # Keep one machine always running so there is no ~10s cold-start boot on the
+  # first request after idle, and so the nightly background jobs run reliably.
+  auto_stop_machines = 'suspend'
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ['app']
 
 [[vm]]

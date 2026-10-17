@@ -329,8 +329,29 @@ if (app.Environment.IsDevelopment())
     await seeder.SeedAsync();
 }
 
-// Generate trips on startup (today through today+3) so there's data immediately
-await NmuShuttle.Api.Infrastructure.StartupTripGenerator.GenerateTripsAsync(app.Services);
+// Generate trips (today through today+3) so there's data immediately. In
+// production this runs in the background AFTER the server starts listening, so
+// the app can serve requests right away instead of blocking boot on Supabase
+// round-trips. In Development we still await it for predictable local seeding.
+if (app.Environment.IsDevelopment())
+{
+    await NmuShuttle.Api.Infrastructure.StartupTripGenerator.GenerateTripsAsync(app.Services);
+}
+else
+{
+    _ = Task.Run(async () =>
+    {
+        try
+        {
+            await NmuShuttle.Api.Infrastructure.StartupTripGenerator.GenerateTripsAsync(app.Services);
+        }
+        catch (Exception ex)
+        {
+            app.Services.GetRequiredService<ILogger<Program>>()
+                .LogError(ex, "Background StartupTripGenerator failed.");
+        }
+    });
+}
 
 // Seed a demo trip at capacity with waitlisted students (for notification demo)
 if (app.Environment.IsDevelopment())

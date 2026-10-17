@@ -1,0 +1,9 @@
+{
+  "name": "gen-icons",
+  "private": true,
+  "type": "module",
+  "description": "One-off generator: renders assets/logo.svg into web favicons + PWA install icons.",
+  "dependencies": {
+    "sharp": "^0.33.5"
+  }
+}

@@ -1,0 +1,4 @@
+# Node tooling used only to render the posters to PNG.
+# render.mjs and package.json are kept; the installed dependencies are not.
+node_modules/
+package-lock.json

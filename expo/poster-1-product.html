@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NMU Shuttle — Poster 1 (Product)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<style>
+  :root{
+    --gold:#ffcc00;
+    --navy:#132e51;
+    --navy-800:#1b3d6b;
+    --navy-700:#254f88;
+    --ink:#0e2440;
+    --paper:#ffffff;
+    --mist:#f4f6fa;
+    --line:#dfe6f0;
+    --muted:#5b6b82;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:#54616e;font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink);}
+
+  /* A3 portrait */
+  .page{
+    width:297mm;height:420mm;
+    background:var(--paper);
+    margin:12mm auto;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 10px 40px rgba(0,0,0,.35);
+    display:flex;flex-direction:column;
+  }
+
+  .material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;}
+
+  /* ---------- Header ---------- */
+  .hero{
+    background:var(--navy);
+    color:#fff;
+    padding:18mm 16mm 14mm;
+    position:relative;
+  }
+  .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6mm;background:var(--gold);}
+  .kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(255,204,0,.16);color:var(--gold);
+    font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:11pt;padding:6px 14px;border-radius:999px;}
+  .hero h1{font-size:46pt;font-weight:900;line-height:1.02;margin-top:14px;letter-spacing:-.01em;}
+  .hero h1 span{color:var(--gold);}
+  .hero p{font-size:15pt;color:#c7d4e6;margin-top:12px;max-width:215mm;line-height:1.4;font-weight:500;}
+  .meta{display:flex;gap:28px;margin-top:18px;flex-wrap:wrap;}
+  .meta div{font-size:11pt;color:#9fb2cc;}
+  .meta b{display:block;color:#fff;font-size:13pt;font-weight:700;}
+
+  /* ---------- Body ---------- */
+  .body{flex:1;padding:14mm 16mm 10mm;display:flex;flex-direction:column;gap:11mm;}
+
+  .section-title{display:flex;align-items:center;gap:10px;font-size:19pt;font-weight:800;color:var(--navy);}
+  .section-title .bar{width:7px;height:26px;background:var(--gold);border-radius:3px;}
+
+  /* feature grid */
+  .features{display:grid;grid-template-columns:1fr 1fr;gap:7mm;margin-top:7mm;}
+  .card{border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--mist);}
+  .card .top{display:flex;align-items:center;gap:12px;}
+  .icon{width:44px;height:44px;border-radius:11px;background:var(--navy);color:var(--gold);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .icon .material-symbols-outlined{font-size:26px;}
+  .card h3{font-size:14.5pt;font-weight:800;color:var(--ink);}
+  .card p{font-size:11pt;color:var(--muted);line-height:1.42;margin-top:8px;font-weight:500;}
+
+  /* flow strip */
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:7mm;
+    border:1.5px solid var(--line);border-radius:14px;overflow:hidden;}
+  .step{padding:16px 14px;position:relative;background:#fff;}
+  .step:not(:last-child){border-right:1.5px solid var(--line);}
+  .step .n{width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--navy);
+    font-weight:900;font-size:13pt;display:flex;align-items:center;justify-content:center;}
+  .step h4{font-size:12.5pt;font-weight:800;margin-top:10px;color:var(--navy);}
+  .step p{font-size:9.8pt;color:var(--muted);margin-top:5px;line-height:1.35;font-weight:500;}
+
+  /* roles */
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm;margin-top:7mm;}
+  .role{border-radius:14px;padding:16px;color:#fff;background:var(--navy);}
+  .role.mid{background:var(--navy-700);}
+  .role .material-symbols-outlined{font-size:30px;color:var(--gold);}
+  .role h4{font-size:14pt;font-weight:800;margin-top:8px;}
+  .role p{font-size:10pt;color:#c7d4e6;margin-top:5px;line-height:1.38;font-weight:500;}
+  .role .tag{display:inline-block;margin-top:9px;font-size:8.5pt;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;background:rgba(255,204,0,.18);color:var(--gold);padding:3px 9px;border-radius:999px;}
+
+  /* ---------- Footer ---------- */
+  .foot{background:var(--mist);border-top:1.5px solid var(--line);padding:9mm 16mm;
+    display:flex;justify-content:space-between;align-items:center;}
+  .foot .brand{display:flex;align-items:center;gap:12px;}
+  .dot{width:36px;height:36px;border-radius:9px;background:var(--navy);color:var(--gold);
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15pt;}
+  .foot b{font-size:13pt;color:var(--navy);}
+  .foot small{display:block;color:var(--muted);font-size:9.5pt;font-weight:500;}
+  .foot .live{text-align:right;font-size:10pt;color:var(--muted);font-weight:600;}
+  .foot .live b{color:var(--navy);font-size:10.5pt;}
+
+  @media print{
+    @page{size:A3 portrait;margin:0;}
+    html,body{background:#fff;}
+    .page{margin:0;box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <span class="kicker"><span class="material-symbols-outlined" style="font-size:16px;">directions_bus</span>Campus Transit Platform</span>
+    <h1>NMU Shuttle <span>Management Network</span></h1>
+    <p>A booking and boarding system that coordinates daily shuttles between off-campus residences and Nelson Mandela University campuses — built for students, marshals, and administrators.</p>
+    <div class="meta">
+      <div><b>3 roles</b>Student · Marshal · Admin</div>
+      <div><b>QR boarding</b>Scan-to-verify check-in</div>
+      <div><b>Priority access</b>Disability-cleared pre-booking</div>
+      <div><b>Automated ops</b>Nightly trip generation</div>
+    </div>
+  </header>
+
+  <main class="body">
+
+    <section>
+      <div class="section-title"><span class="bar"></span>Key Features</div>
+      <div class="features">
+        <div class="card">
+          <div class="top"><div class="icon"><span class="material-symbols-outlined">event_seat</span></div><h3>Seat Booking</h3></div>
+          <p>Students book a seat on scheduled trips up to 3 days ahead and receive a QR boarding pass. A waitlist fills automatically when a trip is full.</p>
+        </div>
+        <div class="card">
+          <div class="top"><div class="icon"><span class="material-symbols-outlined">accessible</span></div><h3>Priority Accessibility</h3></div>
+          <p>Disability-cleared students get automatic recurring pre-bookings, assigned to the front accessible shuttles in the convoy.</p>
+        </div>
+        <div class="card">
+          <div class="top"><div class="icon"><span class="material-symbols-outlined">qr_code_scanner</span></div><h3>Marshal Check-In</h3></div>
+          <p>Field marshals scan passenger QR codes to verify boarding. Scanning opens 35 minutes before departure.</p>
+        </div>
+        <div class="card">
+          <div class="top"><div class="icon"><span class="material-symbols-outlined">dashboard</span></div><h3>Admin Portal</h3></div>
+          <p>Full control over stops, shuttles, users, schedules and calendar exceptions — plus vendor reliability analytics and report handling.</p>
+        </div>
+        <div class="card">
+          <div class="top"><div class="icon"><span class="material-symbols-outlined">bolt</span></div><h3>Automated Operations</h3></div>
+          <p>A nightly job creates trips 3 days ahead and injects priority bookings. A lockout gate locks trips at T-60 and promotes the waitlist.</p>
+        </div>
+        <div class="card">
+          <div class="top"><div class="icon"><span class="material-symbols-outlined">build</span></div><h3>Breakdown Handling</h3></div>
+          <p>A marshal flags a broken shuttle, an admin resolves it (replace or cancel), and affected riders get a push notification only after resolution.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="bar"></span>How a Trip Works</div>
+      <div class="flow">
+        <div class="step"><div class="n">1</div><h4>Book</h4><p>Student reserves a seat and gets a QR pass, up to 3 days ahead.</p></div>
+        <div class="step"><div class="n">2</div><h4>Lock</h4><p>At T-60 min the trip locks and the waitlist is promoted FIFO.</p></div>
+        <div class="step"><div class="n">3</div><h4>Scan</h4><p>From T-35 min the marshal scans passengers at the boarding point.</p></div>
+        <div class="step"><div class="n">4</div><h4>Board</h4><p>Riders fill the front shuttle first across the convoy.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="bar"></span>Who Uses It</div>
+      <div class="roles">
+        <div class="role">
+          <span class="material-symbols-outlined">school</span>
+          <h4>Student</h4>
+          <p>Books trips, holds a QR pass, joins waitlists, and gets live trip updates.</p>
+          <span class="tag">Flutter · Android</span>
+        </div>
+        <div class="role mid">
+          <span class="material-symbols-outlined">badge</span>
+          <h4>Marshal</h4>
+          <p>Scans passengers, manages boarding, and flags shuttle breakdowns from the field.</p>
+          <span class="tag">Flutter · Android</span>
+        </div>
+        <div class="role">
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          <h4>Admin</h4>
+          <p>Runs the network — stops, shuttles, schedules, exceptions and analytics.</p>
+          <span class="tag">Flutter · Web</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <div class="brand">
+      <div class="dot">N</div>
+      <div><b>NMU Shuttle</b><small>Nelson Mandela University · Gqeberha, South Africa</small></div>
+    </div>
+    <div class="live">
+      <b>Try it live</b>
+      noormosia.github.io/NMUShuttles
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -77,6 +77,9 @@ jobs:
           # Favicon for the root landing page (reuse the brand logo).
           cp assets/logos/1.png public/favicon.png
 
+          # Brand mark (SVG) shown in the hero.
+          cp assets/logo.svg public/logo.svg
+
           echo "----- public/ tree -----"
           ls -la public
           echo "----- public/app -----"
@@ -142,6 +145,10 @@ jobs:
               .hero{background:var(--navy);color:#fff;position:relative;border-top:none;
                     padding:80px 0;}
               .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--gold);}
+              .brandline{display:flex;align-items:center;gap:18px;}
+              .brandline img{width:64px;height:64px;flex:0 0 auto;
+                    /* logo.svg is solid black; render it white on the navy hero */
+                    filter:brightness(0) invert(1);}
               .kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(255,204,0,.16);
                     color:var(--gold);font-weight:700;letter-spacing:.14em;text-transform:uppercase;
                     font-size:.72rem;padding:7px 15px;border-radius:999px;}
@@ -221,8 +228,9 @@ jobs:
               footer{background:var(--navy);color:#c7d4e6;border-top:none;padding:40px 0;}
               footer .inner{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
               footer .brand{display:flex;align-items:center;gap:14px;}
-              footer .dot{width:40px;height:40px;border-radius:10px;background:var(--gold);color:var(--navy);
-                    font-weight:900;font-size:1.2rem;display:flex;align-items:center;justify-content:center;}
+              footer .dot{width:40px;height:40px;border-radius:10px;background:var(--gold);
+                    display:flex;align-items:center;justify-content:center;}
+              footer .dot img{width:26px;height:26px;}
               footer b{color:#fff;font-size:1.05rem;}
               footer small{display:block;font-size:.82rem;}
 
@@ -242,7 +250,10 @@ jobs:
             <!-- HERO -->
             <header class="hero">
               <div class="wrap">
-                <h1>LATT <span>Mobile</span></h1>
+                <div class="brandline">
+                  <img src="logo.svg" alt="LATT Mobile logo" width="64" height="64">
+                  <h1>LATT <span>Mobile</span></h1>
+                </div>
                 <p>A booking and boarding system that coordinates daily shuttles between off-campus
                    residences and Nelson Mandela University campuses, built for students, marshals,
                    and administrators.</p>
@@ -290,8 +301,8 @@ jobs:
                     </div>
                   </div>
                   <div class="member">
-                    <div class="avatar">TM</div>
-                    <h4>Tshepo Noor Mosia</h4><small>Developer</small>
+                    <div class="avatar">NM</div>
+                    <h4>Noor Tshepo Mosia</h4><small>Developer</small>
                     <div class="links">
                       <a href="#" target="_blank" rel="noopener">LinkedIn</a>
                       <a href="https://github.com/noormosia" target="_blank" rel="noopener">GitHub</a>
@@ -396,7 +407,7 @@ jobs:
             <footer>
               <div class="wrap inner">
                 <div class="brand">
-                  <div class="dot">L</div>
+                  <div class="dot"><img src="logo.svg" alt="LATT Mobile logo" width="26" height="26"></div>
                   <div><b>LATT Mobile</b><small>Nelson Mandela University · Gqeberha, South Africa</small></div>
                 </div>
                 <div>

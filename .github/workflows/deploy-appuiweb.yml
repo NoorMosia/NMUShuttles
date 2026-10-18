@@ -136,13 +136,11 @@ jobs:
                     font-weight:800;color:var(--navy);margin-bottom:8px;}
               .section-title .bar{width:7px;height:28px;background:var(--gold);border-radius:3px;}
               .lead{color:var(--muted);font-weight:500;max-width:70ch;margin-bottom:28px;}
-              section{padding:64px 0;border-top:1px solid var(--line);
-                    min-height:100vh;display:flex;flex-direction:column;justify-content:center;}
+              section{padding:72px 0;border-top:1px solid var(--line);}
 
               /* ---------- Hero ---------- */
               .hero{background:var(--navy);color:#fff;position:relative;border-top:none;
-                    min-height:100vh;display:flex;flex-direction:column;justify-content:center;
-                    padding:72px 0;}
+                    padding:80px 0;}
               .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--gold);}
               .kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(255,204,0,.16);
                     color:var(--gold);font-weight:700;letter-spacing:.14em;text-transform:uppercase;
@@ -373,13 +371,11 @@ jobs:
                     <div class="node"><h4>Admin Portal</h4><p>Flutter Web</p></div>
                   </div>
                   <div class="conn-note">HTTPS · JSON · JWT Bearer tokens</div>
-                  <div class="arrow">&#8595;</div>
                   <div class="tier-label">Application</div>
                   <div class="row one">
                     <div class="node api"><h4>.NET 9 Web API</h4>
                       <p>Controllers · Services · DTOs · FluentValidation · JWT role guards (Student / Marshal / Admin) · EF Core · Background services: nightly rolling trip job plus the 60-minute lockout gate</p></div>
                   </div>
-                  <div class="arrow">&#8595;</div>
                   <div class="tier-label">Data &amp; External Services</div>
                   <div class="row three">
                     <div class="node"><h4>SQL Database</h4><p>EF Core code-first</p></div>

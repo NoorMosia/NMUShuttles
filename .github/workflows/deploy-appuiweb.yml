@@ -93,8 +93,8 @@ jobs:
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>NMU Shuttle — Campus Transit Platform</title>
-            <meta name="description" content="NMU Shuttle — book and manage campus shuttle trips at Nelson Mandela University.">
+            <title>LATT Mobile · Campus Transit</title>
+            <meta name="description" content="LATT Mobile: book and manage campus shuttle trips at Nelson Mandela University.">
 
             <!-- Favicon -->
             <link rel="icon" type="image/png" href="favicon.png">
@@ -102,18 +102,18 @@ jobs:
 
             <!-- Social media cards (Open Graph) -->
             <meta property="og:type" content="website">
-            <meta property="og:site_name" content="NMU Shuttle">
-            <meta property="og:title" content="NMU Shuttle">
+            <meta property="og:site_name" content="LATT Mobile">
+            <meta property="og:title" content="LATT Mobile">
             <meta property="og:description" content="Book and manage campus shuttle trips at Nelson Mandela University.">
             <meta property="og:url" content="https://noormosia.github.io/NMUShuttles/">
             <meta property="og:image" content="https://noormosia.github.io/NMUShuttles/social-card.png">
             <meta property="og:image:width" content="1500">
             <meta property="og:image:height" content="1500">
-            <meta property="og:image:alt" content="NMU Shuttle logo">
+            <meta property="og:image:alt" content="LATT Mobile logo">
 
             <!-- Social media cards (Twitter / X) -->
             <meta name="twitter:card" content="summary">
-            <meta name="twitter:title" content="NMU Shuttle">
+            <meta name="twitter:title" content="LATT Mobile">
             <meta name="twitter:description" content="Book and manage campus shuttle trips at Nelson Mandela University.">
             <meta name="twitter:image" content="https://noormosia.github.io/NMUShuttles/social-card.png">
 
@@ -136,11 +136,13 @@ jobs:
                     font-weight:800;color:var(--navy);margin-bottom:8px;}
               .section-title .bar{width:7px;height:28px;background:var(--gold);border-radius:3px;}
               .lead{color:var(--muted);font-weight:500;max-width:70ch;margin-bottom:28px;}
-              section{padding:56px 0;border-top:1px solid var(--line);}
+              section{padding:64px 0;border-top:1px solid var(--line);
+                    min-height:100vh;display:flex;flex-direction:column;justify-content:center;}
 
               /* ---------- Hero ---------- */
               .hero{background:var(--navy);color:#fff;position:relative;border-top:none;
-                    padding:64px 0 72px;}
+                    min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+                    padding:72px 0;}
               .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--gold);}
               .kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(255,204,0,.16);
                     color:var(--gold);font-weight:700;letter-spacing:.14em;text-transform:uppercase;
@@ -169,8 +171,10 @@ jobs:
               /* ---------- Features ---------- */
               .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
               .card{border:1.5px solid var(--line);border-radius:14px;padding:22px;background:#fff;}
-              .card .ic{width:44px;height:44px;border-radius:11px;background:var(--navy);color:var(--gold);
-                    display:flex;align-items:center;justify-content:center;font-size:1.4rem;}
+              .card .ic{width:46px;height:46px;border-radius:11px;background:var(--navy);
+                    display:flex;align-items:center;justify-content:center;}
+              .card .ic svg{width:24px;height:24px;stroke:var(--gold);stroke-width:2;
+                    fill:none;stroke-linecap:round;stroke-linejoin:round;}
               .card h3{font-size:1.05rem;font-weight:800;color:var(--ink);margin:14px 0 6px;}
               .card p{font-size:.92rem;color:var(--muted);font-weight:500;}
 
@@ -240,10 +244,9 @@ jobs:
             <!-- HERO -->
             <header class="hero">
               <div class="wrap">
-                <span class="kicker">Campus Transit Platform</span>
-                <h1>NMU Shuttle <span>Management Network</span></h1>
+                <h1>LATT <span>Mobile</span></h1>
                 <p>A booking and boarding system that coordinates daily shuttles between off-campus
-                   residences and Nelson Mandela University campuses — built for students, marshals,
+                   residences and Nelson Mandela University campuses, built for students, marshals,
                    and administrators.</p>
                 <div class="cta">
                   <a class="btn btn-gold" href="app/">Student / Marshal App</a>
@@ -257,98 +260,6 @@ jobs:
                 </div>
               </div>
             </header>
-
-            <!-- PROBLEM -->
-            <section class="problem">
-              <div class="wrap">
-                <div class="section-title"><span class="bar"></span>The Problem We Solve</div>
-                <div class="problem-grid">
-                  <div>
-                    <p class="q">Getting students between home and campus was manual, crowded, and hard to trust.</p>
-                  </div>
-                  <div>
-                    <p>Shuttle seats were first-come-first-served with no reliable way to reserve a spot,
-                       verify who boards, or give accessibility-cleared students a guaranteed seat.</p>
-                    <p>NMU Shuttle replaces that with reserved seats, QR-verified boarding, automatic
-                       waitlists, priority pre-booking for disability-cleared students, and live handling
-                       of breakdowns — so a daily commute is predictable for riders and manageable for staff.</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- FEATURES -->
-            <section>
-              <div class="wrap">
-                <div class="section-title"><span class="bar"></span>What It Does</div>
-                <p class="lead">Six capabilities cover the full journey — from booking a seat to boarding a vehicle.</p>
-                <div class="features">
-                  <div class="card"><div class="ic">&#128657;</div><h3>Seat Booking</h3>
-                    <p>Book a seat on scheduled trips up to 3 days ahead and get a QR boarding pass. A waitlist fills automatically when a trip is full.</p></div>
-                  <div class="card"><div class="ic">&#9855;</div><h3>Priority Accessibility</h3>
-                    <p>Disability-cleared students get automatic recurring pre-bookings, assigned to the front accessible shuttles in the convoy.</p></div>
-                  <div class="card"><div class="ic">&#128247;</div><h3>Marshal Check-In</h3>
-                    <p>Field marshals scan passenger QR codes to verify boarding. Scanning opens 35 minutes before departure.</p></div>
-                  <div class="card"><div class="ic">&#128202;</div><h3>Admin Portal</h3>
-                    <p>Full control over stops, shuttles, users, schedules and calendar exceptions — plus vendor reliability analytics and report handling.</p></div>
-                  <div class="card"><div class="ic">&#9889;</div><h3>Automated Operations</h3>
-                    <p>A nightly job creates trips 3 days ahead and injects priority bookings. A lockout gate locks trips at T-60 and promotes the waitlist.</p></div>
-                  <div class="card"><div class="ic">&#128295;</div><h3>Breakdown Handling</h3>
-                    <p>A marshal flags a broken shuttle, an admin resolves it (replace or cancel), and affected riders get a push notification only after resolution.</p></div>
-                </div>
-              </div>
-            </section>
-
-            <!-- FLOW -->
-            <section>
-              <div class="wrap">
-                <div class="section-title"><span class="bar"></span>How a Trip Works</div>
-                <p class="lead">From reservation to boarding, each trip moves through four stages.</p>
-                <div class="flow">
-                  <div class="step"><div class="n">1</div><h4>Book</h4><p>Student reserves a seat and gets a QR pass, up to 3 days ahead.</p></div>
-                  <div class="step"><div class="n">2</div><h4>Lock</h4><p>At T-60 min the trip locks and the waitlist is promoted FIFO.</p></div>
-                  <div class="step"><div class="n">3</div><h4>Scan</h4><p>From T-35 min the marshal scans passengers at the boarding point.</p></div>
-                  <div class="step"><div class="n">4</div><h4>Board</h4><p>Riders fill the front shuttle first across the convoy.</p></div>
-                </div>
-              </div>
-            </section>
-
-            <!-- ARCHITECTURE -->
-            <section>
-              <div class="wrap">
-                <div class="section-title"><span class="bar"></span>Architecture</div>
-                <p class="lead">A Flutter front end across mobile and web, a .NET 9 REST API, and a SQL database —
-                   connected by JWT auth, push notifications, and automated background jobs.</p>
-                <div class="arch">
-                  <div class="tier-label">Clients</div>
-                  <div class="row three">
-                    <div class="node"><h4>Student App</h4><p>Flutter · Android</p></div>
-                    <div class="node"><h4>Marshal App</h4><p>Flutter · Android (role-switched)</p></div>
-                    <div class="node"><h4>Admin Portal</h4><p>Flutter Web</p></div>
-                  </div>
-                  <div class="conn-note">HTTPS · JSON · JWT Bearer tokens</div>
-                  <div class="arrow">&#8595;</div>
-                  <div class="tier-label">Application</div>
-                  <div class="row one">
-                    <div class="node api"><h4>.NET 9 Web API · /api/v1</h4>
-                      <p>Controllers · Services · DTOs · FluentValidation · JWT role guards (Student / Marshal / Admin) · EF Core · Background services: nightly rolling trip job + T-60 lockout gate</p></div>
-                  </div>
-                  <div class="arrow">&#8595;</div>
-                  <div class="tier-label">Data &amp; External Services</div>
-                  <div class="row three">
-                    <div class="node"><h4>SQL Database</h4><p>EF Core code-first</p></div>
-                    <div class="node"><h4>Firebase FCM</h4><p>Push notifications</p></div>
-                    <div class="node"><h4>Resend</h4><p>OTP email delivery</p></div>
-                  </div>
-                </div>
-                <div class="stack">
-                  <div class="chip"><b>Flutter</b><span>Mobile + Web · Material 3</span></div>
-                  <div class="chip"><b>.NET 9</b><span>ASP.NET Core Web API</span></div>
-                  <div class="chip"><b>SQL + EF Core</b><span>Code-first migrations</span></div>
-                  <div class="chip"><b>JWT Auth</b><span>3 roles · OTP + password</span></div>
-                </div>
-              </div>
-            </section>
 
             <!-- TEAM -->
             <section class="team">
@@ -392,12 +303,105 @@ jobs:
               </div>
             </section>
 
+            <!-- PROBLEM -->
+            <section class="problem">
+              <div class="wrap">
+                <div class="section-title"><span class="bar"></span>The Problem We Solve</div>
+                <div class="problem-grid">
+                  <div>
+                    <p class="q">Getting students between home and campus was manual, crowded, and unsafe.</p>
+                  </div>
+                  <div>
+                    <p>Shuttle seats were claimed on a first come, first served basis with no reliable way
+                       to reserve a spot, verify who boards, or give accessibility-cleared students a
+                       guaranteed seat.</p>
+                    <p>LATT Mobile replaces that with reserved seats, QR-verified boarding, automatic
+                       waitlists, priority pre-booking for disability-cleared students, and live handling
+                       of breakdowns, so a daily commute is predictable for riders and manageable for staff.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- FEATURES -->
+            <section>
+              <div class="wrap">
+                <div class="section-title"><span class="bar"></span>What It Does</div>
+                <p class="lead">Six capabilities cover the full journey, from booking a seat to boarding a vehicle.</p>
+                <div class="features">
+                  <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/><path d="M6 16v2M18 16v2"/></svg></div><h3>Seat Booking</h3>
+                    <p>Book a seat on scheduled trips up to 3 days ahead and get a QR boarding pass. A waitlist fills automatically when a trip is full.</p></div>
+                  <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="1.8"/><path d="M5 8h14M12 8v6M8 20l4-6 4 6"/></svg></div><h3>Priority Accessibility</h3>
+                    <p>Disability-cleared students get automatic recurring pre-bookings, assigned to the front accessible shuttles in the convoy.</p></div>
+                  <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7"/><rect x="14" y="4" width="7" height="7"/><rect x="3" y="15" width="7" height="6"/><path d="M14 15h3v3M20 20v.01M17 21h.01"/></svg></div><h3>Marshal Check-In</h3>
+                    <p>Field marshals scan passenger QR codes to verify boarding. Scanning opens 35 minutes before departure.</p></div>
+                  <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 13h7V4H3zM14 20h7V4h-7zM3 20h7v-4H3z"/></svg></div><h3>Admin Portal</h3>
+                    <p>Full control over stops, shuttles, users, schedules and calendar exceptions, plus vendor reliability analytics and report handling.</p></div>
+                  <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div><h3>Automated Operations</h3>
+                    <p>A nightly job creates trips 3 days ahead and injects priority bookings. A lockout gate locks trips 60 minutes before departure and promotes the waitlist.</p></div>
+                  <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 00-5.4 5.4l-6 6 2 2 6-6a4 4 0 005.4-5.4l-2.5 2.5-2-2z"/></svg></div><h3>Breakdown Handling</h3>
+                    <p>A marshal flags a broken shuttle, an admin resolves it (replace or cancel), and affected riders get a push notification only after resolution.</p></div>
+                </div>
+              </div>
+            </section>
+
+            <!-- FLOW -->
+            <section>
+              <div class="wrap">
+                <div class="section-title"><span class="bar"></span>How a Trip Works</div>
+                <p class="lead">From reservation to boarding, each trip moves through four stages.</p>
+                <div class="flow">
+                  <div class="step"><div class="n">1</div><h4>Book</h4><p>Student reserves a seat and gets a QR pass, up to 3 days ahead.</p></div>
+                  <div class="step"><div class="n">2</div><h4>Lock</h4><p>60 minutes before departure the trip locks and the waitlist is promoted FIFO.</p></div>
+                  <div class="step"><div class="n">3</div><h4>Scan</h4><p>From 35 minutes before departure the marshal scans passengers at the boarding point.</p></div>
+                  <div class="step"><div class="n">4</div><h4>Board</h4><p>Riders fill the front shuttle first across the convoy.</p></div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ARCHITECTURE -->
+            <section>
+              <div class="wrap">
+                <div class="section-title"><span class="bar"></span>Architecture</div>
+                <p class="lead">A Flutter front end across mobile and web, a .NET 9 REST API, and a SQL database,
+                   connected by JWT auth, push notifications, and automated background jobs.</p>
+                <div class="arch">
+                  <div class="tier-label">Clients</div>
+                  <div class="row three">
+                    <div class="node"><h4>Student App</h4><p>Flutter · Android</p></div>
+                    <div class="node"><h4>Marshal App</h4><p>Flutter · Android (role-switched)</p></div>
+                    <div class="node"><h4>Admin Portal</h4><p>Flutter Web</p></div>
+                  </div>
+                  <div class="conn-note">HTTPS · JSON · JWT Bearer tokens</div>
+                  <div class="arrow">&#8595;</div>
+                  <div class="tier-label">Application</div>
+                  <div class="row one">
+                    <div class="node api"><h4>.NET 9 Web API</h4>
+                      <p>Controllers · Services · DTOs · FluentValidation · JWT role guards (Student / Marshal / Admin) · EF Core · Background services: nightly rolling trip job plus the 60-minute lockout gate</p></div>
+                  </div>
+                  <div class="arrow">&#8595;</div>
+                  <div class="tier-label">Data &amp; External Services</div>
+                  <div class="row three">
+                    <div class="node"><h4>SQL Database</h4><p>EF Core code-first</p></div>
+                    <div class="node"><h4>Firebase FCM</h4><p>Push notifications</p></div>
+                    <div class="node"><h4>Resend</h4><p>OTP email delivery</p></div>
+                  </div>
+                </div>
+                <div class="stack">
+                  <div class="chip"><b>Flutter</b><span>Mobile + Web · Material 3</span></div>
+                  <div class="chip"><b>.NET 9</b><span>ASP.NET Core Web API</span></div>
+                  <div class="chip"><b>SQL + EF Core</b><span>Code-first migrations</span></div>
+                  <div class="chip"><b>JWT Auth</b><span>3 roles · OTP + password</span></div>
+                </div>
+              </div>
+            </section>
+
             <!-- FOOTER -->
             <footer>
               <div class="wrap inner">
                 <div class="brand">
-                  <div class="dot">N</div>
-                  <div><b>NMU Shuttle</b><small>Nelson Mandela University · Gqeberha, South Africa</small></div>
+                  <div class="dot">L</div>
+                  <div><b>LATT Mobile</b><small>Nelson Mandela University · Gqeberha, South Africa</small></div>
                 </div>
                 <div>
                   <a class="btn btn-gold" href="app/" style="margin-right:10px;">Open the App</a>

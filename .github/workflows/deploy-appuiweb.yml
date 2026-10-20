@@ -80,6 +80,14 @@ jobs:
           # Brand mark (SVG) shown in the hero.
           cp assets/logo.svg public/logo.svg
 
+          # Team member photos for the Built By section.
+          mkdir -p public/team
+          cp "assets/built by/LUSANDA.png" public/team/LUSANDA.png
+          cp "assets/built by/ANELE.png"   public/team/ANELE.png
+          cp "assets/built by/TOM.png"     public/team/TOM.png
+          cp "assets/built by/TSHEPO.png"  public/team/TSHEPO.png
+          cp assets/groupLogo/by4sp_net.png public/by4sp_net.png
+
           echo "----- public/ tree -----"
           ls -la public
           echo "----- public/app -----"
@@ -215,8 +223,9 @@ jobs:
               .team{background:var(--mist);border-top:none;}
               .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
               .member{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:22px;text-align:center;}
-              .avatar{width:64px;height:64px;border-radius:50%;background:var(--navy);color:var(--gold);
-                    font-weight:900;font-size:1.4rem;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+              .avatar{width:80px;height:80px;border-radius:50%;background:var(--navy);color:var(--gold);
+                    font-weight:900;font-size:1.4rem;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;overflow:hidden;}
+              .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
               .member h4{font-size:1rem;font-weight:800;color:var(--ink);}
               .member small{display:block;color:var(--muted);font-size:.8rem;margin-top:3px;font-weight:600;}
               .links{display:flex;justify-content:center;gap:10px;margin-top:14px;}
@@ -277,7 +286,7 @@ jobs:
                 <p class="lead">This system was designed and built by four developers.</p>
                 <div class="team-grid">
                   <div class="member">
-                    <div class="avatar">LN</div>
+                    <div class="avatar"><img src="team/LUSANDA.png" alt="Lusanda Ngubeni"></div>
                     <h4>Lusanda Ngubeni</h4><small>Developer</small>
                     <div class="links">
                       <a href="#" target="_blank" rel="noopener">LinkedIn</a>
@@ -285,7 +294,7 @@ jobs:
                     </div>
                   </div>
                   <div class="member">
-                    <div class="avatar">AS</div>
+                    <div class="avatar"><img src="team/ANELE.png" alt="Anele Sombo"></div>
                     <h4>Anele Sombo</h4><small>Developer</small>
                     <div class="links">
                       <a href="#" target="_blank" rel="noopener">LinkedIn</a>
@@ -293,7 +302,7 @@ jobs:
                     </div>
                   </div>
                   <div class="member">
-                    <div class="avatar">LS</div>
+                    <div class="avatar"><img src="team/TOM.png" alt="Letlhogonolo Setati"></div>
                     <h4>Letlhogonolo Setati</h4><small>Developer</small>
                     <div class="links">
                       <a href="#" target="_blank" rel="noopener">LinkedIn</a>
@@ -301,7 +310,7 @@ jobs:
                     </div>
                   </div>
                   <div class="member">
-                    <div class="avatar">NM</div>
+                    <div class="avatar"><img src="team/TSHEPO.png" alt="Noor Tshepo Mosia"></div>
                     <h4>Noor Tshepo Mosia</h4><small>Developer</small>
                     <div class="links">
                       <a href="#" target="_blank" rel="noopener">LinkedIn</a>
